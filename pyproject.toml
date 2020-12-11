@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gcp-pilot"
-version = "0.0.1"
+version = "0.1.1"
 description = "Google Cloud Platform Friendly Pilot"
 authors = ["Joao Daher <joao@daher.dev>"]
 packages = [
@@ -10,11 +10,16 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-google-api-python-client = "*"
-google-cloud-tasks = "*"
-google-cloud-scheduler = "^2"
-google-cloud-storage = "*"
-google-cloud-build = "*"
+google-api-python-client = "^1"
+google-cloud-tasks = { version = "^2", optional = true}
+google-cloud-scheduler = { version = "^2", optional = true}
+google-cloud-storage = { version = "^1", optional = true}
+google-cloud-build = { version = "^3", optional = true}
+
+[tool.poetry.extras]
+tasks = ["google-cloud-tasks", "google-cloud-scheduler"]
+build = ["google-cloud-build"]
+storage = ["google-cloud-storage"]
 
 
 [tool.poetry.dev-dependencies]

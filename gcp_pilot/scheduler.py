@@ -116,7 +116,7 @@ class CloudScheduler(GoogleCloudPilotAPI):
             location: str = None,
     ):
         try:
-            response = self.update(
+            response = await self.update(
                 name=name,
                 url=url,
                 payload=payload,
@@ -128,7 +128,7 @@ class CloudScheduler(GoogleCloudPilotAPI):
                 project_id=project_id,
             )
         except NotFound:
-            response = self.create(
+            response = await self.create(
                 name=name,
                 url=url,
                 payload=payload,

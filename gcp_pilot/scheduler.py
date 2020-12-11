@@ -1,8 +1,8 @@
 import os
 from typing import Dict
 
+from google.api_core.exceptions import NotFound
 from google.cloud import scheduler
-from google.cloud.exceptions import NotFound
 
 from gcp_pilot.base import GoogleCloudPilotAPI
 

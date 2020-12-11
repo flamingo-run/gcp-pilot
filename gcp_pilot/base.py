@@ -1,6 +1,6 @@
 import abc
 import os
-from typing import Dict, Any
+from typing import Dict, Any, Callable
 
 from google import auth
 from googleapiclient.discovery import build
@@ -55,6 +55,22 @@ class GoogleCloudPilotAPI(abc.ABC):
 
         project = GoogleResourceManager().get_project(project_id=project_id)
         return project.projectNumber
+
+    def _paginate(self, method: Callable, result_key: str, params: Dict[str, Any] = None):
+        page_token = None
+        params = params or {}
+
+        while True:
+            results = method(
+                **params,
+                pageToken=page_token,
+            ).execute()
+            for space in results.get(result_key, []):
+                yield space
+
+            page_token = results.get('nextPageToken')
+            if not page_token:
+                break
 
 
 class AccountManagerMixin:

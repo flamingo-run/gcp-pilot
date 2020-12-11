@@ -1,5 +1,17 @@
 # Google Cloud Pilot
 
+## Installation
+
+`pip install gcp-pilot`
+
+## Usage
+
+```
+from gcp_pilot.resource import ResourceManager
+
+grm = ResourceManager()
+```
+
 ## Supported APIs
 
 - IAM

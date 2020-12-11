@@ -35,3 +35,18 @@ grm = ResourceManager()
    - manage schedules
 - Cloud Tasks
    - manage tasks & queues
+- BigQuery
+   - manage datasets
+   - perform queries
+- Calendar
+   - manage events
+- Google Chats
+   - build complex messages
+   - call webhook
+   - interact as bot
+- Cloud Directory
+   - manage groups
+- Sheets
+   - manage spreadsheets
+- Speech
+   - recognize speech from audio

@@ -3,7 +3,7 @@ setup:
 
 dependencies:
 	@make setup
-	@poetry install --no-root --extras "tasks build storage bigquery speech sheets"
+	@poetry install --no-root --extras "tasks build storage bigquery speech sheets pubsub"
 
 update:
 	@poetry update

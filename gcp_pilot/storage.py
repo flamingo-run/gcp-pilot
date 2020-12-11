@@ -1,6 +1,11 @@
 # More Information: https://googleapis.dev/python/storage/latest/index.html
+import io
+import os
+
+import requests
 from google.cloud import storage
 from google.cloud.exceptions import Conflict
+from google.cloud.storage import Bucket
 
 from gcp_pilot.base import GoogleCloudPilotAPI
 
@@ -8,7 +13,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 class GoogleCloudStorage(GoogleCloudPilotAPI):
     _client_class = storage.Client
 
-    async def create_bucket(self, name: str, region: str, project_id: str = None, exists_ok: bool = True):
+    async def create_bucket(self, name: str, region: str, project_id: str = None, exists_ok: bool = True) -> Bucket:
         bucket = self.client.bucket(name)
         try:
             return self.client.create_bucket(
@@ -21,18 +26,87 @@ class GoogleCloudStorage(GoogleCloudPilotAPI):
                 raise
             return await self.check_bucket(name=name)
 
-    async def check_bucket(self, name):
+    async def check_bucket(self, name: str) -> Bucket:
         return self.client.get_bucket(bucket_or_name=name)
 
     async def upload(
             self,
+            source_file,
             bucket_name: str,
-            source_file_name: str,
-            destination_blob_name: str,
+            target_file_name: str = None,
+            chunk_size: int = None,
+            project_id: str = None,
+            region: str = None,
             is_public: bool = False,
     ):
-        bucket = self.client.bucket(bucket_name)
-        blob = bucket.blob(destination_blob_name)
-        blob.upload_from_filename(source_file_name)
+        target_bucket = await self.create_bucket(name=bucket_name, project_id=project_id, region=region)
+
+        target_file_name = target_file_name or str(source_file).rsplit('/')[-1]
+        blob = target_bucket.blob(target_file_name, chunk_size=chunk_size)
+
+        if isinstance(source_file, str):
+            if source_file.startswith('http'):
+                file_obj = self._download(url=source_file)
+                blob.upload_from_file(file_obj)
+            elif os.path.exists(source_file):
+                blob.upload_from_filename(source_file)
+            else:
+                content = io.StringIO(source_file)
+                blob.upload_from_file(content)
+        else:
+            blob.upload_from_file(source_file)
+
         if is_public:
             blob.make_public()
+
+        return f'gs://{target_bucket.name}/{blob.name}'
+
+    async def copy(
+            self,
+            source_file_name,
+            source_bucket_name: str,
+            target_bucket_name: str,
+            target_file_name: str = None,
+            project_id: str = None,
+            region: str = None,
+    ):
+        source_bucket = await self.create_bucket(name=source_bucket_name, region=region, project_id=project_id)
+        source_blob = source_bucket.blob(source_file_name)
+
+        target_bucket = await self.create_bucket(name=target_bucket_name, region=region, project_id=project_id)
+        target_file_name = target_file_name or str(source_file_name).rsplit('/')[-1]
+
+        obj = source_bucket.copy_blob(source_blob, target_bucket, target_file_name)
+        return obj.name
+
+    async def move(
+            self,
+            source_file_name: str,
+            source_bucket_name: str,
+            target_bucket_name: str,
+            target_file_name: str = None,
+            project_id: str = None,
+            region: str = None,
+    ):
+        data = await self.copy(
+            source_file_name=source_file_name,
+            source_bucket_name=source_bucket_name,
+            target_file_name=target_file_name,
+            target_bucket_name=target_bucket_name,
+            project_id=project_id,
+            region=region,
+        )
+        await self.delete(file_name=source_file_name, bucket_name=source_bucket_name)
+        return data
+
+    async def delete(self, file_name, bucket_name: str = None):
+        bucket = await self.check_bucket(name=bucket_name)
+        blob = bucket.blob(file_name)
+        return blob.delete()
+
+    def _download(self, url):
+        response = requests.get(url, stream=True)
+        f = io.BytesIO()
+        f.write(response.content)
+        f.seek(0)
+        return f

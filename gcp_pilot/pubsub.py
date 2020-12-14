@@ -95,6 +95,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             subscription_id: str,
             project_id: str = None,
             exists_ok: bool = True,
+            auto_create_topic: bool = True,
             push_to_url: str = None,
             use_oidc_auth: bool = False,
     ) -> Subscription:
@@ -115,7 +116,20 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             )
 
         try:
-            self.client.create_subscription(
+            return self.client.create_subscription(
+                name=subscription_path,
+                topic=topic_path,
+                push_config=push_config,
+            )
+        except NotFound:
+            if not auto_create_topic:
+                raise
+            await CloudPublisher().create_topic(
+                topic_id=topic_id,
+                project_id=project_id,
+                exists_ok=False,
+            )
+            return self.client.create_subscription(
                 name=subscription_path,
                 topic=topic_path,
                 push_config=push_config,

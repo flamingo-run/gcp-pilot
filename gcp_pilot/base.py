@@ -23,8 +23,8 @@ class GoogleCloudPilotAPI(abc.ABC):
     def __init__(self, subject=None, location=None, **kwargs):
         self.credentials, project_id = self._build_credentials(subject=subject)
         self.project_id = kwargs.get('project') \
-            or DEFAULT_PROJECT_ID \
-            or getattr(self.credentials, 'project_id', project_id)
+                          or DEFAULT_PROJECT_ID \
+                          or getattr(self.credentials, 'project_id', project_id)
 
         self.location = location or DEFAULT_LOCATION
 

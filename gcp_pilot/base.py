@@ -11,14 +11,11 @@ DEFAULT_LOCATION = os.environ.get('LOCATION', 'us-east1')
 PolicyType = Dict[str, Any]
 
 
-# Speed up consecutive authentications
-_CACHED_CREDENTIALS = None
-
-
 class GoogleCloudPilotAPI(abc.ABC):
     _client_class = None
     _scopes = ['https://www.googleapis.com/auth/cloud-platform']
     _iam_roles = []
+    _cached_credentials = None
 
     def __init__(self, subject=None, location=None, **kwargs):
         self.credentials, project_id = self._build_credentials(subject=subject)
@@ -35,11 +32,12 @@ class GoogleCloudPilotAPI(abc.ABC):
 
     @classmethod
     def _build_credentials(cls, subject=None):
-        if not _CACHED_CREDENTIALS:
+        # Speed up consecutive authentications
+        if not cls._cached_credentials:
             credentials, project_id = auth.default()
-            _cached_credentials = credentials, project_id
+            cls._cached_credentials = credentials, project_id
 
-        credentials, project_id = _CACHED_CREDENTIALS
+        credentials, project_id = cls._cached_credentials
         if subject:
             credentials = credentials.with_subject(subject=subject)
         return credentials, project_id

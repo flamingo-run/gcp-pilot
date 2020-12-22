@@ -108,7 +108,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
             self,
             name: str,
             url: str,
-            payload,
+            payload: str,
             cron: str,
             timezone: str = None,
             method: int = DEFAULT_METHOD,

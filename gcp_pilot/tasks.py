@@ -41,6 +41,7 @@ class CloudTasks(GoogleCloudPilotAPI):
             project_id: str = None,
             location: str = None,
             unique: bool = True,
+            use_oidc_auth: bool = True,
     ):
         queue_path = self.client.queue_path(
             project=project_id or self.project_id,
@@ -62,7 +63,7 @@ class CloudTasks(GoogleCloudPilotAPI):
                 http_method=method,
                 url=url,
                 body=payload.encode(),
-                **self.oidc_token,
+                **(self.oidc_token if use_oidc_auth else {}),
             )
         )
 

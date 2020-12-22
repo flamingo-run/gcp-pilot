@@ -36,6 +36,7 @@ class CloudScheduler(GoogleCloudPilotAPI):
             headers: Dict[str, str] = None,
             project_id: str = None,
             location: str = None,
+            use_oidc_auth: bool = True,
     ):
         parent = self._parent_path(project_id=project_id, location=location)
         job_name = self._job_path(job=name, project_id=project_id, location=location)
@@ -48,6 +49,7 @@ class CloudScheduler(GoogleCloudPilotAPI):
                 http_method=method,
                 body=payload.encode(),
                 headers=headers or {},
+                **(self.oidc_token if use_oidc_auth else {}),
             )
         )
 
@@ -70,6 +72,7 @@ class CloudScheduler(GoogleCloudPilotAPI):
             headers: Dict[str, str] = None,
             project_id: str = None,
             location: str = None,
+            use_oidc_auth: bool = True,
     ):
         job_name = self._job_path(job=name, project_id=project_id, location=location)
         job = scheduler.Job(
@@ -81,6 +84,7 @@ class CloudScheduler(GoogleCloudPilotAPI):
                 http_method=method,
                 body=payload.encode(),
                 headers=headers or {},
+                **(self.oidc_token if use_oidc_auth else {}),
             )
         )
 
@@ -114,6 +118,7 @@ class CloudScheduler(GoogleCloudPilotAPI):
             headers: Dict[str, str] = None,
             project_id: str = None,
             location: str = None,
+            use_oidc_auth: bool = True,
     ):
         try:
             response = await self.update(
@@ -126,6 +131,7 @@ class CloudScheduler(GoogleCloudPilotAPI):
                 headers=headers,
                 location=location,
                 project_id=project_id,
+                use_oidc_auth=use_oidc_auth,
             )
         except NotFound:
             response = await self.create(
@@ -138,5 +144,6 @@ class CloudScheduler(GoogleCloudPilotAPI):
                 headers=headers,
                 location=location,
                 project_id=project_id,
+                use_oidc_auth=use_oidc_auth,
             )
         return response

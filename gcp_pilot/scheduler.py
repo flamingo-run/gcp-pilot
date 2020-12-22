@@ -6,8 +6,8 @@ from google.cloud import scheduler
 
 from gcp_pilot.base import GoogleCloudPilotAPI
 
+DEFAULT_TIMEZONE = os.environ.get('TIMEZONE', 'Europe/London')  # UTC
 
-DEFAULT_TIMEZONE = os.environ.get('TIMEZONE', 'UTC')
 
 
 class CloudScheduler(GoogleCloudPilotAPI):

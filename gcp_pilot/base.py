@@ -6,9 +6,15 @@ from google import auth
 from googleapiclient.discovery import build
 
 DEFAULT_PROJECT_ID = os.environ.get('PROJECT_ID')
-DEFAULT_LOCATION = os.environ.get('LOCATION', 'us-east1')
+DEFAULT_LOCATION = os.environ.get('LOCATION', None)
 
 PolicyType = Dict[str, Any]
+
+
+def _get_project_default_location(credentials, project_id, default_zone='1'):
+    service = build(serviceName='appengine', version='v1', credentials=credentials)
+    data = service.apps().get(appsId=project_id).execute()
+    return data['locationId'] + default_zone
 
 
 class GoogleCloudPilotAPI(abc.ABC):
@@ -18,20 +24,26 @@ class GoogleCloudPilotAPI(abc.ABC):
     _cached_credentials = None
 
     def __init__(self, subject=None, location=None, **kwargs):
-        self.credentials, project_id = self._build_credentials(subject=subject)
-        self.project_id = kwargs.get('project') \
-            or DEFAULT_PROJECT_ID \
-            or getattr(self.credentials, 'project_id', project_id)
-
-        self.location = location or DEFAULT_LOCATION
+        self.credentials, project_id = self._set_credentials(subject=subject)
+        self.project_id = self._set_project_id(project_id=project_id)
+        self.location = self._set_location(location=location)
 
         self.client = (self._client_class or build)(
             credentials=self.credentials,
             **kwargs
         )
 
+    def _set_project_id(self, project_id: str = None):
+        return DEFAULT_PROJECT_ID or getattr(self.credentials, 'project_id', project_id)
+
+    def _set_location(self, location: str = None):
+        return location or DEFAULT_LOCATION or _get_project_default_location(
+            credentials=self.credentials,
+            project_id=self.project_id,
+        )
+
     @classmethod
-    def _build_credentials(cls, subject=None):
+    def _set_credentials(cls, subject=None):
         # Speed up consecutive authentications
         if not cls._cached_credentials:
             credentials, project_id = auth.default()

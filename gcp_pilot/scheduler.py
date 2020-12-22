@@ -4,13 +4,12 @@ from typing import Dict
 from google.api_core.exceptions import NotFound
 from google.cloud import scheduler
 
-from gcp_pilot.base import GoogleCloudPilotAPI
+from gcp_pilot.base import GoogleCloudPilotAPI, AppEngineBasedService
 
 DEFAULT_TIMEZONE = os.environ.get('TIMEZONE', 'Europe/London')  # UTC
 
 
-
-class CloudScheduler(GoogleCloudPilotAPI):
+class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
     _client_class = scheduler.CloudSchedulerClient
     DEFAULT_METHOD = scheduler.HttpMethod.POST
 
@@ -18,11 +17,11 @@ class CloudScheduler(GoogleCloudPilotAPI):
         self.timezone = kwargs.pop('timezone', DEFAULT_TIMEZONE)
         super().__init__(**kwargs)
 
-    def _parent_path(self, project_id=None, location=None):
-        return f'projects/{project_id or self.project_id}/locations/{location or self.location}'
+    def _parent_path(self, project_id=None):
+        return f'projects/{project_id or self.project_id}/locations/{self.location}'
 
-    def _job_path(self, job, project_id=None, location=None):
-        parent_name = self._parent_path(project_id=project_id, location=location)
+    def _job_path(self, job, project_id=None):
+        parent_name = self._parent_path(project_id=project_id)
         return f'{parent_name}/jobs/{job}'
 
     async def create(
@@ -35,11 +34,10 @@ class CloudScheduler(GoogleCloudPilotAPI):
             method: int = DEFAULT_METHOD,
             headers: Dict[str, str] = None,
             project_id: str = None,
-            location: str = None,
             use_oidc_auth: bool = True,
     ):
-        parent = self._parent_path(project_id=project_id, location=location)
-        job_name = self._job_path(job=name, project_id=project_id, location=location)
+        parent = self._parent_path(project_id=project_id)
+        job_name = self._job_path(job=name, project_id=project_id)
         job = scheduler.Job(
             name=job_name,
             schedule=cron,
@@ -71,10 +69,9 @@ class CloudScheduler(GoogleCloudPilotAPI):
             method: int = DEFAULT_METHOD,
             headers: Dict[str, str] = None,
             project_id: str = None,
-            location: str = None,
             use_oidc_auth: bool = True,
     ):
-        job_name = self._job_path(job=name, project_id=project_id, location=location)
+        job_name = self._job_path(job=name, project_id=project_id)
         job = scheduler.Job(
             name=job_name,
             schedule=cron,
@@ -93,15 +90,15 @@ class CloudScheduler(GoogleCloudPilotAPI):
         )
         return response
 
-    async def get(self, name: str, project_id: str = None, location: str = None):
-        job_name = self._job_path(job=name, project_id=project_id, location=location)
+    def get(self, name: str, project_id: str = None):
+        job_name = self._job_path(job=name, project_id=project_id)
         response = self.client.get_job(
             name=job_name,
         )
         return response
 
-    async def delete(self, name: str, project_id: str = None, location: str = None):
-        job_name = self._job_path(job=name, project_id=project_id, location=location)
+    async def delete(self, name: str, project_id: str = None):
+        job_name = self._job_path(job=name, project_id=project_id)
         response = self.client.delete_job(
             name=job_name,
         )
@@ -117,7 +114,6 @@ class CloudScheduler(GoogleCloudPilotAPI):
             method: int = DEFAULT_METHOD,
             headers: Dict[str, str] = None,
             project_id: str = None,
-            location: str = None,
             use_oidc_auth: bool = True,
     ):
         try:
@@ -129,7 +125,6 @@ class CloudScheduler(GoogleCloudPilotAPI):
                 timezone=timezone,
                 method=method,
                 headers=headers,
-                location=location,
                 project_id=project_id,
                 use_oidc_auth=use_oidc_auth,
             )
@@ -142,7 +137,6 @@ class CloudScheduler(GoogleCloudPilotAPI):
                 timezone=timezone,
                 method=method,
                 headers=headers,
-                location=location,
                 project_id=project_id,
                 use_oidc_auth=use_oidc_auth,
             )

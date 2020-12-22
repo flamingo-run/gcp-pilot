@@ -1,4 +1,5 @@
 import abc
+import logging
 import os
 from typing import Dict, Any, Callable
 
@@ -9,6 +10,9 @@ DEFAULT_PROJECT_ID = os.environ.get('PROJECT_ID')
 DEFAULT_LOCATION = os.environ.get('LOCATION', None)
 
 PolicyType = Dict[str, Any]
+
+
+logger = logging.getLogger()
 
 
 def _get_project_default_location(credentials, project_id, default_zone='1'):
@@ -123,3 +127,16 @@ class AccountManagerMixin:
         except (StopIteration, KeyError):
             pass
         return policy
+
+
+class AppEngineBasedService:
+    def _set_location(self, location: str = None):
+        project_location = _get_project_default_location(credentials=self.credentials, project_id=self.project_id)
+
+        explicit_location = location
+        if explicit_location and explicit_location != project_location:
+            logger.warning(
+                f"Location {explicit_location} cannot be set in {self.__class__.__name__}. "
+                f"It uses App Engine's default location for your project: {project_location}"
+            )
+        return project_location

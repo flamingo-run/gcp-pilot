@@ -16,7 +16,7 @@ logger = logging.getLogger()
 
 
 def _get_project_default_location(credentials, project_id, default_zone='1'):
-    service = build(serviceName='appengine', version='v1', credentials=credentials)
+    service = build(serviceName='appengine', version='v1', credentials=credentials, cache_discovery=False)
     data = service.apps().get(appsId=project_id).execute()
     return data['locationId'] + default_zone
 

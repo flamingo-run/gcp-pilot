@@ -50,3 +50,5 @@ grm = ResourceManager()
    - manage spreadsheets
 - Speech
    - recognize speech from audio
+- Datastore
+   - Object Mapping ("ORM-ish" management of documents)

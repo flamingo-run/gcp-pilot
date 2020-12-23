@@ -19,6 +19,7 @@ google-cloud-bigquery = { version = "^1", optional = true}
 google-cloud-speech = { version = "^1", optional = true}
 gspread = { version = "^3", optional = true}
 google-cloud-pubsub = { version = "^2", optional = true}
+google-cloud-datastore = { version = "^2", optional = true}
 
 [tool.poetry.extras]
 tasks = ["google-cloud-tasks", "google-cloud-scheduler"]
@@ -28,6 +29,7 @@ bigquery = ["google-cloud-bigquery"]
 speech = ["google-cloud-speech"]
 sheets = ["gspread"]
 pubsub = ["google-cloud-pubsub"]
+datastore = ["google-cloud-datastore"]
 
 
 [tool.poetry.dev-dependencies]

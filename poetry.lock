@@ -200,6 +200,20 @@ six = ">=1.12.0"
 grpc = ["grpcio (>=1.8.2,<2.0dev)"]
 
 [[package]]
+name = "google-cloud-datastore"
+version = "2.1.0"
+description = "Google Cloud Datastore API client library"
+category = "main"
+optional = true
+python-versions = ">=3.6"
+
+[package.dependencies]
+google-api-core = {version = ">=1.22.2,<2.0.0dev", extras = ["grpc"]}
+google-cloud-core = ">=1.4.0,<2.0dev"
+libcst = ">=0.2.5"
+proto-plus = ">=1.4.0"
+
+[[package]]
 name = "google-cloud-pubsub"
 version = "2.2.0"
 description = "Google Cloud Pub/Sub API client library"
@@ -634,6 +648,7 @@ python-versions = "*"
 [extras]
 bigquery = ["google-cloud-bigquery"]
 build = ["google-cloud-build"]
+datastore = ["google-cloud-datastore"]
 pubsub = ["google-cloud-pubsub"]
 sheets = ["gspread"]
 speech = ["google-cloud-speech"]
@@ -643,7 +658,7 @@ tasks = ["google-cloud-tasks", "google-cloud-scheduler"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "315aeb4ad6df0889937536f7e0587d090896cf49572878fb054c5852947a1ef4"
+content-hash = "e47fdd8c20cd2a9b0b5556b7106a8f8a51035984af5d4e5b9726c46dda4a47b3"
 
 [metadata.files]
 astroid = [
@@ -786,6 +801,10 @@ google-cloud-build = [
 google-cloud-core = [
     {file = "google-cloud-core-1.5.0.tar.gz", hash = "sha256:1277a015f8eeb014c48f2ec094ed5368358318f1146cf49e8de389962dc19106"},
     {file = "google_cloud_core-1.5.0-py2.py3-none-any.whl", hash = "sha256:99a8a15f406f53f2b11bda1f45f952a9cdfbdbba8abf40c75651019d800879f5"},
+]
+google-cloud-datastore = [
+    {file = "google-cloud-datastore-2.1.0.tar.gz", hash = "sha256:11e5eba37917d0e225d7ad298a0bf5ff7341fcef8e993327c14557197a4cd3fb"},
+    {file = "google_cloud_datastore-2.1.0-py2.py3-none-any.whl", hash = "sha256:0181fb775ef8f34970ef0d7718a0325e1a21df70e04453503a5c887414e8d4ef"},
 ]
 google-cloud-pubsub = [
     {file = "google-cloud-pubsub-2.2.0.tar.gz", hash = "sha256:bc50a60803f5c409a295ec0e31cdd4acc271611ce3f4963a072036bbfa5ccde5"},

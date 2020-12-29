@@ -154,7 +154,7 @@ class Document(EmbeddedDocument):
             yield cls._from_dict(**cls.from_entity(entity=entity))
 
     @classmethod
-    def get(cls, pk: str, **kwargs) -> Document:
+    def get(cls, pk: str = None, **kwargs) -> Document:
         if pk is not None:
             entity = cls._client.get(key=cls._get_key(pk=pk))
             if entity:

@@ -104,6 +104,14 @@ class GoogleCloudStorage(GoogleCloudPilotAPI):
         blob = bucket.blob(file_name)
         return blob.delete()
 
+    async def list_files(self, bucket_name: str, prefix: str = None):
+        blobs = self.client.list_blobs(
+            bucket_name,
+            prefix=prefix,
+        )
+        for blob in blobs:
+            yield blob
+
     def _download(self, url):
         response = requests.get(url, stream=True)
         f = io.BytesIO()

@@ -5,7 +5,10 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 
 
 class Spreadsheet(GoogleCloudPilotAPI):
-    _scopes = ['https://spreadsheets.google.com/feeds']
+    _scopes = [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive',
+    ]
 
     def __init__(self, sheet_id: str):
         super().__init__()

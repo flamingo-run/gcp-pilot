@@ -12,6 +12,12 @@ class DoesNotExist(Exception):
     pk: str
 
 
+@dataclass
+class MultipleObjectsFound(Exception):
+    cls: Type[EmbeddedDocument]
+    filters: Dict
+
+
 operators = {
     'eq': '==',
     'gt': '>',
@@ -148,11 +154,19 @@ class Document(EmbeddedDocument):
             yield cls._from_dict(**cls.from_entity(entity=entity))
 
     @classmethod
-    def get(cls, pk: str) -> Document:
-        entity = cls._client.get(key=cls._get_key(pk=pk))
-        if not entity:
-            raise DoesNotExist(cls, pk)
-        return cls._from_dict(**cls.from_entity(entity=entity))
+    def get(cls, pk: str, **kwargs) -> Document:
+        if pk is not None:
+            entity = cls._client.get(key=cls._get_key(pk=pk))
+            if entity:
+                return cls._from_dict(**cls.from_entity(entity=entity))
+        else:
+            one_obj = None
+            for obj in cls.list(**kwargs):
+                if one_obj is not None:
+                    raise MultipleObjectsFound(cls, filters=kwargs)
+                one_obj = obj
+            return one_obj
+        raise DoesNotExist(cls, pk)
 
     def to_entity(self) -> datastore.Entity:
         if not self.pk:

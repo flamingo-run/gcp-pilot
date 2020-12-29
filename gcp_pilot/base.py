@@ -21,9 +21,12 @@ def _get_project_default_location(credentials, project_id, default_zone='1'):
     return data['locationId'] + default_zone
 
 
+MINIMAL_SCOPES = ['https://www.googleapis.com/auth/cloud-platform']
+
+
 class GoogleCloudPilotAPI(abc.ABC):
     _client_class = None
-    _scopes = ['https://www.googleapis.com/auth/cloud-platform']
+    _scopes = []
     _iam_roles = []
     _cached_credentials = None
 
@@ -50,7 +53,8 @@ class GoogleCloudPilotAPI(abc.ABC):
     def _set_credentials(cls, subject=None):
         # Speed up consecutive authentications
         if not cls._cached_credentials:
-            credentials, project_id = auth.default()
+            all_scopes = MINIMAL_SCOPES + cls._scopes
+            credentials, project_id = auth.default(scopes=all_scopes)
             cls._cached_credentials = credentials, project_id
 
         credentials, project_id = cls._cached_credentials

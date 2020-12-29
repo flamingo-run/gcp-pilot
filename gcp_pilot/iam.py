@@ -64,7 +64,7 @@ class GoogleIAM(AccountManagerMixin, GoogleCloudPilotAPI):
 
         return service_accounts
 
-    def _get_policy(self, email: str, project_id: str = None) -> PolicyType:
+    def get_policy(self, email: str, project_id: str = None) -> PolicyType:
         resource = self._service_account_path(email=email, project_id=project_id)
         return self.client.projects().serviceAccounts().getIamPolicy(
             resource=resource,
@@ -76,9 +76,9 @@ class GoogleIAM(AccountManagerMixin, GoogleCloudPilotAPI):
         return f'{prefix}:{email}'
 
     async def bind_member(self, target_email: str, member_email: str, role: str, project_id=None) -> PolicyType:
-        policy = self._get_policy(email=target_email, project_id=project_id)
+        policy = self.get_policy(email=target_email, project_id=project_id)
         changed_policy = self.bind_email_to_policy(email=member_email, role=role, policy=policy)
-        return self._set_policy(email=target_email, policy=changed_policy, project_id=project_id)
+        return self.set_policy(email=target_email, policy=changed_policy, project_id=project_id)
 
     async def remove_member(
             self,
@@ -87,11 +87,11 @@ class GoogleIAM(AccountManagerMixin, GoogleCloudPilotAPI):
             role: str,
             project_id: str = None,
     ) -> PolicyType:
-        policy = self._get_policy(email=target_email, project_id=project_id)
+        policy = self.get_policy(email=target_email, project_id=project_id)
         changed_policy = self.unbind_email_from_policy(email=member_email, role=role, policy=policy)
-        return self._set_policy(email=target_email, policy=changed_policy, project_id=project_id)
+        return self.set_policy(email=target_email, policy=changed_policy, project_id=project_id)
 
-    def _set_policy(self, email: str, policy: PolicyType, project_id: str = None) -> PolicyType:
+    def set_policy(self, email: str, policy: PolicyType, project_id: str = None) -> PolicyType:
         resource = self._service_account_path(email=email, project_id=project_id)
         return self.client.projects().serviceAccounts().setIamPolicy(
             resource=resource,

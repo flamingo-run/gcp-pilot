@@ -99,7 +99,7 @@ class GoogleCloudStorage(GoogleCloudPilotAPI):
         await self.delete(file_name=source_file_name, bucket_name=source_bucket_name)
         return data
 
-    async def delete(self, file_name, bucket_name: str = None):
+    async def delete(self, file_name: str, bucket_name: str = None):
         bucket = await self.check_bucket(name=bucket_name)
         blob = bucket.blob(file_name)
         return blob.delete()

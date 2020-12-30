@@ -45,7 +45,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
             name=job_name,
             schedule=cron,
             time_zone=timezone or self.timezone,
-            attempt_deadline=timeout_in_seconds,
+            attempt_deadline=f'{timeout_in_seconds}s',
             http_target=scheduler.HttpTarget(
                 uri=url,
                 http_method=method,
@@ -81,7 +81,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
             name=job_name,
             schedule=cron,
             time_zone=timezone or self.timezone,
-            attempt_deadline=timeout_in_seconds,
+            attempt_deadline=f'{timeout_in_seconds}s',
             http_target=scheduler.HttpTarget(
                 uri=url,
                 http_method=method,

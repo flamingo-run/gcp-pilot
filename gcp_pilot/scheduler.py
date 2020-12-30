@@ -1,3 +1,4 @@
+# https://cloud.google.com/scheduler/docs/reference/rest
 import os
 from typing import Dict
 
@@ -35,6 +36,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
             headers: Dict[str, str] = None,
             project_id: str = None,
             use_oidc_auth: bool = True,
+            timeout_in_seconds: int = None
     ) -> scheduler.Job:
         parent = self._parent_path(project_id=project_id)
         job_name = self._job_path(job=name, project_id=project_id)
@@ -42,6 +44,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
             name=job_name,
             schedule=cron,
             time_zone=timezone or self.timezone,
+            attempt_deadline=timeout_in_seconds,
             http_target=scheduler.HttpTarget(
                 uri=url,
                 http_method=method,

@@ -8,6 +8,7 @@ from google.cloud import scheduler
 from gcp_pilot.base import GoogleCloudPilotAPI, AppEngineBasedService
 
 DEFAULT_TIMEZONE = os.environ.get('TIMEZONE', 'Europe/London')  # UTC
+MAX_TIMEOUT = 30 * 60  # max allowed to HTTP endpoints is 30 minutes
 
 
 class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
@@ -36,7 +37,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
             headers: Dict[str, str] = None,
             project_id: str = None,
             use_oidc_auth: bool = True,
-            timeout_in_seconds: int = None
+            timeout_in_seconds: int = MAX_TIMEOUT,
     ) -> scheduler.Job:
         parent = self._parent_path(project_id=project_id)
         job_name = self._job_path(job=name, project_id=project_id)
@@ -73,12 +74,14 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
             headers: Dict[str, str] = None,
             project_id: str = None,
             use_oidc_auth: bool = True,
+            timeout_in_seconds: int = MAX_TIMEOUT,
     ) -> scheduler.Job:
         job_name = self._job_path(job=name, project_id=project_id)
         job = scheduler.Job(
             name=job_name,
             schedule=cron,
             time_zone=timezone or self.timezone,
+            attempt_deadline=timeout_in_seconds,
             http_target=scheduler.HttpTarget(
                 uri=url,
                 http_method=method,
@@ -118,6 +121,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
             headers: Dict[str, str] = None,
             project_id: str = None,
             use_oidc_auth: bool = True,
+            timeout_in_seconds: int = MAX_TIMEOUT,
     ) -> scheduler.Job:
         try:
             response = await self.update(
@@ -130,6 +134,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
                 headers=headers,
                 project_id=project_id,
                 use_oidc_auth=use_oidc_auth,
+                timeout_in_seconds=timeout_in_seconds,
             )
         except NotFound:
             response = await self.create(
@@ -142,5 +147,6 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
                 headers=headers,
                 project_id=project_id,
                 use_oidc_auth=use_oidc_auth,
+                timeout_in_seconds=timeout_in_seconds,
             )
         return response

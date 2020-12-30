@@ -4,6 +4,7 @@ import os
 from typing import Dict, Any, Callable
 
 from google import auth
+from google.auth import impersonated_credentials
 from googleapiclient.discovery import build
 
 DEFAULT_PROJECT_ID = os.environ.get('PROJECT_ID')
@@ -31,9 +32,10 @@ class GoogleCloudPilotAPI(abc.ABC):
     _iam_roles = []
     _cached_credentials = None
 
-    def __init__(self, subject=None, location=None, project_id=None, **kwargs):
+    def __init__(self, subject=None, location=None, project_id=None, impersonate_account=None, **kwargs):
         self.credentials, credential_project_id = self._set_credentials(
             subject=subject,
+            impersonate_account=impersonate_account,
         )
         self.project_id = self._set_project_id(project_id=project_id, credential_project_id=credential_project_id)
         self.location = self._set_location(location=location)
@@ -53,11 +55,28 @@ class GoogleCloudPilotAPI(abc.ABC):
         )
 
     @classmethod
-    def _set_credentials(cls, subject=None):
+    def _impersonate_account(cls, credentials, service_account, scopes):
+        return impersonated_credentials.Credentials(
+            source_credentials=credentials,
+            target_principal=service_account,
+            target_scopes=scopes,
+            delegates=[],
+        )
+
+    @classmethod
+    def _set_credentials(cls, subject=None, impersonate_account=None):
         # Speed up consecutive authentications
         if not cls._cached_credentials:
             all_scopes = MINIMAL_SCOPES + cls._scopes
             credentials, project_id = auth.default(scopes=all_scopes)
+
+            if impersonate_account:
+                credentials = cls._impersonate_account(
+                    credentials=credentials,
+                    service_account=impersonate_account,
+                    scopes=all_scopes,
+                )
+
             cls._cached_credentials = credentials, project_id
 
         credentials, project_id = cls._cached_credentials

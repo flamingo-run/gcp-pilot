@@ -75,6 +75,7 @@ class GoogleCloudPilotAPI(abc.ABC):
 
         # Fetch project from service account
         # Since we are impersonating this service account, use it's own project
+        # TODO: regex this
         project_id = credentials.service_account_email.split('@')[-1].replace('.iam.gserviceaccount.com', '')
 
         return credentials, project_id
@@ -82,6 +83,7 @@ class GoogleCloudPilotAPI(abc.ABC):
     @classmethod
     def _set_credentials(cls, subject: str = None, impersonate_account: str = None) -> AuthType:
         # Speed up consecutive authentications
+        # TODO: check if this does not break multiple client usage
         if not cls._cached_credentials:
             all_scopes = MINIMAL_SCOPES + cls._scopes
             credentials, project_id = auth.default(scopes=all_scopes)

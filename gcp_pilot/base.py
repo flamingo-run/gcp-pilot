@@ -11,7 +11,6 @@ DEFAULT_LOCATION = os.environ.get('LOCATION', None)
 
 PolicyType = Dict[str, Any]
 
-
 logger = logging.getLogger()
 
 
@@ -21,7 +20,9 @@ def _get_project_default_location(credentials, project_id, default_zone='1'):
     return data['locationId'] + default_zone
 
 
-MINIMAL_SCOPES = ['https://www.googleapis.com/auth/cloud-platform']
+MINIMAL_SCOPES = [
+    'https://www.googleapis.com/auth/cloud-platform',
+]
 
 
 class GoogleCloudPilotAPI(abc.ABC):

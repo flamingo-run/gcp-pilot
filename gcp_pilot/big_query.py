@@ -4,8 +4,8 @@ from typing import Any
 from google.cloud import bigquery
 from google.cloud.bigquery import Table, DatasetReference
 
-from gcp_pilot.base import GoogleCloudPilotAPI
 from gcp_pilot import exceptions
+from gcp_pilot.base import GoogleCloudPilotAPI
 
 
 class BigQuery(GoogleCloudPilotAPI):

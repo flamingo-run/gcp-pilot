@@ -58,7 +58,6 @@ class CloudPublisher(GoogleCloudPilotAPI):
             return future.result()
 
 
-
 class CloudSubscriber(GoogleCloudPilotAPI):
     _client_class = pubsub_v1.SubscriberClient
 

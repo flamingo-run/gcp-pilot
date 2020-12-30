@@ -31,9 +31,11 @@ class GoogleCloudPilotAPI(abc.ABC):
     _iam_roles = []
     _cached_credentials = None
 
-    def __init__(self, subject=None, location=None, **kwargs):
-        self.credentials, project_id = self._set_credentials(subject=subject)
-        self.project_id = self._set_project_id(project_id=project_id)
+    def __init__(self, subject=None, location=None, project_id=None, **kwargs):
+        self.credentials, credential_project_id = self._set_credentials(
+            subject=subject,
+        )
+        self.project_id = self._set_project_id(project_id=project_id, credential_project_id=credential_project_id)
         self.location = self._set_location(location=location)
 
         self.client = (self._client_class or build)(
@@ -41,8 +43,8 @@ class GoogleCloudPilotAPI(abc.ABC):
             **kwargs
         )
 
-    def _set_project_id(self, project_id: str = None):
-        return DEFAULT_PROJECT_ID or getattr(self.credentials, 'project_id', project_id)
+    def _set_project_id(self, project_id: str, credential_project_id: str):
+        return project_id or DEFAULT_PROJECT_ID or credential_project_id
 
     def _set_location(self, location: str = None):
         return location or DEFAULT_LOCATION or _get_project_default_location(
@@ -61,7 +63,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         credentials, project_id = cls._cached_credentials
         if subject:
             credentials = credentials.with_subject(subject=subject)
-        return credentials, project_id
+        return credentials, (project_id or getattr(credentials, 'project_id'))
 
     @property
     def oidc_token(self):

@@ -6,6 +6,7 @@ from typing import Dict, Any, Callable, Tuple
 from google import auth
 from google.auth.credentials import Credentials
 from google.auth.impersonated_credentials import Credentials as ImpersonatedCredentials
+from google.protobuf.duration_pb2 import Duration
 from googleapiclient.discovery import build
 
 DEFAULT_PROJECT_ID = os.environ.get('PROJECT_ID')
@@ -138,6 +139,9 @@ class GoogleCloudPilotAPI(abc.ABC):
             page_token = results.get('nextPageToken')
             if not page_token:
                 break
+
+    def _as_duration(self, seconds):
+        return Duration(seconds=seconds)
 
 
 class AccountManagerMixin:

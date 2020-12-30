@@ -1,7 +1,11 @@
+from typing import Iterator, Dict, Any
+
 from googleapiclient.errors import HttpError
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import GoogleCloudPilotAPI
+
+UserType = GroupType = MemberType = Dict[str, Any]
 
 
 class Directory(GoogleCloudPilotAPI):
@@ -18,7 +22,7 @@ class Directory(GoogleCloudPilotAPI):
             cache_discovery=False,
         )
 
-    def get_users(self, domain=None):
+    def get_users(self, domain: str = None) -> Iterator[UserType]:
         yield from self._paginate(
             method=self.client.users().list,
             result_key='users',
@@ -29,7 +33,7 @@ class Directory(GoogleCloudPilotAPI):
             )
         )
 
-    def get_groups(self, domain=None):
+    def get_groups(self, domain: str = None) -> Iterator[GroupType]:
         yield from self._paginate(
             method=self.client.groups().list,
             result_key='groups',
@@ -38,12 +42,18 @@ class Directory(GoogleCloudPilotAPI):
             )
         )
 
-    def get_group(self, group_id):
+    def get_group(self, group_id: str) -> GroupType:
         return self.client.groups().get(
             groupKey=group_id,
         ).execute()
 
-    def create_or_update_group(self, email, name=None, description=None, group_id=None):
+    def create_or_update_group(
+            self,
+            email: str,
+            name: str = None,
+            description: str = None,
+            group_id: str = None,
+    ) -> GroupType:
         body = dict(
             email=email,
             name=name,
@@ -60,7 +70,7 @@ class Directory(GoogleCloudPilotAPI):
                 body=body,
             ).execute()
 
-    def delete_group(self, group_id):
+    def delete_group(self, group_id: str) -> GroupType:
         try:
             return self.client.groups().delete(
                 groupKey=group_id,
@@ -70,7 +80,7 @@ class Directory(GoogleCloudPilotAPI):
                 raise exceptions.NotFoundError()
             raise e
 
-    def get_group_members(self, group_id):
+    def get_group_members(self, group_id: str) -> Iterator[MemberType]:
         page_token = None
 
         while True:
@@ -85,7 +95,7 @@ class Directory(GoogleCloudPilotAPI):
             if not page_token:
                 break
 
-    def add_group_member(self, group_id, email, role='MEMBER'):
+    def add_group_member(self, group_id: str, email: str, role: str = 'MEMBER') -> MemberType:
         body = {'email': email, 'role': role}
 
         try:
@@ -102,7 +112,7 @@ class Directory(GoogleCloudPilotAPI):
 
             raise e
 
-    def delete_group_member(self, group_id, member_id):
+    def delete_group_member(self, group_id: str, member_id: str) -> MemberType:
         try:
             return self.client.members().delete(
                 groupKey=group_id,

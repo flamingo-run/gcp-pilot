@@ -1,10 +1,13 @@
 import json
 import time
+from typing import Dict, Any, List
 
 from google.api_core.exceptions import NotFound
 from googleapiclient.errors import HttpError
 
 from gcp_pilot.base import GoogleCloudPilotAPI
+
+InstanceType = DatabaseType = UserType = Dict[str, Any]
 
 
 class GoogleCloudSQL(GoogleCloudPilotAPI):
@@ -16,12 +19,12 @@ class GoogleCloudSQL(GoogleCloudPilotAPI):
             version='v1beta4',
         )
 
-    async def list_instances(self, project_id: str = None):
+    async def list_instances(self, project_id: str = None) -> List[InstanceType]:
         return self.client.instances().list(
             project=project_id or self.project_id,
         ).execute()
 
-    async def get_instance(self, name: str, project_id: str = None):
+    async def get_instance(self, name: str, project_id: str = None) -> InstanceType:
         return self.client.instances().get(
             instance=name,
             project=project_id or self.project_id,
@@ -37,7 +40,7 @@ class GoogleCloudSQL(GoogleCloudPilotAPI):
             project_id: str = None,
             exists_ok: bool = True,
             wait_ready: bool = True,
-    ):
+    ) -> InstanceType:
         body = dict(
             name=name,
             database_version=version,
@@ -77,7 +80,7 @@ class GoogleCloudSQL(GoogleCloudPilotAPI):
         print(f"Instance {name} is {current_state}!")
         return sql_instance
 
-    async def get_database(self, instance: str, database: str, project_id: str = None):
+    async def get_database(self, instance: str, database: str, project_id: str = None) -> DatabaseType:
         project_id = project_id or self.project_id
         return self.client.databases().get(
             instance=instance,
@@ -85,7 +88,13 @@ class GoogleCloudSQL(GoogleCloudPilotAPI):
             project=project_id,
         ).execute()
 
-    async def create_database(self, name: str, instance: str, project_id: str = None, exists_ok: bool = True):
+    async def create_database(
+            self,
+            name: str,
+            instance: str,
+            project_id: str = None,
+            exists_ok: bool = True,
+    ) -> DatabaseType:
         body = dict(
             name=name,
         )
@@ -105,13 +114,13 @@ class GoogleCloudSQL(GoogleCloudPilotAPI):
                 return await self.get_database(instance=instance, database=name, project_id=project_id)
             raise
 
-    async def list_users(self, instance: str, project_id: str = None):
+    async def list_users(self, instance: str, project_id: str = None) -> List[UserType]:
         return self.client.users().list(
             instance=instance,
             project=project_id or self.project_id,
         ).execute()
 
-    async def create_user(self, name: str, password: str, instance: str, project_id: str = None):
+    async def create_user(self, name: str, password: str, instance: str, project_id: str = None) -> UserType:
         body = dict(
             name=name,
             password=password,

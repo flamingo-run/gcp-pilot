@@ -1,5 +1,5 @@
-from google.auth.transport.requests import AuthorizedSession
 import gspread
+from google.auth.transport.requests import AuthorizedSession
 
 from gcp_pilot.base import GoogleCloudPilotAPI
 
@@ -15,7 +15,7 @@ class Spreadsheet(GoogleCloudPilotAPI):
         self.sheet_id = sheet_id
         self.spreadsheet = self.client.open_by_key(self.sheet_id)
 
-    def worksheet(self, name):
+    def worksheet(self, name: str) -> gspread.Worksheet:
         return self.spreadsheet.worksheet(name)
 
     @classmethod
@@ -25,5 +25,5 @@ class Spreadsheet(GoogleCloudPilotAPI):
         return gc
 
     @property
-    def url(self):
+    def url(self) -> str:
         return f'https://docs.google.com/spreadsheets/d/{self.sheet_id}/edit'

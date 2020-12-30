@@ -1,6 +1,7 @@
 # More Information: https://googleapis.dev/python/storage/latest/index.html
 import io
 import os
+from typing import AsyncIterator
 
 import requests
 from google.cloud import storage
@@ -87,7 +88,7 @@ class GoogleCloudStorage(GoogleCloudPilotAPI):
             target_file_name: str = None,
             project_id: str = None,
             region: str = None,
-    ):
+    ) -> Blob:
         data = await self.copy(
             source_file_name=source_file_name,
             source_bucket_name=source_bucket_name,
@@ -99,12 +100,12 @@ class GoogleCloudStorage(GoogleCloudPilotAPI):
         await self.delete(file_name=source_file_name, bucket_name=source_bucket_name)
         return data
 
-    async def delete(self, file_name: str, bucket_name: str = None):
+    async def delete(self, file_name: str, bucket_name: str = None) -> None:
         bucket = await self.check_bucket(name=bucket_name)
         blob = bucket.blob(file_name)
         return blob.delete()
 
-    async def list_files(self, bucket_name: str, prefix: str = None):
+    async def list_files(self, bucket_name: str, prefix: str = None) -> AsyncIterator[Blob]:
         blobs = self.client.list_blobs(
             bucket_name,
             prefix=prefix,
@@ -112,7 +113,7 @@ class GoogleCloudStorage(GoogleCloudPilotAPI):
         for blob in blobs:
             yield blob
 
-    def _download(self, url):
+    def _download(self, url: str) -> io.BytesIO:
         response = requests.get(url, stream=True)
         f = io.BytesIO()
         f.write(response.content)

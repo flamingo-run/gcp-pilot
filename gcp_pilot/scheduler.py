@@ -17,10 +17,10 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         self.timezone = kwargs.pop('timezone', DEFAULT_TIMEZONE)
         super().__init__(**kwargs)
 
-    def _parent_path(self, project_id=None):
+    def _parent_path(self, project_id: str = None) -> str:
         return f'projects/{project_id or self.project_id}/locations/{self.location}'
 
-    def _job_path(self, job, project_id=None):
+    def _job_path(self, job, project_id: str = None) -> str:
         parent_name = self._parent_path(project_id=project_id)
         return f'{parent_name}/jobs/{job}'
 
@@ -35,7 +35,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
             headers: Dict[str, str] = None,
             project_id: str = None,
             use_oidc_auth: bool = True,
-    ):
+    ) -> scheduler.Job:
         parent = self._parent_path(project_id=project_id)
         job_name = self._job_path(job=name, project_id=project_id)
         job = scheduler.Job(
@@ -70,7 +70,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
             headers: Dict[str, str] = None,
             project_id: str = None,
             use_oidc_auth: bool = True,
-    ):
+    ) -> scheduler.Job:
         job_name = self._job_path(job=name, project_id=project_id)
         job = scheduler.Job(
             name=job_name,
@@ -90,14 +90,14 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         )
         return response
 
-    def get(self, name: str, project_id: str = None):
+    def get(self, name: str, project_id: str = None) -> scheduler.Job:
         job_name = self._job_path(job=name, project_id=project_id)
         response = self.client.get_job(
             name=job_name,
         )
         return response
 
-    async def delete(self, name: str, project_id: str = None):
+    async def delete(self, name: str, project_id: str = None) -> None:
         job_name = self._job_path(job=name, project_id=project_id)
         response = self.client.delete_job(
             name=job_name,
@@ -115,7 +115,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
             headers: Dict[str, str] = None,
             project_id: str = None,
             use_oidc_auth: bool = True,
-    ):
+    ) -> scheduler.Job:
         try:
             response = await self.update(
                 name=name,

@@ -1,9 +1,9 @@
 # https://googleapis.dev/python/pubsub/latest/index.html
-from typing import Callable, Dict, Any, List
+from typing import Callable, Dict, Any, AsyncIterator
 
 from google.api_core.exceptions import AlreadyExists, NotFound
 from google.cloud import pubsub_v1
-from google.pubsub_v1 import PushConfig, Subscription
+from google.pubsub_v1 import PushConfig, Subscription, types
 
 from gcp_pilot.base import GoogleCloudPilotAPI
 
@@ -11,7 +11,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 class CloudPublisher(GoogleCloudPilotAPI):
     _client_class = pubsub_v1.PublisherClient
 
-    async def create_topic(self, topic_id: str, project_id: str = None, exists_ok: bool = True):
+    async def create_topic(self, topic_id: str, project_id: str = None, exists_ok: bool = True) -> types.Topic:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
             topic=topic_id,
@@ -33,7 +33,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
             topic_id: str,
             project_id: str = None,
             attributes: Dict[str, Any] = None,
-    ):
+    ) -> types.PublishResponse:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
             topic=topic_id,
@@ -61,7 +61,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
 class CloudSubscriber(GoogleCloudPilotAPI):
     _client_class = pubsub_v1.SubscriberClient
 
-    async def list_subscriptions(self, project_id: str = None) -> List[Subscription]:
+    async def list_subscriptions(self, project_id: str = None) -> AsyncIterator[Subscription]:
         all_subscriptions = self.client.list_subscriptions(
             project=f'projects/{project_id or self.project_id}',
         )
@@ -78,7 +78,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             subscription=subscription_path,
         )
 
-    async def delete_subscription(self, subscription_id: str, project_id: str = None):
+    async def delete_subscription(self, subscription_id: str, project_id: str = None) -> None:
         subscription_path = self.client.subscription_path(
             project=project_id or self.project_id,
             subscription=subscription_id,

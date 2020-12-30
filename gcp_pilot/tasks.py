@@ -42,7 +42,7 @@ class CloudTasks(GoogleCloudPilotAPI):
             location: str = None,
             unique: bool = True,
             use_oidc_auth: bool = True,
-    ):
+    ) -> tasks_v2.Task:
         queue_path = self.client.queue_path(
             project=project_id or self.project_id,
             location=location or self.location,
@@ -89,7 +89,7 @@ class CloudTasks(GoogleCloudPilotAPI):
             queue_name: str,
             project_id: str = None,
             location: str = None,
-    ):
+    ) -> tasks_v2.Queue:
         parent = self._parent_path(project_id=project_id, location=location)
         queue_path = self._queue_path(queue=queue_name, project_id=project_id, location=location)
 

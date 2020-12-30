@@ -1,7 +1,11 @@
 # https://cloud.google.com/source-repositories/docs/reference/rest
+from typing import Dict, Any
+
 from googleapiclient.errors import HttpError
 
 from gcp_pilot.base import GoogleCloudPilotAPI
+
+RepoType = Dict[str, Any]
 
 
 class GoogleCloudSourceRepo(GoogleCloudPilotAPI):
@@ -20,12 +24,12 @@ class GoogleCloudSourceRepo(GoogleCloudPilotAPI):
         parent_path = self._parent_path(project_id=project_id)
         return f'{parent_path}/repos/{repo}'
 
-    async def get_repo(self, repo_name: str, project_id: str = None):
+    async def get_repo(self, repo_name: str, project_id: str = None) -> RepoType:
         return self.client.projects().repos().get(
             name=self._repo_path(repo=repo_name, project_id=project_id),
         ).execute()
 
-    async def create_repo(self, repo_name: str, project_id: str = None, exists_ok: bool = True):
+    async def create_repo(self, repo_name: str, project_id: str = None, exists_ok: bool = True) -> RepoType:
         parent = self._parent_path(project_id=project_id)
         repo_path = self._repo_path(repo=repo_name, project_id=project_id)
         try:

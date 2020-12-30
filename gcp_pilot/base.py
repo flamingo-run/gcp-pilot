@@ -66,12 +66,18 @@ class GoogleCloudPilotAPI(abc.ABC):
 
     @classmethod
     def _impersonate_account(cls, credentials, service_account, scopes) -> ImpersonatedAuthType:
-        return impersonated_credentials.Credentials(
+        credentials = ImpersonatedCredentials(
             source_credentials=credentials,
             target_principal=service_account,
             target_scopes=scopes,
             delegates=[],
         )
+
+        # Fetch project from service account
+        # Since we are impersonating this service account, use it's own project
+        project_id = credentials.service_account_email.split('@')[-1].replace('.iam.gserviceaccount.com', '')
+
+        return credentials, project_id
 
     @classmethod
     def _set_credentials(cls, subject: str = None, impersonate_account: str = None) -> AuthType:
@@ -81,11 +87,12 @@ class GoogleCloudPilotAPI(abc.ABC):
             credentials, project_id = auth.default(scopes=all_scopes)
 
             if impersonate_account:
-                credentials = cls._impersonate_account(
+                credentials, impersonated_project_id = cls._impersonate_account(
                     credentials=credentials,
                     service_account=impersonate_account,
                     scopes=all_scopes,
                 )
+                project_id = impersonated_project_id or project_id
 
             cls._cached_credentials = credentials, project_id
 

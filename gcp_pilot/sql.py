@@ -13,10 +13,11 @@ InstanceType = DatabaseType = UserType = Dict[str, Any]
 class GoogleCloudSQL(GoogleCloudPilotAPI):
     _iam_roles = ['cloudsql.client']
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__(
             serviceName='sqladmin',
             version='v1beta4',
+            **kwargs,
         )
 
     async def list_instances(self, project_id: str = None) -> List[InstanceType]:

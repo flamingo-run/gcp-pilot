@@ -9,10 +9,11 @@ AccountType = Dict[str, Any]
 
 
 class GoogleIAM(AccountManagerMixin, GoogleCloudPilotAPI):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__(
             serviceName='iam',
             version='v1',
+            **kwargs,
         )
 
     def _parent_path(self, project_id: str = None) -> str:

@@ -8,7 +8,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 class Calendar(GoogleCloudPilotAPI):
     _scopes = ['https://www.googleapis.com/auth/calendar']
 
-    def __init__(self, email, timezone: str = 'UTC'):
+    def __init__(self, email, timezone: str = 'UTC', **kwargs):
         self.email = email
         self.timezone = pytz.timezone(timezone)
 
@@ -17,6 +17,7 @@ class Calendar(GoogleCloudPilotAPI):
             version='v3',
             cache_discovery=False,
             subject=email,
+            **kwargs,
         )
 
     class Color:

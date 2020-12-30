@@ -2,10 +2,11 @@ from gcp_pilot.base import AccountManagerMixin, GoogleCloudPilotAPI, PolicyType
 
 
 class GoogleResourceManager(AccountManagerMixin, GoogleCloudPilotAPI):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__(
             serviceName='cloudresourcemanager',
             version='v1',
+            **kwargs,
         )
 
     def get_policy(self, project_id: str = None, version: int = 1) -> PolicyType:

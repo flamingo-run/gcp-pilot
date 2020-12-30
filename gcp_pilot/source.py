@@ -11,10 +11,11 @@ RepoType = Dict[str, Any]
 class GoogleCloudSourceRepo(GoogleCloudPilotAPI):
     _iam_roles = ['source.repos.create']
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__(
             serviceName='sourcerepo',
             version='v1',
+            **kwargs,
         )
 
     def _parent_path(self, project_id: str = None) -> str:

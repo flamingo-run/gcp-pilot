@@ -14,12 +14,13 @@ class Directory(GoogleCloudPilotAPI):
         'https://www.googleapis.com/auth/admin.directory.user',
     ]
 
-    def __init__(self, email):
+    def __init__(self, email: str, **kwargs):
         self.email = email
         super().__init__(
             serviceName='admin',
             version='directory_v1',
             cache_discovery=False,
+            **kwargs,
         )
 
     def get_users(self, domain: str = None) -> Iterator[UserType]:

@@ -10,8 +10,8 @@ class Spreadsheet(GoogleCloudPilotAPI):
         'https://www.googleapis.com/auth/drive',
     ]
 
-    def __init__(self, sheet_id: str):
-        super().__init__()
+    def __init__(self, sheet_id: str, **kwargs):
+        super().__init__(**kwargs)
         self.sheet_id = sheet_id
         self.spreadsheet = self.client.open_by_key(self.sheet_id)
 

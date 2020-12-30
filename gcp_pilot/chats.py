@@ -198,11 +198,12 @@ class ChatsHook:
 class ChatsBot(GoogleCloudPilotAPI):
     _scopes = ['https://www.googleapis.com/auth/chat.bot']
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__(
             serviceName='chat',
             version='v1',
             cache_discovery=False,
+            **kwargs,
         )
 
     def _room_path(self, room_id: str):

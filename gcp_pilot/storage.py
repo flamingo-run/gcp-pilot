@@ -6,7 +6,7 @@ from typing import AsyncIterator
 import requests
 from google.cloud import storage
 from google.cloud.exceptions import Conflict
-from google.cloud.storage import Bucket
+from google.cloud.storage import Bucket, Blob
 
 from gcp_pilot.base import GoogleCloudPilotAPI
 
@@ -39,7 +39,7 @@ class GoogleCloudStorage(GoogleCloudPilotAPI):
             project_id: str = None,
             region: str = None,
             is_public: bool = False,
-    ):
+    ) -> Blob:
         target_bucket = await self.create_bucket(name=bucket_name, project_id=project_id, region=region)
 
         target_file_name = target_file_name or str(source_file).rsplit('/')[-1]
@@ -60,7 +60,7 @@ class GoogleCloudStorage(GoogleCloudPilotAPI):
         if is_public:
             blob.make_public()
 
-        return f'gs://{target_bucket.name}/{blob.name}'
+        return blob
 
     async def copy(
             self,
@@ -70,7 +70,7 @@ class GoogleCloudStorage(GoogleCloudPilotAPI):
             target_file_name: str = None,
             project_id: str = None,
             region: str = None,
-    ):
+    ) -> Blob:
         source_bucket = await self.create_bucket(name=source_bucket_name, region=region, project_id=project_id)
         source_blob = source_bucket.blob(source_file_name)
 
@@ -78,7 +78,7 @@ class GoogleCloudStorage(GoogleCloudPilotAPI):
         target_file_name = target_file_name or str(source_file_name).rsplit('/')[-1]
 
         obj = source_bucket.copy_blob(source_blob, target_bucket, target_file_name)
-        return obj.name
+        return obj
 
     async def move(
             self,

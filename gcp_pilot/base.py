@@ -9,8 +9,7 @@ from google.auth.impersonated_credentials import Credentials as ImpersonatedCred
 from google.protobuf.duration_pb2 import Duration
 from googleapiclient.discovery import build
 
-DEFAULT_PROJECT_ID = os.environ.get('PROJECT_ID')
-DEFAULT_LOCATION = os.environ.get('LOCATION', None)
+DEFAULT_LOCATION = os.environ.get('GOOGLE_CLOUD_LOCATION', None)
 
 PolicyType = Dict[str, Any]
 AuthType = Tuple[Credentials, str]
@@ -57,7 +56,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         )
 
     def _set_project_id(self, project_id: str, credential_project_id: str) -> str:
-        return project_id or DEFAULT_PROJECT_ID or credential_project_id
+        return project_id or credential_project_id
 
     def _set_location(self, location: str = None) -> str:
         return location or DEFAULT_LOCATION or _get_project_default_location(

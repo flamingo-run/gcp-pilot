@@ -15,6 +15,7 @@ class GoogleCloudSourceRepo(GoogleCloudPilotAPI):
         super().__init__(
             serviceName='sourcerepo',
             version='v1',
+            cache_discovery=False,
             **kwargs,
         )
 

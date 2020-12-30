@@ -6,6 +6,7 @@ class GoogleResourceManager(AccountManagerMixin, GoogleCloudPilotAPI):
         super().__init__(
             serviceName='cloudresourcemanager',
             version='v1',
+            cache_discovery=False,
             **kwargs,
         )
 

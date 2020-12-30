@@ -13,6 +13,7 @@ class GoogleIAM(AccountManagerMixin, GoogleCloudPilotAPI):
         super().__init__(
             serviceName='iam',
             version='v1',
+            cache_discovery=False,
             **kwargs,
         )
 

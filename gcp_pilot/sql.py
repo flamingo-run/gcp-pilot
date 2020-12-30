@@ -17,6 +17,7 @@ class GoogleCloudSQL(GoogleCloudPilotAPI):
         super().__init__(
             serviceName='sqladmin',
             version='v1beta4',
+            cache_discovery=False,
             **kwargs,
         )
 

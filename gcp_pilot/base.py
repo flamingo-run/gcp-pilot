@@ -1,21 +1,24 @@
 import abc
 import logging
 import os
-from typing import Dict, Any, Callable
+from typing import Dict, Any, Callable, Tuple
 
 from google import auth
-from google.auth import impersonated_credentials
+from google.auth.credentials import Credentials
+from google.auth.impersonated_credentials import Credentials as ImpersonatedCredentials
 from googleapiclient.discovery import build
 
 DEFAULT_PROJECT_ID = os.environ.get('PROJECT_ID')
 DEFAULT_LOCATION = os.environ.get('LOCATION', None)
 
 PolicyType = Dict[str, Any]
+AuthType = Tuple[Credentials, str]
+ImpersonatedAuthType = Tuple[ImpersonatedCredentials, str]
 
 logger = logging.getLogger()
 
 
-def _get_project_default_location(credentials, project_id, default_zone='1'):
+def _get_project_default_location(credentials, project_id: str, default_zone: str = '1') -> str:
     service = build(serviceName='appengine', version='v1', credentials=credentials, cache_discovery=False)
     data = service.apps().get(appsId=project_id).execute()
     return data['locationId'] + default_zone
@@ -32,7 +35,14 @@ class GoogleCloudPilotAPI(abc.ABC):
     _iam_roles = []
     _cached_credentials = None
 
-    def __init__(self, subject=None, location=None, project_id=None, impersonate_account=None, **kwargs):
+    def __init__(
+            self,
+            subject: str = None,
+            location: str = None,
+            project_id: str = None,
+            impersonate_account: str = None,
+            **kwargs,
+    ):
         self.credentials, credential_project_id = self._set_credentials(
             subject=subject,
             impersonate_account=impersonate_account,
@@ -45,17 +55,17 @@ class GoogleCloudPilotAPI(abc.ABC):
             **kwargs
         )
 
-    def _set_project_id(self, project_id: str, credential_project_id: str):
+    def _set_project_id(self, project_id: str, credential_project_id: str) -> str:
         return project_id or DEFAULT_PROJECT_ID or credential_project_id
 
-    def _set_location(self, location: str = None):
+    def _set_location(self, location: str = None) -> str:
         return location or DEFAULT_LOCATION or _get_project_default_location(
             credentials=self.credentials,
             project_id=self.project_id,
         )
 
     @classmethod
-    def _impersonate_account(cls, credentials, service_account, scopes):
+    def _impersonate_account(cls, credentials, service_account, scopes) -> ImpersonatedAuthType:
         return impersonated_credentials.Credentials(
             source_credentials=credentials,
             target_principal=service_account,
@@ -64,7 +74,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         )
 
     @classmethod
-    def _set_credentials(cls, subject=None, impersonate_account=None):
+    def _set_credentials(cls, subject: str = None, impersonate_account: str = None) -> AuthType:
         # Speed up consecutive authentications
         if not cls._cached_credentials:
             all_scopes = MINIMAL_SCOPES + cls._scopes
@@ -85,10 +95,10 @@ class GoogleCloudPilotAPI(abc.ABC):
         return credentials, (project_id or getattr(credentials, 'project_id'))
 
     @property
-    def oidc_token(self):
+    def oidc_token(self) -> Dict[str, Dict[str, str]]:
         return {'oidc_token': {'service_account_email': self.credentials.service_account_email}}
 
-    async def add_permissions(self, email, project_id=None):
+    async def add_permissions(self, email: str, project_id: str = None) -> None:
         from gcp_pilot.resource import GoogleResourceManager  # pylint: disable=import-outside-toplevel
 
         for role in self._iam_roles:
@@ -98,13 +108,13 @@ class GoogleCloudPilotAPI(abc.ABC):
                 project_id=project_id or self.project_id,
             )
 
-    def _get_project_number(self, project_id):
+    def _get_project_number(self, project_id: str) -> int:
         from gcp_pilot.resource import GoogleResourceManager  # pylint: disable=import-outside-toplevel
 
         project = GoogleResourceManager().get_project(project_id=project_id)
         return project.projectNumber
 
-    def _paginate(self, method: Callable, result_key: str, params: Dict[str, Any] = None):
+    def _paginate(self, method: Callable, result_key: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
         page_token = None
         params = params or {}
 
@@ -113,8 +123,8 @@ class GoogleCloudPilotAPI(abc.ABC):
                 **params,
                 pageToken=page_token,
             ).execute()
-            for space in results.get(result_key, []):
-                yield space
+            for item in results.get(result_key, []):
+                yield item
 
             page_token = results.get('nextPageToken')
             if not page_token:

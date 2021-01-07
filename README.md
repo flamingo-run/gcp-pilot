@@ -1,3 +1,8 @@
+![Github CI](https://github.com/flamingo-run/gcp-pilot/workflows/Github%20CI/badge.svg)
+[![Maintainability](https://api.codeclimate.com/v1/badges/0e03784af54dab4a7ebe/maintainability)](https://codeclimate.com/github/flamingo-run/gcp-pilot/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/0e03784af54dab4a7ebe/test_coverage)](https://codeclimate.com/github/flamingo-run/gcp-pilot/test_coverage)
+[![python](https://img.shields.io/badge/python-3.8-blue.svg)]()
+
 # Google Cloud Pilot
 
 ## Installation

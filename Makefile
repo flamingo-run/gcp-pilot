@@ -20,6 +20,9 @@ lint:
 	@echo "Checking code style ..."
 	@poetry run pylint --rcfile=./.pylintrc gcp_pilot
 
+unit:
+	@echo "No tests yet..."
+
 clean:
 	@rm -rf .coverage coverage.xml dist/ build/ *.egg-info/
 

@@ -123,9 +123,27 @@ class GoogleCloudPilotAPI(abc.ABC):
         project = GoogleResourceManager().get_project(project_id=project_id)
         return project.projectNumber
 
-    def _paginate(self, method: Callable, result_key: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _paginate(
+            self,
+            method: Callable,
+            result_key: str,
+            params: Dict[str, Any] = None,
+            order_by: str = None,
+            limit: int = 200,
+    ) -> Dict[str, Any]:
         page_token = None
         params = params or {}
+
+        if order_by:
+            if order_by.startswith('-'):
+                params['sortOrder'] = 'DESCENDING'
+                order_by = order_by[1:]
+            else:
+                params['sortOrder'] = 'ASCENDING'
+            params['orderBy'] = order_by
+
+        if limit:
+            params['maxResults'] = limit
 
         while True:
             results = method(

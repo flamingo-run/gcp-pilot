@@ -25,24 +25,29 @@ class Directory(GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    def get_users(self, domain: str = None) -> Iterator[UserType]:
+    def _build_context(self, customer: str = None, domain: str = None) -> Dict[str, str]:
+        context = {
+            'customer': customer or 'my_customer',
+        }
+        if domain:
+            context['domain'] = domain
+        return context
+
+    def get_users(self, customer: str = None, domain: str = None) -> Iterator[UserType]:
+        params = self._build_context(customer=customer, domain=domain)
         yield from self._paginate(
             method=self.client.users().list,
             result_key='users',
-            params=dict(
-                customer='my_customer',  # TODO: double check this param
-                domain=domain,
-                orderBy='email',
-            )
+            params=params,
+            order_by='email',
         )
 
-    def get_groups(self, domain: str = None) -> Iterator[GroupType]:
+    def get_groups(self, customer: str = None, domain: str = None) -> Iterator[GroupType]:
+        params = self._build_context(customer=customer, domain=domain)
         yield from self._paginate(
             method=self.client.groups().list,
             result_key='groups',
-            params=dict(
-                domain=domain,
-            )
+            params=params,
         )
 
     def get_group(self, group_id: str) -> GroupType:

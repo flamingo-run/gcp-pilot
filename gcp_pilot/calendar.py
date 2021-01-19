@@ -1,3 +1,4 @@
+# More Information: https://developers.google.com/calendar/v3/reference
 import datetime
 
 import pytz
@@ -47,35 +48,27 @@ class Calendar(GoogleCloudPilotAPI):
         min_date = self.date_to_str(starts_at) if starts_at else None
 
         page_size = 100
-        filters = dict(
+        params = dict(
             calendarId=calendar_id,
             timeMin=min_date,
-            maxResults=page_size,
             singleEvents=True,
-            orderBy='startTime',
         )
-        page_token = None
-        while True:
-            filters['pageToken'] = page_token
-            events_result = self.client.events().list(**filters).execute()
 
-            events = events_result.get('items', [])
-            for event in events:
-                yield event
-
-            page_token = events_result.get('nextPageToken')
-            if not page_token:
-                break
+        yield from self._paginate(
+            method=self.client.events().list,
+            result_key='items',
+            params=params,
+            order_by='startTime',
+            limit=page_size,
+        )
 
     def get_calendars(self):
-        page_token = None
-        while True:
-            calendar_list = self.client.calendarList().list(pageToken=page_token).execute()
-            for calendar_list_entry in calendar_list['items']:
-                yield calendar_list_entry
-            page_token = calendar_list.get('nextPageToken')
-            if not page_token:
-                break
+        params = {}
+        yield from self._paginate(
+            method=self.client.calendarList().list,
+            result_key='items',
+            params=params,
+        )
 
     def create_or_update_event(
             self,

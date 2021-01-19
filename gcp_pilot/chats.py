@@ -3,7 +3,7 @@ import json
 import requests
 
 from gcp_pilot import exceptions
-from gcp_pilot.base import GoogleCloudPilotAPI
+from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
 
 
 class Text:
@@ -195,7 +195,7 @@ class ChatsHook:
         return self._post(body=body)
 
 
-class ChatsBot(GoogleCloudPilotAPI):
+class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):
     _scopes = ['https://www.googleapis.com/auth/chat.bot']
 
     def __init__(self, **kwargs):
@@ -226,9 +226,10 @@ class ChatsBot(GoogleCloudPilotAPI):
         return f'{room_path}/{member_path}'
 
     def get_room(self, room_id: str):
-        return self.client.spaces().get(
+        return self._execute(
+            method=self.client.spaces().get,
             name=self._room_path(room_id=room_id),
-        ).execute()
+        )
 
     def get_rooms(self):
         yield from self._paginate(
@@ -238,9 +239,10 @@ class ChatsBot(GoogleCloudPilotAPI):
 
     def get_member(self, room_id: str, member_id: str):
         name = self._member_path(room_id=room_id, member_id=member_id)
-        return self.client.spaces().members().get(
+        return self._execute(
+            method=self.client.spaces().members().get,
             name=name,
-        ).execute()
+        )
 
     def get_members(self, room_id: str):
         yield from self._paginate(
@@ -252,10 +254,11 @@ class ChatsBot(GoogleCloudPilotAPI):
     def send_text(self, room_id: str, text: str):
         body = {'text': text}
 
-        return self.client.spaces().messages().create(
+        return self._execute(
+            method=self.client.spaces().messages().create,
             parent=self._room_path(room_id=room_id),
             body=body,
-        ).execute()
+        )
 
     def send_card(self, room_id: str, card: Card, additional_text: str = None):
         body = {
@@ -265,7 +268,8 @@ class ChatsBot(GoogleCloudPilotAPI):
         if additional_text:
             body['text'] = additional_text
 
-        return self.client.spaces().messages().create(
+        return self._execute(
+            method=self.client.spaces().messages().create,
             parent=self._room_path(room_id=room_id),
             body=body,
-        ).execute()
+        )

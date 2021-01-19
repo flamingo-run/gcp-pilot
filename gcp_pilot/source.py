@@ -1,14 +1,13 @@
 # https://cloud.google.com/source-repositories/docs/reference/rest
 from typing import Dict, Any
 
-from googleapiclient.errors import HttpError
-
-from gcp_pilot.base import GoogleCloudPilotAPI
+from gcp_pilot import exceptions
+from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
 
 RepoType = Dict[str, Any]
 
 
-class GoogleCloudSourceRepo(GoogleCloudPilotAPI):
+class GoogleCloudSourceRepo(DiscoveryMixin, GoogleCloudPilotAPI):
     _iam_roles = ['source.repos.create']
 
     def __init__(self, **kwargs):
@@ -27,21 +26,23 @@ class GoogleCloudSourceRepo(GoogleCloudPilotAPI):
         return f'{parent_path}/repos/{repo}'
 
     async def get_repo(self, repo_name: str, project_id: str = None) -> RepoType:
-        return self.client.projects().repos().get(
+        return self._execute(
+            method=self.client.projects().repos().get,
             name=self._repo_path(repo=repo_name, project_id=project_id),
-        ).execute()
+        )
 
     async def create_repo(self, repo_name: str, project_id: str = None, exists_ok: bool = True) -> RepoType:
         parent = self._parent_path(project_id=project_id)
         repo_path = self._repo_path(repo=repo_name, project_id=project_id)
         try:
-            return self.client.projects().repos().create(
+            return self._execute(
+                method=self.client.projects().repos().create,
                 parent=parent,
                 body={
                     'name': repo_path,
                 },
-            ).execute()
-        except HttpError as e:
-            if e.resp.status == 409 and exists_ok:
-                return await self.get_repo(repo_name=repo_name, project_id=project_id)
-            raise
+            )
+        except exceptions.AlreadyExists:
+            if not exists_ok:
+                raise
+            return await self.get_repo(repo_name=repo_name, project_id=project_id)

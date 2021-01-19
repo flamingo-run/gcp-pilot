@@ -3,10 +3,10 @@ import datetime
 
 import pytz
 
-from gcp_pilot.base import GoogleCloudPilotAPI
+from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
 
 
-class Calendar(GoogleCloudPilotAPI):
+class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
     _scopes = ['https://www.googleapis.com/auth/calendar']
 
     def __init__(self, email, timezone: str = 'UTC', **kwargs):
@@ -114,19 +114,22 @@ class Calendar(GoogleCloudPilotAPI):
             data['attendees'] = attendees
 
         if event_id:
-            return self.client.events().update(
+            return self._execute(
+                method=self.client.events().update,
                 calendarId=calendar_id,
                 eventId=event_id,
                 body=data,
-            ).execute()
+            )
         else:
-            return self.client.events().insert(
+            return self._execute(
+                method=self.client.events().insert,
                 calendarId=calendar_id,
                 body=data,
-            ).execute()
+            )
 
     def delete_event(self, event_id, calendar_id='primary'):
-        return self.client.events().delete(
+        return self._execute(
+            method=self.client.events().delete,
             calendarId=calendar_id,
             eventId=event_id,
-        ).execute()
+        )

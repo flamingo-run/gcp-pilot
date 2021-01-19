@@ -1,3 +1,4 @@
+# More Information: https://developers.google.com/admin-sdk/directory/reference/rest
 from typing import Iterator, Dict, Any
 
 from googleapiclient.errors import HttpError
@@ -20,6 +21,7 @@ class Directory(GoogleCloudPilotAPI):
             serviceName='admin',
             version='directory_v1',
             cache_discovery=False,
+            subject=email,
             **kwargs,
         )
 

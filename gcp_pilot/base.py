@@ -1,14 +1,14 @@
 import abc
 import logging
 import os
-from typing import Dict, Any, Callable, Tuple, List
+from typing import Dict, Any, Callable, Tuple, List, Generator
 
 from google import auth
 from google.auth import iam
 from google.auth.credentials import Credentials
-from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 from google.auth.impersonated_credentials import Credentials as ImpersonatedCredentials
 from google.auth.transport import requests
+from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 from google.protobuf.duration_pb2 import Duration
 from googleapiclient.discovery import build
 
@@ -18,6 +18,7 @@ TOKEN_URI = 'https://accounts.google.com/o/oauth2/token'
 PolicyType = Dict[str, Any]
 AuthType = Tuple[Credentials, str]
 ImpersonatedAuthType = Tuple[ImpersonatedCredentials, str]
+ResourceType = Dict[str, Any]
 
 logger = logging.getLogger()
 
@@ -174,40 +175,6 @@ class GoogleCloudPilotAPI(abc.ABC):
         project = GoogleResourceManager().get_project(project_id=project_id)
         return project.projectNumber
 
-    def _paginate(
-            self,
-            method: Callable,
-            result_key: str,
-            params: Dict[str, Any] = None,
-            order_by: str = None,
-            limit: int = 200,
-    ) -> Dict[str, Any]:
-        page_token = None
-        params = params or {}
-
-        if order_by:
-            if order_by.startswith('-'):
-                params['sortOrder'] = 'DESCENDING'
-                order_by = order_by[1:]
-            else:
-                params['sortOrder'] = 'ASCENDING'
-            params['orderBy'] = order_by
-
-        if limit:
-            params['maxResults'] = limit
-
-        while True:
-            results = method(
-                **params,
-                pageToken=page_token,
-            ).execute()
-            for item in results.get(result_key, []):
-                yield item
-
-            page_token = results.get('nextPageToken')
-            if not page_token:
-                break
-
     def _as_duration(self, seconds):
         return Duration(seconds=seconds)
 
@@ -263,3 +230,41 @@ class AppEngineBasedService:
                 f"It uses App Engine's default location for your project: {project_location}"
             )
         return project_location
+
+
+class DiscoveryMixin:
+    def _execute(self, method: Callable, **kwargs) -> ResourceType:
+        return method(**kwargs).execute()
+
+    def _paginate(
+            self,
+            method: Callable,
+            result_key: str = 'items',
+            params: Dict[str, Any] = None,
+            order_by: str = None,
+            limit: int = 200,
+    ) -> Generator[ResourceType]:
+        page_token = None
+        params = params or {}
+
+        if order_by:
+            if order_by.startswith('-'):
+                params['sortOrder'] = 'DESCENDING'
+                order_by = order_by[1:]
+            params['orderBy'] = order_by
+
+        if limit:
+            params['maxResults'] = limit
+
+        while True:
+            results = self._execute(
+                method=method,
+                **params,
+                pageToken=page_token,
+            )
+            for item in results.get(result_key, []):
+                yield item
+
+            page_token = results.get('nextPageToken')
+            if not page_token:
+                break

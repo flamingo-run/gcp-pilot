@@ -82,19 +82,15 @@ class Directory(GoogleCloudPilotAPI):
             raise e
 
     def get_group_members(self, group_id: str) -> Iterator[MemberType]:
-        page_token = None
+        params = dict(
+            groupKey=group_id,
+        )
 
-        while True:
-            results = self.client.members().list(
-                groupKey=group_id,
-                pageToken=page_token,
-            ).execute()
-            for member in results.get('members', []):
-                yield member
-
-            page_token = results.get('nextPageToken')
-            if not page_token:
-                break
+        yield from self._paginate(
+            method=self.client.members().list,
+            result_key='members',
+            params=params,
+        )
 
     def add_group_member(self, group_id: str, email: str, role: str = 'MEMBER') -> MemberType:
         body = {'email': email, 'role': role}

@@ -1,16 +1,17 @@
+# More Information: https://cloud.google.com/sql/docs/mysql/apis#rest-api
 import json
 import time
-from typing import Dict, Any, List
+from typing import Dict, Any, Generator
 
-from google.api_core.exceptions import NotFound
 from googleapiclient.errors import HttpError
 
-from gcp_pilot.base import GoogleCloudPilotAPI
+from gcp_pilot import exceptions
+from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
 
 InstanceType = DatabaseType = UserType = Dict[str, Any]
 
 
-class GoogleCloudSQL(GoogleCloudPilotAPI):
+class GoogleCloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
     _iam_roles = ['cloudsql.client']
 
     def __init__(self, **kwargs):
@@ -21,16 +22,24 @@ class GoogleCloudSQL(GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    async def list_instances(self, project_id: str = None) -> List[InstanceType]:
-        return self.client.instances().list(
-            project=project_id or self.project_id,
-        ).execute()
+    async def list_instances(self, project_id: str = None) -> Generator[InstanceType]:
+        params = dict(
+            project=project_id or self.project_id
+        )
+        instances = self._paginate(
+            method=self.client.instances().list,
+            result_key='items',
+            params=params,
+        )
+        for item in instances:
+            yield item
 
     async def get_instance(self, name: str, project_id: str = None) -> InstanceType:
-        return self.client.instances().get(
+        return self._execute(
+            method=self.client.instances().get,
             instance=name,
             project=project_id or self.project_id,
-        ).execute()
+        )
 
     async def create_instance(
             self,
@@ -53,23 +62,21 @@ class GoogleCloudSQL(GoogleCloudPilotAPI):
             ),
         )
         try:
-            sql_instance = self.client.instances().insert(
+            sql_instance = self._execute(
+                method=self.client.instances().insert,
                 project=project_id or self.project_id,
                 body=body,
-            ).execute()
+            )
             current_state = sql_instance['status']
-        except HttpError as e:
-            if e.resp.status == 409 and exists_ok:
-                try:
-                    sql_instance = await self.get_instance(name=name, project_id=project_id)
-                    current_state = sql_instance['state']
-                except HttpError as e:
-                    if e.resp.status == 404:
-                        message = f"Instance {name} was probably deleted recently. Cannot reuse name for 1 week."
-                        raise NotFound(message=message) from e
-                    raise e
-            else:
+        except exceptions.AlreadyExists:
+            if not exists_ok:
                 raise
+
+            try:
+                sql_instance = await self.get_instance(name=name, project_id=project_id)
+                current_state = sql_instance['state']
+            except exceptions.NotFound as e:
+                raise exceptions.DeletedRecently(resource=f"Instance {name}") from e
 
         if not wait_ready:
             return sql_instance
@@ -84,11 +91,12 @@ class GoogleCloudSQL(GoogleCloudPilotAPI):
 
     async def get_database(self, instance: str, database: str, project_id: str = None) -> DatabaseType:
         project_id = project_id or self.project_id
-        return self.client.databases().get(
+        return self._execute(
+            method=self.client.databases().get,
             instance=instance,
             database=database,
             project=project_id,
-        ).execute()
+        )
 
     async def create_database(
             self,
@@ -116,19 +124,26 @@ class GoogleCloudSQL(GoogleCloudPilotAPI):
                 return await self.get_database(instance=instance, database=name, project_id=project_id)
             raise
 
-    async def list_users(self, instance: str, project_id: str = None) -> List[UserType]:
-        return self.client.users().list(
+    async def list_users(self, instance: str, project_id: str = None) -> Generator[UserType]:
+        params = dict(
             instance=instance,
             project=project_id or self.project_id,
-        ).execute()
+        )
+        users = self._paginate(
+            method=self.client.users().list,
+            params=params,
+        )
+        for item in users:
+            yield item
 
     async def create_user(self, name: str, password: str, instance: str, project_id: str = None) -> UserType:
         body = dict(
             name=name,
             password=password,
         )
-        return self.client.users().insert(
+        return self._execute(
+            method=self.client.users().insert,
             instance=instance,
             project=project_id or self.project_id,
             body=body,
-        ).execute()
+        )

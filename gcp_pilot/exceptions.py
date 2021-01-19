@@ -10,8 +10,14 @@ class UnboundException(Exception):
     pass
 
 
-class NotFoundError(Exception):
+class NotFound(Exception):
     pass
+
+
+class DeletedRecently(Exception):
+    def __init__(self, resource, blocked_period='1 week'):
+        message = f"{resource} was probably deleted recently. Cannot reuse name for {blocked_period}."
+        super().__init__(message)
 
 
 class BigQueryJobError(Exception):
@@ -20,5 +26,13 @@ class BigQueryJobError(Exception):
         super().__init__(message)
 
 
-class AlreadyExistsError(Exception):
+class AlreadyExists(Exception):
+    pass
+
+
+class AlreadyDeleted(Exception):
+    pass
+
+
+class NotAllowed(Exception):
     pass

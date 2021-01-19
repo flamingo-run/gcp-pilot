@@ -1,4 +1,5 @@
 import abc
+import json
 import logging
 import os
 from typing import Dict, Any, Callable, Tuple, List, Generator
@@ -11,6 +12,9 @@ from google.auth.transport import requests
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 from google.protobuf.duration_pb2 import Duration
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+
+from gcp_pilot import exceptions
 
 DEFAULT_LOCATION = os.environ.get('GOOGLE_CLOUD_LOCATION', None)
 TOKEN_URI = 'https://accounts.google.com/o/oauth2/token'
@@ -232,7 +236,29 @@ class AppEngineBasedService:
         return project_location
 
 
+def friendly_http_error(func):
+    _reasons = {
+        'notFound': exceptions.NotFound,
+        'deleted': exceptions.AlreadyDeleted,
+        'forbidden': exceptions.NotAllowed,
+    }
+
+    def inner_function(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except HttpError as exc:
+            error = json.loads(exc.content)['error']['errors'][0]
+
+            exception_klass = _reasons.get(error['reason'], None)
+            if exception_klass:
+                raise exception_klass() from exc  # TODO: add more details to the exceptions
+            raise exc
+
+    return inner_function
+
+
 class DiscoveryMixin:
+    @friendly_http_error
     def _execute(self, method: Callable, **kwargs) -> ResourceType:
         return method(**kwargs).execute()
 

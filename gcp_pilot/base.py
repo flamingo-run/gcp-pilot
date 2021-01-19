@@ -4,12 +4,16 @@ import os
 from typing import Dict, Any, Callable, Tuple, List
 
 from google import auth
+from google.auth import iam
 from google.auth.credentials import Credentials
+from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 from google.auth.impersonated_credentials import Credentials as ImpersonatedCredentials
+from google.auth.transport import requests
 from google.protobuf.duration_pb2 import Duration
 from googleapiclient.discovery import build
 
 DEFAULT_LOCATION = os.environ.get('GOOGLE_CLOUD_LOCATION', None)
+TOKEN_URI = 'https://accounts.google.com/o/oauth2/token'
 
 PolicyType = Dict[str, Any]
 AuthType = Tuple[Credentials, str]
@@ -93,26 +97,61 @@ class GoogleCloudPilotAPI(abc.ABC):
         return credentials, project_id
 
     @classmethod
+    def _delegated_credential(
+            cls,
+            credentials: Credentials,
+            subject: str,
+            scopes: List[str],
+    ) -> ServiceAccountCredentials:
+        try:
+            admin_credentials = credentials.with_subject(subject).with_scopes(scopes)
+        except AttributeError:
+            # When inside GCP, the credentials provided by the metadata service are immutable.
+            # https://github.com/GoogleCloudPlatform/professional-services/tree/master/examples/gce-to-adminsdk
+
+            request = requests.Request()
+            credentials.refresh(request)
+
+            # Create an IAM signer using the bootstrap credentials.
+            signer = iam.Signer(
+                request,
+                credentials,
+                credentials.service_account_email,
+            )
+            # Create OAuth 2.0 Service Account credentials using the IAM-based
+            # signer and the bootstrap_credential's service account email.
+            admin_credentials = ServiceAccountCredentials(
+                signer,
+                credentials.service_account_email,
+                TOKEN_URI,
+                scopes=scopes,
+                subject=subject,
+            )
+
+        return admin_credentials
+
+    @classmethod
     def _set_credentials(cls, subject: str = None, impersonate_account: str = None) -> AuthType:
         # Speed up consecutive authentications
         # TODO: check if this does not break multiple client usage
+        all_scopes = MINIMAL_SCOPES + cls._scopes
         if not cls._cached_credentials:
-            all_scopes = MINIMAL_SCOPES + cls._scopes
             credentials, project_id = auth.default(scopes=all_scopes)
-
-            if impersonate_account:
-                credentials, impersonated_project_id = cls._impersonate_account(
-                    credentials=credentials,
-                    service_account=impersonate_account,
-                    scopes=all_scopes,
-                )
-                project_id = impersonated_project_id or project_id
-
             cls._cached_credentials = credentials, project_id
+        else:
+            credentials, project_id = cls._cached_credentials
 
-        credentials, project_id = cls._cached_credentials
+        if impersonate_account:
+            credentials, impersonated_project_id = cls._impersonate_account(
+                credentials=credentials,
+                service_account=impersonate_account,
+                scopes=all_scopes,
+            )
+            project_id = impersonated_project_id or project_id
+
         if subject:
-            credentials = credentials.with_subject(subject=subject)
+            credentials = cls._delegated_credential(credentials=credentials, subject=subject, scopes=all_scopes)
+
         return credentials, (project_id or getattr(credentials, 'project_id'))
 
     @property

@@ -1,14 +1,13 @@
 # More Information: https://cloud.google.com/iam/docs/
-from typing import Dict, Any, List
+from typing import Dict, Any, Generator
 
-from googleapiclient.errors import HttpError
-
-from gcp_pilot.base import GoogleCloudPilotAPI, AccountManagerMixin, PolicyType
+from gcp_pilot import exceptions
+from gcp_pilot.base import GoogleCloudPilotAPI, AccountManagerMixin, PolicyType, DiscoveryMixin
 
 AccountType = Dict[str, Any]
 
 
-class GoogleIAM(AccountManagerMixin, GoogleCloudPilotAPI):
+class GoogleIAM(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
     def __init__(self, **kwargs):
         super().__init__(
             serviceName='iam',
@@ -32,9 +31,11 @@ class GoogleIAM(AccountManagerMixin, GoogleCloudPilotAPI):
             email=self._build_service_account_email(name=name, project_id=project_id),
             project_id=project_id,
         )
-        return self.client.projects().serviceAccounts().get(
+
+        return self._execute(
+            method=self.client.projects().serviceAccounts().get,
             name=account_path,
-        ).execute()
+        )
 
     async def create_service_account(
             self,
@@ -44,33 +45,41 @@ class GoogleIAM(AccountManagerMixin, GoogleCloudPilotAPI):
             exists_ok: bool = True,
     ) -> AccountType:
         try:
-            service_account = self.client.projects().serviceAccounts().create(
+            body = {
+                'accountId': name,
+                'serviceAccount': {
+                    'displayName': display_name
+                }
+            }
+            service_account = self._execute(
+                method=self.client.projects().serviceAccounts().create,
                 name=self._parent_path(project_id=project_id),
-                body={
-                    'accountId': name,
-                    'serviceAccount': {
-                        'displayName': display_name
-                    }
-                }).execute()
-        except HttpError as e:
-            if e.resp.status == 409 and exists_ok:
-                service_account = await self.get_service_account(name=name, project_id=project_id)
-            else:
+                body=body,
+            )
+        except exceptions.AlreadyExists:
+            if not exists_ok:
                 raise
+            service_account = await self.get_service_account(name=name, project_id=project_id)
         return service_account
 
-    async def list_service_accounts(self, project_id: str = None) -> List[AccountType]:
-        service_accounts = self.client.projects().serviceAccounts().list(
+    async def list_service_accounts(self, project_id: str = None) -> Generator[AccountType]:
+        params = dict(
             name=self._parent_path(project_id=project_id),
-        ).execute()
-
-        return service_accounts
+        )
+        pagination = self._paginate(
+            method=self.client.projects().serviceAccounts().list,
+            result_key='accounts',
+            params=params,
+        )
+        for item in pagination:
+            yield item
 
     def get_policy(self, email: str, project_id: str = None) -> PolicyType:
         resource = self._service_account_path(email=email, project_id=project_id)
-        return self.client.projects().serviceAccounts().getIamPolicy(
+        return self._execute(
+            method=self.client.projects().serviceAccounts().getIamPolicy,
             resource=resource,
-        ).execute()
+        )
 
     def as_member(self, email: str) -> str:
         is_service_account = email.endswith('.gserviceaccount.com')
@@ -95,10 +104,11 @@ class GoogleIAM(AccountManagerMixin, GoogleCloudPilotAPI):
 
     def set_policy(self, email: str, policy: PolicyType, project_id: str = None) -> PolicyType:
         resource = self._service_account_path(email=email, project_id=project_id)
-        return self.client.projects().serviceAccounts().setIamPolicy(
+        return self._execute(
+            method=self.client.projects().serviceAccounts().setIamPolicy,
             resource=resource,
             body={'policy': policy, 'updateMask': 'bindings'},
-        ).execute()
+        )
 
     def get_compute_service_account(self, project_number: str = None) -> str:
         number = project_number or self._get_project_number(project_id=self.project_id)

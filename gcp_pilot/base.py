@@ -1,7 +1,7 @@
 import abc
 import logging
 import os
-from typing import Dict, Any, Callable, Tuple
+from typing import Dict, Any, Callable, Tuple, List
 
 from google import auth
 from google.auth.credentials import Credentials
@@ -38,9 +38,9 @@ MINIMAL_SCOPES = [
 
 class GoogleCloudPilotAPI(abc.ABC):
     _client_class = None
-    _scopes = []
-    _iam_roles = []
-    _cached_credentials = None
+    _scopes: List[str] = []
+    _iam_roles: List[str] = []
+    _cached_credentials: AuthType = None
 
     def __init__(
             self,
@@ -72,7 +72,12 @@ class GoogleCloudPilotAPI(abc.ABC):
         )
 
     @classmethod
-    def _impersonate_account(cls, credentials, service_account, scopes) -> ImpersonatedAuthType:
+    def _impersonate_account(
+            cls,
+            credentials: Credentials,
+            service_account: str,
+            scopes: List[str],
+    ) -> ImpersonatedAuthType:
         credentials = ImpersonatedCredentials(
             source_credentials=credentials,
             target_principal=service_account,

@@ -17,11 +17,18 @@ ImpersonatedAuthType = Tuple[ImpersonatedCredentials, str]
 
 logger = logging.getLogger()
 
+_CACHED_LOCATIONS = {}  # TODO: Implement a smarter solution for caching project's location
+
 
 def _get_project_default_location(credentials, project_id: str, default_zone: str = '1') -> str:
-    service = build(serviceName='appengine', version='v1', credentials=credentials, cache_discovery=False)
-    data = service.apps().get(appsId=project_id).execute()
-    return data['locationId'] + default_zone
+    location = _CACHED_LOCATIONS.get(project_id, None)
+
+    if not location:
+        service = build(serviceName='appengine', version='v1', credentials=credentials, cache_discovery=False)
+        data = service.apps().get(appsId=project_id).execute()
+        location = data['locationId'] + default_zone
+        _CACHED_LOCATIONS[project_id] = location
+    return location
 
 
 MINIMAL_SCOPES = [

@@ -15,8 +15,8 @@ google-cloud-tasks = { version = "^2", optional = true}
 google-cloud-scheduler = { version = "^2", optional = true}
 google-cloud-storage = { version = "^1", optional = true}
 google-cloud-build = { version = "^3", optional = true}
-google-cloud-bigquery = { version = "^1", optional = true}
-google-cloud-speech = { version = "^1", optional = true}
+google-cloud-bigquery = { version = "^2", optional = true}
+google-cloud-speech = { version = "^2", optional = true}
 gspread = { version = "^3", optional = true}
 google-cloud-pubsub = { version = "^2", optional = true}
 google-cloud-datastore = { version = "^2", optional = true}
@@ -34,7 +34,7 @@ datastore = ["google-cloud-datastore"]
 
 [tool.poetry.dev-dependencies]
 pylint = "*"
-nose = "^1"
+nose = "*"
 coverage = "*"
 
 

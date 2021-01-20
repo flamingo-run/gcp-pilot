@@ -269,7 +269,7 @@ class DiscoveryMixin:
             params: Dict[str, Any] = None,
             order_by: str = None,
             limit: int = 200,
-    ) -> Generator[ResourceType]:
+    ) -> Generator[ResourceType, None, None]:
         page_token = None
         params = params or {}
 

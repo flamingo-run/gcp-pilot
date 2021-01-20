@@ -62,7 +62,7 @@ class IAM(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
             service_account = await self.get_service_account(name=name, project_id=project_id)
         return service_account
 
-    async def list_service_accounts(self, project_id: str = None) -> Generator[AccountType]:
+    async def list_service_accounts(self, project_id: str = None) -> Generator[AccountType, None, None]:
         params = dict(
             name=self._parent_path(project_id=project_id),
         )

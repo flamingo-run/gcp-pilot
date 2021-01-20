@@ -143,7 +143,7 @@ class Document(EmbeddedDocument):
         return cls.__name__
 
     @classmethod
-    def list(cls, **kwargs) -> Generator[Document]:
+    def list(cls, **kwargs) -> Generator[Document, None, None]:
         query = cls._client.query(kind=cls._kind())
 
         for key, value in kwargs.items():

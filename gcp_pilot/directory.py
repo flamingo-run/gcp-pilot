@@ -30,7 +30,7 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
             context['domain'] = domain
         return context
 
-    def get_users(self, customer: str = None, domain: str = None) -> Generator[UserType]:
+    def get_users(self, customer: str = None, domain: str = None) -> Generator[UserType, None, None]:
         params = self._build_context(customer=customer, domain=domain)
         yield from self._paginate(
             method=self.client.users().list,
@@ -39,7 +39,7 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
             order_by='email',
         )
 
-    def get_groups(self, customer: str = None, domain: str = None) -> Generator[GroupType]:
+    def get_groups(self, customer: str = None, domain: str = None) -> Generator[GroupType, None, None]:
         params = self._build_context(customer=customer, domain=domain)
         yield from self._paginate(
             method=self.client.groups().list,
@@ -83,7 +83,7 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
             groupKey=group_id,
         )
 
-    def get_group_members(self, group_id: str) -> Generator[MemberType]:
+    def get_group_members(self, group_id: str) -> Generator[MemberType, None, None]:
         params = dict(
             groupKey=group_id,
         )

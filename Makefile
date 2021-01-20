@@ -12,6 +12,7 @@ update:
 test:
 	@make check
 	@make lint
+	@make unit
 
 check:
 	@poetry check
@@ -21,7 +22,8 @@ lint:
 	@poetry run pylint --rcfile=./.pylintrc gcp_pilot
 
 unit:
-	@echo "No tests yet..."
+	@echo "Running unit tests ..."
+	@poetry run nosetests
 
 clean:
 	@rm -rf .coverage coverage.xml dist/ build/ *.egg-info/

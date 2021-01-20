@@ -7,7 +7,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
 RepoType = Dict[str, Any]
 
 
-class GoogleCloudSourceRepo(DiscoveryMixin, GoogleCloudPilotAPI):
+class SourceRepository(DiscoveryMixin, GoogleCloudPilotAPI):
     _iam_roles = ['source.repos.create']
 
     def __init__(self, **kwargs):

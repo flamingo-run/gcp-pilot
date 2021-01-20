@@ -1,7 +1,7 @@
 from gcp_pilot.base import AccountManagerMixin, GoogleCloudPilotAPI, PolicyType, DiscoveryMixin
 
 
-class GoogleResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
+class ResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
     def __init__(self, **kwargs):
         super().__init__(
             serviceName='cloudresourcemanager',

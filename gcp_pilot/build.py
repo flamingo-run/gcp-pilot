@@ -13,7 +13,7 @@ TriggerType = cloudbuild_v1.BuildTrigger
 AnyEventType = Union[cloudbuild_v1.GitHubEventsConfig, cloudbuild_v1.RepoSource]
 
 
-class GoogleCloudBuild(GoogleCloudPilotAPI):
+class CloudBuild(GoogleCloudPilotAPI):
     _client_class = cloudbuild_v1.CloudBuildClient
 
     def make_build_step(

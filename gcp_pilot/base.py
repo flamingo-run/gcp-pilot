@@ -164,19 +164,19 @@ class GoogleCloudPilotAPI(abc.ABC):
         return {'oidc_token': {'service_account_email': self.credentials.service_account_email}}
 
     async def add_permissions(self, email: str, project_id: str = None) -> None:
-        from gcp_pilot.resource import GoogleResourceManager  # pylint: disable=import-outside-toplevel
+        from gcp_pilot.resource import ResourceManager  # pylint: disable=import-outside-toplevel
 
         for role in self._iam_roles:
-            await GoogleResourceManager().add_member(
+            await ResourceManager().add_member(
                 email=email,
                 role=role,
                 project_id=project_id or self.project_id,
             )
 
     def _get_project_number(self, project_id: str) -> int:
-        from gcp_pilot.resource import GoogleResourceManager  # pylint: disable=import-outside-toplevel
+        from gcp_pilot.resource import ResourceManager  # pylint: disable=import-outside-toplevel
 
-        project = GoogleResourceManager().get_project(project_id=project_id)
+        project = ResourceManager().get_project(project_id=project_id)
         return project.projectNumber
 
     def _as_duration(self, seconds):

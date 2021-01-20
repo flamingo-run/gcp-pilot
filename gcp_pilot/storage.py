@@ -11,7 +11,7 @@ from google.cloud.storage import Bucket, Blob
 from gcp_pilot.base import GoogleCloudPilotAPI
 
 
-class GoogleCloudStorage(GoogleCloudPilotAPI):
+class CloudStorage(GoogleCloudPilotAPI):
     _client_class = storage.Client
 
     async def create_bucket(self, name: str, region: str, project_id: str = None, exists_ok: bool = True) -> Bucket:

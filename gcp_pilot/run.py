@@ -2,5 +2,5 @@
 from gcp_pilot.base import GoogleCloudPilotAPI
 
 
-class GoogleCloudRun(GoogleCloudPilotAPI):
+class CloudRun(GoogleCloudPilotAPI):
     pass

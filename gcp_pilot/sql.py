@@ -11,7 +11,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
 InstanceType = DatabaseType = UserType = Dict[str, Any]
 
 
-class GoogleCloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
+class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
     _iam_roles = ['cloudsql.client']
 
     def __init__(self, **kwargs):

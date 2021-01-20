@@ -6,6 +6,16 @@ from typing import Type, Generator, get_type_hints, get_args, Dict
 from google.cloud import datastore
 
 
+class ClientMixin:
+    _client = None
+
+    @classmethod
+    def _get_client(cls) -> datastore.Client:
+        if not cls._CLIENT:
+            cls._CLIENT = datastore.Client()
+        return cls._CLIENT
+
+
 @dataclass
 class DoesNotExist(Exception):
     cls: Type[EmbeddedDocument]
@@ -43,8 +53,6 @@ def query_operator(key: str) -> tuple:
 
 @dataclass
 class EmbeddedDocument:
-    _client = datastore.Client()
-
     @classmethod
     def _fields(cls):
         resolved_hints = get_type_hints(cls)
@@ -125,14 +133,14 @@ class EmbeddedDocument:
 
 
 @dataclass
-class Document(EmbeddedDocument):
+class Document(ClientMixin, EmbeddedDocument):
     @property
     def pk(self) -> str:
         raise NotImplementedError()
 
     @classmethod
     def _get_key(cls, pk: str = None) -> datastore.Key:
-        return cls._client.key(cls._kind(), pk)
+        return cls._get_client().key(cls._kind(), pk)
 
     @property
     def _key(self):
@@ -144,7 +152,7 @@ class Document(EmbeddedDocument):
 
     @classmethod
     def list(cls, **kwargs) -> Generator[Document, None, None]:
-        query = cls._client.query(kind=cls._kind())
+        query = cls._get_client().query(kind=cls._kind())
 
         for key, value in kwargs.items():
             field, operator = query_operator(key=key)
@@ -156,7 +164,7 @@ class Document(EmbeddedDocument):
     @classmethod
     def get(cls, pk: str = None, **kwargs) -> Document:
         if pk is not None:
-            entity = cls._client.get(key=cls._get_key(pk=pk))
+            entity = cls._get_client().get(key=cls._get_key(pk=pk))
             if entity:
                 return cls._from_dict(**cls.from_entity(entity=entity))
         else:
@@ -187,22 +195,22 @@ class Document(EmbeddedDocument):
         return obj.save()
 
     def save(self) -> Document:
-        self._client.put(entity=self.to_entity())
+        self._get_client().put(entity=self.to_entity())
         return self.get(pk=self.pk)
 
     @classmethod
     def update(cls, pk: str, **kwargs) -> Document:
         if kwargs:
-            entity = cls._client.get(key=cls._get_key(pk=pk))
+            entity = cls._get_client().get(key=cls._get_key(pk=pk))
             # TODO: enable partial nested updates
             as_data = {
                 key: value._to_dict() if isinstance(value, EmbeddedDocument) else value
                 for key, value in kwargs.items()
             }
             entity.update(as_data)
-            cls._client.put(entity=entity)
+            cls._get_client().put(entity=entity)
         return cls.get(pk=pk)
 
     @classmethod
     def delete(cls, pk: str) -> None:
-        cls._client.delete(key=cls._get_key(pk=pk))
+        cls._get_client().delete(key=cls._get_key(pk=pk))

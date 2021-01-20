@@ -22,7 +22,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    async def list_instances(self, project_id: str = None) -> Generator[InstanceType]:
+    async def list_instances(self, project_id: str = None) -> Generator[InstanceType, None, None]:
         params = dict(
             project=project_id or self.project_id
         )
@@ -124,7 +124,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
                 return await self.get_database(instance=instance, database=name, project_id=project_id)
             raise
 
-    async def list_users(self, instance: str, project_id: str = None) -> Generator[UserType]:
+    async def list_users(self, instance: str, project_id: str = None) -> Generator[UserType, None, None]:
         params = dict(
             instance=instance,
             project=project_id or self.project_id,

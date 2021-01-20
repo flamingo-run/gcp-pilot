@@ -1,5 +1,4 @@
-from google.cloud.speech import enums, SpeechClient
-from google.cloud.speech_v1.proto.cloud_speech_pb2 import RecognitionAudio, RecognitionConfig
+from google.cloud.speech_v1 import RecognitionAudio, SpeechClient, RecognitionConfig
 
 from gcp_pilot.base import GoogleCloudPilotAPI
 
@@ -27,7 +26,7 @@ class Speech(GoogleCloudPilotAPI):
 
     def _speech_to_text(self, audio, language, rate, long_running=False):
         config = RecognitionConfig(
-            encoding=enums.RecognitionConfig.AudioEncoding.FLAC,
+            encoding=RecognitionConfig.AudioEncoding.FLAC,
             sample_rate_hertz=rate,
             language_code=language,
         )

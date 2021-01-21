@@ -29,7 +29,7 @@ class MultipleObjectsFound(Exception):
 
 
 operators = {
-    'eq': '==',
+    'eq': '=',
     'gt': '>',
     'gte': '>=',
     'lt': '<',

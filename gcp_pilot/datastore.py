@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields
-from typing import Type, Generator, get_type_hints, get_args, Dict
+from typing import Type, Generator, get_type_hints, get_args, Dict, List
 
 from google.cloud import datastore
+
+from gcp_pilot import exceptions
 
 
 class ClientMixin:
@@ -38,17 +40,25 @@ operators = {
 }
 
 
-def query_operator(key: str) -> tuple:
+def query_operator(key: str, accepted_fields: List[str]) -> tuple:
+    lookup_fields = []
+    operator = None
+
     parts = key.split('__')
-    field = parts[0]
-    if len(parts) == 1:
-        operator = '=='
-    else:
-        try:
-            operator = operators[parts[1]]
-        except KeyError as e:
-            raise Exception(f"Unsupported query operator {parts[1]}") from e
-    return field, operator
+    for idx, part in enumerate(parts):
+        is_last = idx == len(parts) - 1
+        if part in operators:
+            if not is_last:
+                raise exceptions.UnsupportedFormatException(f"Unsupported lookup key format {key}")
+            operator = part
+        elif idx == 0 and part not in accepted_fields:
+            raise exceptions.ValidationError(
+                f"{part} is not a valid field. Excepted one of {' | '.join(accepted_fields)}"
+            )
+        else:
+            lookup_fields.append(part)
+
+    return '.'.join(lookup_fields), (operator or '=')
 
 
 @dataclass
@@ -155,7 +165,7 @@ class Document(ClientMixin, EmbeddedDocument):
         query = cls._get_client().query(kind=cls._kind())
 
         for key, value in kwargs.items():
-            field, operator = query_operator(key=key)
+            field, operator = query_operator(key=key, accepted_fields=list(cls._fields().keys()))
             query.add_filter(field, operator, value)
 
         for entity in query.fetch():

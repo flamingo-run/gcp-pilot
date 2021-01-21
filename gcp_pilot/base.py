@@ -16,8 +16,8 @@ from googleapiclient.errors import HttpError
 
 from gcp_pilot import exceptions
 
-DEFAULT_PROJECT = os.environ.get('GOOGLE_CLOUD_PROJECT', None)
-DEFAULT_LOCATION = os.environ.get('GOOGLE_CLOUD_LOCATION', None)
+DEFAULT_PROJECT = os.environ.get('GCP_PROJECT', None)
+DEFAULT_LOCATION = os.environ.get('GCP_LOCATION', None)
 DEFAULT_SERVICE_ACCOUNT = os.environ.get('GCP_SERVICE_ACCOUNT', None)
 
 TOKEN_URI = 'https://accounts.google.com/o/oauth2/token'

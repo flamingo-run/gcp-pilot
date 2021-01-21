@@ -167,15 +167,16 @@ class Document(ClientMixin, EmbeddedDocument):
             entity = cls._get_client().get(key=cls._get_key(pk=pk))
             if entity:
                 return cls._from_dict(**cls.from_entity(entity=entity))
-        else:
-            one_obj = None
-            for obj in cls.list(**kwargs):
-                if one_obj is not None:
-                    raise MultipleObjectsFound(cls, filters=kwargs)
-                one_obj = obj
-            if not one_obj:
-                raise DoesNotExist(cls, pk)
-            return one_obj
+            raise DoesNotExist(cls, pk)
+
+        one_obj = None
+        for obj in cls.list(**kwargs):
+            if one_obj is not None:
+                raise MultipleObjectsFound(cls, filters=kwargs)
+            one_obj = obj
+        if not one_obj:
+            raise DoesNotExist(cls, pk)
+        return one_obj
 
     def to_entity(self) -> datastore.Entity:
         if not self.pk:

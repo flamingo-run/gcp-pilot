@@ -16,6 +16,7 @@ from googleapiclient.errors import HttpError
 
 from gcp_pilot import exceptions
 
+DEFAULT_PROJECT = os.environ.get('GOOGLE_CLOUD_PROJECT', None)
 DEFAULT_LOCATION = os.environ.get('GOOGLE_CLOUD_LOCATION', None)
 TOKEN_URI = 'https://accounts.google.com/o/oauth2/token'
 
@@ -72,7 +73,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         )
 
     def _set_project_id(self, project_id: str, credential_project_id: str) -> str:
-        return project_id or credential_project_id
+        return project_id or DEFAULT_PROJECT or credential_project_id
 
     def _set_location(self, location: str = None) -> str:
         return location or DEFAULT_LOCATION or _get_project_default_location(

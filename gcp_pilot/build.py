@@ -224,6 +224,30 @@ class CloudBuild(GoogleCloudPilotAPI):
         for build in all_builds:
             yield build
 
+    async def subscribe(
+            self,
+            subscription_id: str,
+            project_id: str = None,
+            push_to_url: str = None,
+            use_oidc_auth: bool = False,
+    ):
+        # https://cloud.google.com/cloud-build/docs/subscribe-build-notifications
+        try:
+            # try to import here to avoid making pubsub a mandatory dependency of CloudBuild
+            from gcp_pilot.pubsub import CloudSubscriber  # pylint: disable=import-outside-toplevel
+        except ImportError as e:
+            raise ImportError("Add `pubsub` extras dependency in order to use CloudBuild notifications") from e
+        subscriber = CloudSubscriber()
+        await subscriber.create_subscription(
+            topic_id='cloud-builds',  # pre-defined by GCP
+            subscription_id=subscription_id,
+            project_id=project_id,
+            exists_ok=True,
+            auto_create_topic=True,
+            push_to_url=push_to_url,
+            use_oidc_auth=use_oidc_auth,
+        )
+
 
 @dataclass
 class _SubstitutionVariable:

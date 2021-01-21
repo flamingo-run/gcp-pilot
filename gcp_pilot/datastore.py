@@ -173,8 +173,9 @@ class Document(ClientMixin, EmbeddedDocument):
                 if one_obj is not None:
                     raise MultipleObjectsFound(cls, filters=kwargs)
                 one_obj = obj
+            if not one_obj:
+                raise DoesNotExist(cls, pk)
             return one_obj
-        raise DoesNotExist(cls, pk)
 
     def to_entity(self) -> datastore.Entity:
         if not self.pk:

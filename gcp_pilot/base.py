@@ -18,6 +18,8 @@ from gcp_pilot import exceptions
 
 DEFAULT_PROJECT = os.environ.get('GOOGLE_CLOUD_PROJECT', None)
 DEFAULT_LOCATION = os.environ.get('GOOGLE_CLOUD_LOCATION', None)
+DEFAULT_SERVICE_ACCOUNT = os.environ.get('GCP_SERVICE_ACCOUNT', None)
+
 TOKEN_URI = 'https://accounts.google.com/o/oauth2/token'
 
 PolicyType = Dict[str, Any]
@@ -62,7 +64,7 @@ class GoogleCloudPilotAPI(abc.ABC):
     ):
         self.credentials, credential_project_id = self._set_credentials(
             subject=subject,
-            impersonate_account=impersonate_account,
+            impersonate_account=impersonate_account or DEFAULT_SERVICE_ACCOUNT,
         )
         self.project_id = self._set_project_id(project_id=project_id, credential_project_id=credential_project_id)
         self.location = self._set_location(location=location)

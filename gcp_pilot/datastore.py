@@ -11,9 +11,9 @@ class ClientMixin:
 
     @classmethod
     def _get_client(cls) -> datastore.Client:
-        if not cls._CLIENT:
-            cls._CLIENT = datastore.Client()
-        return cls._CLIENT
+        if not cls._client:
+            cls._client = datastore.Client()
+        return cls._client
 
 
 @dataclass

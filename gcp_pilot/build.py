@@ -1,6 +1,6 @@
 # More Information: https://cloud.google.com/cloud-build/docs/api
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Generator
 from urllib.parse import urlparse
 
 from google.api_core.exceptions import AlreadyExists
@@ -211,11 +211,19 @@ class CloudBuild(GoogleCloudPilotAPI):
         except AlreadyExists:
             return await self.update_trigger(**create_args)
 
-    def get_builds(self, trigger_id: str = None, project_id: str = None) -> cloudbuild_v1.Build:
+    def get_builds(
+            self,
+            trigger_id: str = None,
+            project_id: str = None,
+            status: str = None,
+    ) -> Generator[cloudbuild_v1.Build, None, None]:
         # https://cloud.google.com/cloud-build/docs/view-build-results#filtering_build_results_using_queries
         filters = []
         if trigger_id:
             filters.append(f'trigger_id="{trigger_id}"')
+
+        if status:
+            filters.append(f'status="{status}"')
 
         all_builds = self.client.list_builds(
             filter=' AND '.join(filters),

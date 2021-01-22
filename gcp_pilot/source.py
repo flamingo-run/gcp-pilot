@@ -25,6 +25,18 @@ class SourceRepository(DiscoveryMixin, GoogleCloudPilotAPI):
         parent_path = self._parent_path(project_id=project_id)
         return f'{parent_path}/repos/{repo}'
 
+    async def list_repos(self, project_id: str = None) -> RepoType:
+        params = dict(
+            name=self._parent_path(project_id=project_id),
+        )
+        items = self._paginate(
+            method=self.client.projects().repos().list,
+            result_key='repos',
+            params=params,
+        )
+        for item in items:
+            yield item
+
     async def get_repo(self, repo_name: str, project_id: str = None) -> RepoType:
         return self._execute(
             method=self.client.projects().repos().get,

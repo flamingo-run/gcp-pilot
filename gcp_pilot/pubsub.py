@@ -1,5 +1,8 @@
 # https://googleapis.dev/python/pubsub/latest/index.html
-from typing import Callable, Dict, Any, AsyncIterator
+import base64
+import json
+from dataclasses import dataclass
+from typing import Callable, Dict, Any, AsyncIterator, Union
 
 from google.api_core.exceptions import AlreadyExists, NotFound
 from google.cloud import pubsub_v1
@@ -154,3 +157,24 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             callback=callback,
         )
         future.result()
+
+
+@dataclass
+class Message:
+    id: str
+    data: Any
+    attributes: Dict[str, Any]
+    subscription: str
+
+    @classmethod
+    def load(cls, body: Union[str, Dict], parser: Callable = json.loads) -> 'Message':
+        # https://cloud.google.com/pubsub/docs/push#receiving_messages
+        if isinstance(body, str):
+            body = json.loads(body)
+
+        return Message(
+            id=body['message']['messageId'],
+            attributes=body['message']['attributes'],
+            subscription=body['subscription'],
+            data=parser(base64.b64decode(body['message']['data']).decode('utf-8'))
+        )

@@ -167,8 +167,10 @@ class Message:
     subscription: str
 
     @classmethod
-    def load(cls, body: Union[str, Dict], parser: Callable = json.loads) -> 'Message':
+    def load(cls, body: Union[str, bytes, Dict], parser: Callable = json.loads) -> 'Message':
         # https://cloud.google.com/pubsub/docs/push#receiving_messages
+        if isinstance(body, bytes):
+            body = body.decode()
         if isinstance(body, str):
             body = json.loads(body)
 

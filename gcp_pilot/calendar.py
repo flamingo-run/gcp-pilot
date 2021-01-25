@@ -1,10 +1,40 @@
 # More Information: https://developers.google.com/calendar/v3/reference
 import datetime
+from dataclasses import dataclass
+from enum import Enum
 from typing import Generator, List, Dict
 
 import pytz
 
 from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, ResourceType
+
+
+@dataclass
+class Attendee:
+    email: str
+    optional: bool = False
+
+    def as_data(self) -> Dict:
+        return {
+            'email': self.email,
+            'optional': self.optional,
+        }
+
+
+class Color(Enum):
+    # Predefined colors.
+    # For more color, use the endpoint: <https://developers.google.com/calendar/v3/reference/colors>
+    light_blue = ('1', '#a4bdfc')
+    light_green = ('2', '#7ae7bf')
+    light_purple = ('3', '#dbadff')
+    light_red = ('4', '#ff887c')
+    yellow = ('5', '#fbd75b')
+    light_orange = ('6', '#ffb878')
+    water_green = ('7', '#46d6db')
+    gray = ('8', '#e1e1e1')
+    blue = ('9', '#5484ed')
+    green = ('10', '#51b749')
+    red = ('11', '#dc2127')
 
 
 class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
@@ -21,19 +51,6 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
             subject=email,
             **kwargs,
         )
-
-    class Color:
-        light_blue = ('1', '#a4bdfc')
-        light_green = ('2', '#7ae7bf')
-        light_purple = ('3', '#dbadff')
-        light_red = ('4', '#ff887c')
-        yellow = ('5', '#fbd75b')
-        light_orange = ('6', '#ffb878')
-        water_green = ('7', '#46d6db')
-        gray = ('8', '#e1e1e1')
-        blue = ('9', '#5484ed')
-        green = ('10', '#51b749')
-        red = ('11', '#dc2127')
 
     def _date_to_str(self, dt: datetime.date, fmt='%Y-%m-%dT%H:%M:%SZ'):
         if isinstance(dt, datetime.datetime):
@@ -116,7 +133,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
             ]
 
         if attendees:
-            data['attendees'] = attendees
+            data['attendees'] = [attendee.as_data() for attendee in attendees]
 
         if event_id:
             return self._execute(

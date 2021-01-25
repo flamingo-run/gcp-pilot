@@ -1,15 +1,16 @@
 # More Information: https://developers.google.com/calendar/v3/reference
 import datetime
+from typing import Generator, List, Dict
 
 import pytz
 
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
+from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, ResourceType
 
 
 class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
     _scopes = ['https://www.googleapis.com/auth/calendar']
 
-    def __init__(self, email, timezone: str = 'UTC', **kwargs):
+    def __init__(self, email: str, timezone: str = 'UTC', **kwargs):
         self.email = email
         self.timezone = pytz.timezone(timezone)
 
@@ -34,7 +35,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         green = ('10', '#51b749')
         red = ('11', '#dc2127')
 
-    def date_to_str(self, dt, fmt='%Y-%m-%dT%H:%M:%SZ'):
+    def _date_to_str(self, dt: datetime.date, fmt='%Y-%m-%dT%H:%M:%SZ'):
         if isinstance(dt, datetime.datetime):
             if not dt.tzinfo:
                 dt = self.timezone.localize(dt)
@@ -44,8 +45,12 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
 
         return dt.strftime(fmt)
 
-    def get_events(self, calendar_id='primary', starts_at=None):
-        min_date = self.date_to_str(starts_at) if starts_at else None
+    def get_events(
+            self,
+            calendar_id: str = 'primary',
+            starts_at: datetime.date = None,
+    ) -> Generator[ResourceType, None, None]:
+        min_date = self._date_to_str(starts_at) if starts_at else None
 
         page_size = 100
         params = dict(
@@ -62,7 +67,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
             limit=page_size,
         )
 
-    def get_calendars(self):
+    def get_calendars(self) -> Generator[ResourceType, None, None]:
         params = {}
         yield from self._paginate(
             method=self.client.calendarList().list,
@@ -72,26 +77,26 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def create_or_update_event(
             self,
-            summary,
-            location,
-            start_at,
-            end_at,
-            event_id=None,
-            description=None,
-            attendees=None,
-            recurrence_type=None,
-            recurrence_amount=None,
-            calendar_id='primary',
-            color=None,
-    ):
+            summary: str,
+            location: str,
+            start_at: datetime.date,
+            end_at: datetime.date,
+            event_id: str = None,
+            description: str = None,
+            attendees: List[Attendee] = None,
+            recurrence_type: str = None,
+            recurrence_amount: str = None,
+            calendar_id: str = 'primary',
+            color: Color = None,
+    ) -> ResourceType:
         def _build_time_field(dt):
             if isinstance(start_at, datetime.datetime):
                 return {
-                    'dateTime': self.date_to_str(dt),
+                    'dateTime': self._date_to_str(dt),
                 }
             else:
                 return {
-                    'date': self.date_to_str(dt, fmt='%Y-%m-%d'),
+                    'date': self._date_to_str(dt, fmt='%Y-%m-%d'),
                 }
 
         data = {
@@ -127,7 +132,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
                 body=data,
             )
 
-    def delete_event(self, event_id, calendar_id='primary'):
+    def delete_event(self, event_id: str, calendar_id: str = 'primary') -> ResourceType:
         return self._execute(
             method=self.client.events().delete,
             calendarId=calendar_id,

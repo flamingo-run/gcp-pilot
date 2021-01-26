@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from enum import Enum
 from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
 from typing import Type, Generator, get_args, Dict, ClassVar, Any, Tuple, get_type_hints, Union, Callable, List
 
 from google.cloud import datastore
 
 from gcp_pilot import exceptions
-
 
 DEFAULT_PK_FIELD = 'id'
 
@@ -188,6 +188,9 @@ class Metadata:
 
             if issubclass(klass, EmbeddedDocument):
                 return klass.Meta.from_dict(data=value)
+
+            if klass == datetime:
+                return klass.fromisoformat(str(value))
 
             return klass(value)
 

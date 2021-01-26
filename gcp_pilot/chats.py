@@ -34,20 +34,8 @@ class Widget(dict):
             return dict(self)
 
 
-class KeyValueWidget(Widget):
-    _key = 'keyValue'
-
-
-class TextWidget(Widget):
-    _key = 'textParagraph'
-
-
-class ImageWidget(Widget):
-    _key = 'image'
-
-
 class ButtonWidget(Widget):
-    def __init__(self, url, text=None, image_url=None, icon=None):
+    def __init__(self, url, text: str = None, image_url: str = None, icon: str = None):
         super().__init__()
         if text:
             self._key = 'textButton'
@@ -68,6 +56,64 @@ class ButtonWidget(Widget):
         }
 
 
+class OnClickWidget(Widget):
+    _key = 'onClick'
+
+    def __init__(self, url):
+        data = dict(
+            openLink=dict(url=url)
+        )
+        super().__init__(data)
+
+
+class KeyValueWidget(Widget):
+    _key = 'keyValue'
+
+    def __init__(
+            self,
+            content: str,
+            top: str = None,
+            bottom: str = None,
+            break_lines: bool = True,
+            on_click: OnClickWidget = None,
+            icon: str = None,
+            button: ButtonWidget = None,
+    ):
+        data = dict(
+            content=content,
+            contentMultiline='true' if break_lines else 'false',
+        )
+        if top:
+            data['topLabel'] = top
+        if bottom:
+            data['bottomLabel'] = bottom
+        if on_click:
+            data['onClick'] = on_click
+        if icon:
+            data['icon'] = icon
+        if button:
+            data['button'] = button
+
+        super().__init__(data)
+
+
+class TextWidget(Widget):
+    _key = 'textParagraph'
+
+    def __init__(self, text: str):
+        super().__init__(text=text)
+
+
+class ImageWidget(Widget):
+    _key = 'image'
+
+    def __init__(self, image_url: str, on_click: OnClickWidget = None):
+        data = dict(imageUrl=image_url)
+        if on_click:
+            data.update(on_click.as_data())
+        super().__init__(data)
+
+
 @dataclass
 class Section:
     header: str = None
@@ -85,38 +131,32 @@ class Section:
             icon: str = None,
             button: str = None,
     ):
+
         widget = KeyValueWidget(
-            topLabel=title,
+            top=title,
             content=content,
-            contentMultiline="true",
-            bottomLabel=footer,
+            break_lines=True,
+            bottom=footer,
+            on_click=OnClickWidget(url=click_url) if click_url else None,
+            icon=icon,
+            button=button,
         )
-
-        if click_url:
-            widget["onClick"] = {
-                "openLink": {
-                    "url": click_url,
-                }
-            }
-
-        if icon:
-            widget['icon'] = icon
-
-        if button:
-            widget['button'] = button
-
-        self.widgets.append(KeyValueWidget(keyValue=widget))
+        self.widgets.append(widget)
 
     def add_paragraph(self, text: str):
         self.widgets.append(TextWidget(text=text))
 
-    def add_buttons(self, buttons: List[str]):
-        self.widgets.append(Widget(buttons=buttons))
+    def add_button(self, url, text: str = None, image_url: str = None, icon: str = None, append: bool = True):
+        button = ButtonWidget(url=url, text=text, image_url=image_url, icon=icon)
+        if append and self.widgets and 'buttons' in self.widgets[-1]:
+            self.widgets[-1]['buttons'].append(button)
+        else:
+            self.widgets.append(Widget(buttons=[button]))
 
     def add_image(self, image_url: str, click_url: str = None):
         widget = ImageWidget(
-            imageUrl=image_url,
-            onClick={"openLink": {"url": click_url or image_url}},
+            image_url=image_url,
+            on_click=OnClickWidget(url=click_url) if click_url else None,
         )
         self.widgets.append(widget)
 
@@ -129,7 +169,7 @@ class Section:
         return data
 
     def __bool__(self):
-        return self.header is not None or self.widgets
+        return self.header is not None or bool(self.widgets)
 
 
 @dataclass

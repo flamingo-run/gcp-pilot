@@ -110,6 +110,7 @@ class Manager:
         entity = self.to_entity(obj=obj)
         self.get_client().put(entity=entity)
 
+        # if successfully saved, we assure the auto-generated ID is added to the final object
         if not obj.pk:
             setattr(obj, obj.Meta.pk_field, entity.id)
         return obj
@@ -252,7 +253,7 @@ class ORM(type):
 
         if not is_abstract_model:
             # Since it was not explicitly provided, add id: str = None
-            if cls._has_explicit_pk_field(attrs=attrs, bases=bases) and is_concrete_model:
+            if not cls._has_explicit_pk_field(attrs=attrs, bases=bases) and is_concrete_model:
                 attrs['__annotations__'][DEFAULT_PK_FIELD] = int
                 attrs[DEFAULT_PK_FIELD] = None
 
@@ -328,7 +329,7 @@ class Document(EmbeddedDocument):
 
     @property
     def pk(self):
-        return getattr(self, self.Meta.pk_field)
+        return getattr(self, self.Meta.pk_field, None)
 
     def save(self) -> Document:
         return self.documents.create(obj=self)

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 from dataclasses import dataclass
-from typing import Type, Generator, get_args, Dict, ClassVar, Any, Tuple, get_type_hints, Union, Callable
+from typing import Type, Generator, get_args, Dict, ClassVar, Any, Tuple, get_type_hints, Union, Callable, List
 
 from google.cloud import datastore
 
@@ -77,7 +77,7 @@ class Manager:
         empty = False
         while not empty:
             query_iter = query.fetch(start_cursor=cursor, limit=page_size)
-            page = next(query_iter.pages)
+            page = next(query_iter.pages, [])
             for item in page:
                 yield item
             cursor = query_iter.next_page_token
@@ -247,14 +247,12 @@ class Metadata:
 
 class ORM(type):
     def __new__(cls, name, bases, attrs):
-        is_abstract_model = name in ['Document', 'EmbeddedDocument']
-        is_concrete_model = 'Document' in [base.__name__ for base in bases]
+        is_abstract_model = cls._is_abstract(name=name)
+        is_concrete_model = cls._is_concrete(bases=bases)
 
         if not is_abstract_model:
-            all_fields = cls._extract_fields(attrs=attrs)
-
             # Since it was not explicitly provided, add id: str = None
-            if DEFAULT_PK_FIELD not in attrs['__annotations__'] and is_concrete_model:
+            if cls._has_explicit_pk_field(attrs=attrs, bases=bases) and is_concrete_model:
                 attrs['__annotations__'][DEFAULT_PK_FIELD] = int
                 attrs[DEFAULT_PK_FIELD] = None
 
@@ -264,8 +262,7 @@ class ORM(type):
             return new_cls
 
         # Metadata initialization
-        hints = get_type_hints(new_cls)
-        typed_fields = {k: v for k, v in hints.items() if k in all_fields}
+        typed_fields = cls._extract_fields(klass=new_cls)
         new_cls.Meta = Metadata(
             fields=typed_fields,
             doc_klass=new_cls,
@@ -274,7 +271,7 @@ class ORM(type):
         # Manager initialization
         if is_concrete_model:
             new_cls.documents = Manager(
-                fields=all_fields,
+                fields=typed_fields,
                 pk_field=DEFAULT_PK_FIELD,
                 doc_klass=new_cls,
                 kind=name,
@@ -285,8 +282,32 @@ class ORM(type):
         return new_cls
 
     @classmethod
-    def _extract_fields(cls, attrs: Dict) -> Dict[str, type]:
-        return attrs.get('__annotations__', {})
+    def _is_abstract(cls, name: str) -> bool:
+        return name in ['Document', 'EmbeddedDocument']
+
+    @classmethod
+    def _is_concrete(cls, bases: Tuple[type]) -> bool:
+        return 'Document' in [base.__name__ for base in bases]
+
+    @classmethod
+    def _has_explicit_pk_field(cls, attrs: Dict, bases: Tuple[type]) -> bool:
+        if DEFAULT_PK_FIELD in attrs.get('__annotations__', []):
+            return True
+
+        for base in bases:
+            if DEFAULT_PK_FIELD in get_type_hints(base):
+                return True
+
+        return False
+
+    @classmethod
+    def _extract_fields(cls, klass: type) -> Dict[str, type]:
+        def _ignore(t: str, k: type):
+            return t.startswith('_') or getattr(k, '__origin__', None) == ClassVar
+
+        hints = get_type_hints(klass)
+        typed_fields = {t: k for t, k in hints.items() if not _ignore(t, k)}
+        return typed_fields
 
 
 @dataclass

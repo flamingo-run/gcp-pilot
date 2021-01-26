@@ -17,6 +17,15 @@ from gcp_pilot.resource import ResourceManager
 grm = ResourceManager()
 ```
 
+## Identification Features
+
+- **Authentication**: each client uses [ADC](https://cloud.google.com/docs/authentication/production#automatically),
+which consists on trying to detect the service account with fallbacks: SDK > Environment Variable > Metadata
+- **Impersonation**: it's possible to create clients with ``impersonate_account`` parameter that [impersonates](https://cloud.google.com/iam/docs/impersonating-service-accounts#allow-impersonation) another account.
+- **Delegation**: services _(eg. Google Workspace)_ that requires specific subjects are automatically delegated, sometimes even performing additional credential signatures.
+- **Region**: most GCP services requires a location to work on *(some even require specific locations)*. If not provided, the clients use the project's default location, as defined by App Engine.
+- **Authorization**: OIDC authorization is automatically generated for services *(eg. CloudRun)* that require authentication to be used.
+
 ## Supported APIs
 
 - IAM
@@ -52,7 +61,7 @@ grm = ResourceManager()
 - Cloud Directory
    - manage groups
 - Sheets
-   - manage spreadsheets
+   - manage spreadsheets (powered by gspread)
 - Speech
    - recognize speech from audio
 - Datastore

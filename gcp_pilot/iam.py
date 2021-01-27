@@ -109,15 +109,3 @@ class IAM(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
             resource=resource,
             body={'policy': policy, 'updateMask': 'bindings'},
         )
-
-    def get_compute_service_account(self, project_number: str = None) -> str:
-        number = project_number or self._get_project_number(project_id=self.project_id)
-        return f'{number}-compute@developer.gserviceaccount.com'
-
-    def get_cloud_build_service_account(self, project_number: str = None) -> str:
-        number = project_number or self._get_project_number(project_id=self.project_id)
-        return f'{number}@cloudbuild.gserviceaccount.com'
-
-    def get_cloud_run_service_account(self, project_number=None) -> str:
-        number = project_number or self._get_project_number(project_id=self.project_id)
-        return f'service-{number}@serverless-robot-prod.iam.gserviceaccount.com'

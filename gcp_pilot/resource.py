@@ -18,6 +18,9 @@ class ResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
     def set_policy(self, policy: PolicyType, project_id: str = None) -> PolicyType:
+        if not policy['bindings']:
+            raise exceptions.NotAllowed("Too dangerous to set policy with empty bindings")
+
         return self._execute(
             method=self.client.projects().setIamPolicy,
             resource=project_id or self.project_id,

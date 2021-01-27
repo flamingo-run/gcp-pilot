@@ -245,16 +245,25 @@ def friendly_http_error(func):
         'deleted': exceptions.AlreadyDeleted,
         'forbidden': exceptions.NotAllowed,
     }
+    _statuses = {
+        'INVALID_ARGUMENT': exceptions.ValidationError,
+    }
 
     def inner_function(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except HttpError as exc:
-            error = json.loads(exc.content)['error']['errors'][0]
+            errors = json.loads(exc.content)['error']
 
-            exception_klass = _reasons.get(error['reason'], None)
+            if 'errors' in errors:
+                exception_klass = _reasons.get(errors['errors'][0]['reason'], None)
+                details = ''  # TODO: add more details to the exceptions
+            else:
+                exception_klass = _statuses.get(errors['status'], None)
+                details = errors['message']
+
             if exception_klass:
-                raise exception_klass() from exc  # TODO: add more details to the exceptions
+                raise exception_klass(details) from exc
             raise exc
 
     return inner_function

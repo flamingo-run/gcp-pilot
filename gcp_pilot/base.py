@@ -180,7 +180,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         from gcp_pilot.resource import ResourceManager  # pylint: disable=import-outside-toplevel
 
         project = ResourceManager().get_project(project_id=project_id)
-        return project.projectNumber
+        return project['projectNumber']
 
     def _as_duration(self, seconds):
         return Duration(seconds=seconds)

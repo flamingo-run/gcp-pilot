@@ -263,6 +263,7 @@ def friendly_http_error(func):
     }
     _statuses = {
         'INVALID_ARGUMENT': exceptions.ValidationError,
+        'PERMISSION_DENIED': exceptions.NotAllowed,
     }
 
     def inner_function(*args, **kwargs):
@@ -276,7 +277,7 @@ def friendly_http_error(func):
                 details = ''  # TODO: add more details to the exceptions
             else:
                 exception_klass = _statuses.get(errors['status'], None)
-                details = errors['message']
+                details = f"{errors['code']}: {errors['message']}"
 
             if exception_klass:
                 raise exception_klass(details) from exc

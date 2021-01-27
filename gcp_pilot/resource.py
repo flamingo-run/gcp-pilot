@@ -251,12 +251,17 @@ class ServiceAgent:
         return project['projectNumber']
 
     @classmethod
-    def restore(cls, services: List[str], project_id: str) -> None:
+    async def restore(cls, services: List[str], project_id: str) -> None:
         rm = ResourceManager()
         for service_name in services:
             email = ServiceAgent.get_email(service_name=service_name, project_id=project_id)
             role = ServiceAgent.get_role(service_name=service_name)
-            rm.add_member(email=email, role=role)
+            if role:
+                try:
+                    await rm.add_member(email=email, role=role)
+                    print(f'[O] {service_name}')
+                except exceptions.ValidationError:
+                    print(f'[X] {service_name}')
 
     def get_compute_service_account(self, project_id: str) -> str:
         project_number = self._get_project_number(project_id=project_id)

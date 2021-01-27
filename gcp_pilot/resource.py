@@ -1,4 +1,7 @@
-from gcp_pilot.base import AccountManagerMixin, GoogleCloudPilotAPI, PolicyType, DiscoveryMixin
+from typing import List
+
+from gcp_pilot import exceptions
+from gcp_pilot.base import AccountManagerMixin, GoogleCloudPilotAPI, PolicyType, DiscoveryMixin, ResourceType
 
 
 class ResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
@@ -32,13 +35,20 @@ class ResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
         changed_policy = self.bind_email_to_policy(email=email, role=role, policy=policy)
         return self.set_policy(policy=changed_policy, project_id=project_id)
 
-    async def remove_member(self, email: str, role: str, project_id: str = None):
+    async def remove_member(self, email: str, role: str, project_id: str = None) -> PolicyType:
         policy = self.get_policy(project_id=project_id)
         changed_policy = self.unbind_email_from_policy(email=email, role=role, policy=policy)
         return self.set_policy(policy=changed_policy, project_id=project_id)
 
-    def get_project(self, project_id: str):
+    def get_project(self, project_id: str) -> ResourceType:
         return self._execute(
             method=self.client.projects().get,
             projectId=project_id or self.project_id,
+        )
+
+    async def allow_impersonation(self, email: str, project_id: str = None) -> PolicyType:
+        return await self.add_member(
+            email=email,
+            role='roles/iam.serviceAccountTokenCreator',
+            project_id=project_id,
         )

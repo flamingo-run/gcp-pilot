@@ -200,20 +200,24 @@ class ChatsHook:
     def __init__(self, hook_url: str):
         self.hook_url = hook_url
 
-    def _post(self, body: Dict) -> Dict:
+    def _post(self, body: Dict, thread_key: str = None) -> Dict:
+        url = self.hook_url
+        if thread_key:
+            url = f'{url}&threadKey={thread_key}'
+
         response = requests.post(
-            url=self.hook_url,
+            url=url,
             headers={'Content-Type': 'application/json; charset=UTF-8'},
             data=json.dumps(body),
         )
         response.raise_for_status()
         return response.json()
 
-    def send_text(self, text: str) -> Dict:
+    def send_text(self, text: str, thread_key: str = None) -> Dict:
         body = {'text': text}
-        return self._post(body=body)
+        return self._post(body=body, thread_key=thread_key)
 
-    def send_card(self, card: Card, additional_text: str = None) -> Dict:
+    def send_card(self, card: Card, additional_text: str = None, thread_key: str = None) -> Dict:
         body = {
             'cards': [card.as_data()],
         }
@@ -221,7 +225,7 @@ class ChatsHook:
         if additional_text:
             body['text'] = additional_text
 
-        return self._post(body=body)
+        return self._post(body=body, thread_key=thread_key)
 
 
 class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):

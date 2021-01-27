@@ -53,6 +53,8 @@ class GoogleCloudPilotAPI(abc.ABC):
     _scopes: List[str] = []
     _iam_roles: List[str] = []
     _cached_credentials: AuthType = None
+    _service_name = None
+    _google_managed_service = False  # Service agent requires impersonation
 
     def __init__(
             self,
@@ -166,14 +168,26 @@ class GoogleCloudPilotAPI(abc.ABC):
     def oidc_token(self) -> Dict[str, Dict[str, str]]:
         return {'oidc_token': {'service_account_email': self.credentials.service_account_email}}
 
-    async def add_permissions(self, email: str, project_id: str = None) -> None:
-        from gcp_pilot.resource import ResourceManager  # pylint: disable=import-outside-toplevel
+    async def set_up_permissions(self, email: str, project_id: str = None) -> None:
+        from gcp_pilot.resource import ResourceManager, ServiceAgent  # pylint: disable=import-outside-toplevel
 
+        rm = ResourceManager()
         for role in self._iam_roles:
-            await ResourceManager().add_member(
+            await rm.add_member(
                 email=email,
                 role=role,
                 project_id=project_id or self.project_id,
+            )
+
+        if self._google_managed_service:
+            email = ServiceAgent.get_email(
+                service_name=f'{self._service_name} Service Account',
+                project_id=self.project_id,
+            )
+
+            await ResourceManager().allow_impersonation(
+                email=email,
+                project_id=project_id,
             )
 
     def _get_project_number(self, project_id: str) -> int:

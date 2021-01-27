@@ -66,3 +66,14 @@ which consists on trying to detect the service account with fallbacks: SDK > Env
    - recognize speech from audio
 - Datastore
    - Object Mapping ("ORM-ish" management of documents)
+
+
+### Auto-Authorization
+
+Some services require specific authorizations that should be setup prior to its usage, some examples:
+- [Pub/Sub] subscribe to a topic with authenticated push;
+- [Cloud Scheduler] schedule a job to trigger a Cloud Run service;
+- [Cloud Tasks] queue a task to trigger a Cloud Run service;
+
+In these cases, `gcp-pilot` tries its best to assure that the required permissions are properly set up 
+before the actual request is made.

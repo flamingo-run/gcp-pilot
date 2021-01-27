@@ -238,7 +238,7 @@ class ServiceAgent:
     def get_email(cls, service_name: str, project_id: str) -> str:
         domain, _ = cls._find(service_name=service_name)
         project_number = cls._get_project_number(project_id=project_id)
-        return f'service-{project_number}@{domain}.iam.gserviceaccount.com'
+        return f'service-{project_number}@{domain}'
 
     @classmethod
     def get_role(cls, service_name: str) -> str:

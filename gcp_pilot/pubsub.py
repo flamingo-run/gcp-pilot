@@ -13,6 +13,8 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 
 class CloudPublisher(GoogleCloudPilotAPI):
     _client_class = pubsub_v1.PublisherClient
+    _service_name = 'Cloud Pub/Sub'
+    _google_managed_service = True
 
     async def create_topic(self, topic_id: str, project_id: str = None, exists_ok: bool = True) -> types.Topic:
         topic_path = self.client.topic_path(
@@ -63,6 +65,8 @@ class CloudPublisher(GoogleCloudPilotAPI):
 
 class CloudSubscriber(GoogleCloudPilotAPI):
     _client_class = pubsub_v1.SubscriberClient
+    _service_name = 'Cloud Pub/Sub'
+    _google_managed_service = True
 
     async def list_subscriptions(self, project_id: str = None) -> AsyncIterator[Subscription]:
         all_subscriptions = self.client.list_subscriptions(

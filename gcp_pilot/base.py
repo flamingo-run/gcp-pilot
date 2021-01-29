@@ -271,6 +271,7 @@ def friendly_http_error(func):
     _statuses = {
         'INVALID_ARGUMENT': exceptions.ValidationError,
         'PERMISSION_DENIED': exceptions.NotAllowed,
+        'NOT_FOUND': exceptions.NotFound,
     }
 
     def inner_function(*args, **kwargs):

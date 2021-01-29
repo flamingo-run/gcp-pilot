@@ -38,7 +38,11 @@ def _get_project_default_location(credentials, project_id: str, default_zone: st
     if not location:
         service = build(serviceName='appengine', version='v1', credentials=credentials, cache_discovery=False)
         data = service.apps().get(appsId=project_id).execute()
-        location = data['locationId'] + default_zone
+        location = data['locationId']
+        try:
+            int(location[-1])
+        except ValueError:
+            location = data['locationId'] + default_zone
         _CACHED_LOCATIONS[project_id] = location
     return location
 

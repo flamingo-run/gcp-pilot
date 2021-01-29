@@ -119,3 +119,7 @@ class CloudStorage(GoogleCloudPilotAPI):
         f.write(response.content)
         f.seek(0)
         return f
+
+    def get_uri(self, blob: Blob) -> str:
+        link = blob.path_helper(bucket_path=blob.bucket.name, blob_name=blob.name)
+        return f'gs://{link}'

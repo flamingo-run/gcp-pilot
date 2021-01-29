@@ -299,6 +299,19 @@ class DiscoveryMixin:
     def _execute(self, method: Callable, **kwargs) -> ResourceType:
         return method(**kwargs).execute()
 
+    def _list(
+            self,
+            method: Callable,
+            result_key: str = 'items',
+            params: Dict[str, Any] = None,
+    ) -> Generator[ResourceType, None, None]:
+        results = self._execute(
+            method=method,
+            **params,
+        )
+        for item in results.get(result_key, []):
+            yield item
+
     def _paginate(
             self,
             method: Callable,

@@ -1,4 +1,4 @@
-# More Information: https://cloud.google.com/iam/docs/
+# More Information: <https://cloud.google.com/iam/docs/reference/rest>
 from typing import Dict, Any, Generator
 
 from gcp_pilot import exceptions

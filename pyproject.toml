@@ -3,6 +3,9 @@ name = "gcp-pilot"
 version = "0.13.2"
 description = "Google Cloud Platform Friendly Pilot"
 authors = ["Joao Daher <joao@daher.dev>"]
+repository = "https://github.com/flamingo-run/gcp-pilot"
+readme = "README.md"
+keywords = ["gcp", "google cloud python", "datastore orm"]
 packages = [
     { include = "gcp_pilot" },
 ]

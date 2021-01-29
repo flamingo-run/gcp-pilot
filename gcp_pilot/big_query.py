@@ -6,6 +6,7 @@ from google.cloud.bigquery import Table, DatasetReference
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import GoogleCloudPilotAPI
+from gcp_pilot.storage import CloudStorage
 
 
 class BigQuery(GoogleCloudPilotAPI):
@@ -65,16 +66,17 @@ class BigQuery(GoogleCloudPilotAPI):
         table_ref = dataset_ref.table(table_id=table_name)
         return self.client.get_table(table_ref)
 
-    def load(
+    async def load(
             self,
-            table_name,
-            gcs_file,
-            project_id=None,
-            dataset_name=None,
+            table_name: str,
+            filename: str,
+            project_id: str = None,
+            dataset_name: str = None,
             schema=None,
             wait: bool = False,
-            truncate=None,
-    ):
+            truncate: bool = None,
+            gcs_bucket: str = None,
+    ) -> None:
         job_config = bigquery.LoadJobConfig()
         if schema:
             job_config.schema = schema
@@ -82,7 +84,7 @@ class BigQuery(GoogleCloudPilotAPI):
             job_config.autodetect = True
             job_config._properties['load']['schemaUpdateOptions'] = ['ALLOW_FIELD_ADDITION']
 
-        extension = gcs_file.split('.')[-1]
+        extension = filename.split('.')[-1]
         if extension == 'json':
             source_format = bigquery.job.SourceFormat.NEWLINE_DELIMITED_JSON
         elif extension == 'csv':
@@ -102,11 +104,34 @@ class BigQuery(GoogleCloudPilotAPI):
             dataset_name=dataset_name,
         )
         target_ref = dataset_ref.table(table_name)
-        load_job = self.client.load_table_from_uri(
-            source_uris=gcs_file,
-            destination=target_ref,
-            job_config=job_config,
-        )
+
+        is_gcs = filename.startswith('gs://')
+        if not is_gcs:
+            if gcs_bucket:
+                gcs = CloudStorage(project_id=self.project_id)
+                blob = await gcs.upload(
+                    source_file=filename,
+                    bucket_name=gcs_bucket,
+                )
+                file_url = gcs.get_uri(blob=blob)
+
+                load_job = self.client.load_table_from_uri(
+                    source_uris=file_url,
+                    destination=target_ref,
+                    job_config=job_config,
+                )
+            else:
+                load_job = self.client.load_table_from_file(
+                    file_obj=open(filename, 'rb'),
+                    destination=target_ref,
+                    job_config=job_config,
+                )
+        else:
+            load_job = self.client.load_table_from_uri(
+                source_uris=filename,
+                destination=target_ref,
+                job_config=job_config,
+            )
 
         if wait:
             self._wait_for_job(job=load_job)

@@ -2,7 +2,7 @@ import abc
 import json
 import logging
 import os
-from typing import Dict, Any, Callable, Tuple, List, Generator
+from typing import Dict, Any, Callable, Tuple, List, Generator, Union
 
 from google import auth
 from google.auth import iam
@@ -11,7 +11,7 @@ from google.auth.impersonated_credentials import Credentials as ImpersonatedCred
 from google.auth.transport import requests
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 from google.protobuf.duration_pb2 import Duration
-from googleapiclient.discovery import build
+from googleapiclient.discovery import build, Resource
 from googleapiclient.errors import HttpError
 
 from gcp_pilot import exceptions
@@ -75,7 +75,10 @@ class GoogleCloudPilotAPI(abc.ABC):
         self.project_id = self._set_project_id(project_id=project_id, credential_project_id=credential_project_id)
         self.location = self._set_location(location=location)
 
-        self.client = (self._client_class or build)(
+        self.client = self._build_client(**kwargs)
+
+    def _build_client(self, **kwargs) -> Union[Resource, _client_class]:
+        return (self._client_class or build)(
             credentials=self.credentials,
             **kwargs
         )

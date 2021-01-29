@@ -189,3 +189,28 @@ class BigQuery(GoogleCloudPilotAPI):
             return job.result()
         except Exception as e:
             raise exceptions.BigQueryJobError(job) from e
+
+    def add_external_gcs_source(
+            self,
+            gcs_url: str,
+            dataset_name: str,
+            table_name: str,
+            skip_rows: int = 0,
+            delimiter: str = ',',
+            quote: str = '\"',
+            source_format: str = 'CSV',
+            project_id: str = None
+    ):
+        dataset_ref = self._dataset_ref(dataset_name=dataset_name, project_id=project_id)
+        table = dataset_ref.table(table_name)
+
+        external_config = bigquery.ExternalConfig(source_format=source_format)
+        external_config.autodetect = True
+        external_config.source_uris = [gcs_url]
+        external_config.options.skip_leading_rows = skip_rows
+        external_config.options.field_delimiter = delimiter
+        external_config.options.quote = quote
+
+        table.external_data_configuration = external_config
+
+        return self.client.create_table(table)

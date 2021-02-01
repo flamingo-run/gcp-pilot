@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gcp-pilot"
-version = "0.13.2"
+version = "0.14.0"
 description = "Google Cloud Platform Friendly Pilot"
 authors = ["Joao Daher <joao@daher.dev>"]
 repository = "https://github.com/flamingo-run/gcp-pilot"

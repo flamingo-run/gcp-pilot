@@ -1,6 +1,6 @@
 # https://cloud.google.com/scheduler/docs/reference/rest
 import os
-from typing import Dict
+from typing import Dict, Generator
 
 from google.api_core.exceptions import NotFound
 from google.cloud import scheduler
@@ -95,6 +95,12 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
             job=job,
         )
         return response
+
+    def list(self, prefix: str = '', project_id: str = None) -> Generator[scheduler.Job, None, None]:
+        parent = self._parent_path(project_id=project_id)
+        for job in self.client.list_jobs(parent=parent):
+            if job.name.split('/jobs/')[-1].startswith(prefix):
+                yield job
 
     def get(self, name: str, project_id: str = None) -> scheduler.Job:
         job_name = self._job_path(job=name, project_id=project_id)

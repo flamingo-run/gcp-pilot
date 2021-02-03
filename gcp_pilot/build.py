@@ -13,6 +13,43 @@ TriggerType = cloudbuild_v1.BuildTrigger
 AnyEventType = Union[cloudbuild_v1.GitHubEventsConfig, cloudbuild_v1.RepoSource]
 
 
+@dataclass
+class _SubstitutionVariable:
+    key: str
+    value: Any
+
+    @property
+    def full_key(self) -> str:
+        # Custom substitution variables must be prefixed with an underscore
+        return f'_{self.key}'
+
+    def __str__(self) -> str:
+        # When used in a template, $_NAME should work, but it requires to be isolated by blank spaces
+        # Thus, we use ${_NAME} by default, because it allows merging with other text.
+        return '${%s}' % self.full_key
+
+
+@dataclass
+class Substitutions:
+    _variables: Dict[str, _SubstitutionVariable] = field(default_factory=dict)
+
+    def add(self, **kwargs):
+        for k, v in kwargs.items():
+            variable = _SubstitutionVariable(key=k.upper(), value=v)
+            self._variables[variable.key] = variable
+
+    @property
+    def as_dict(self) -> Dict[str, str]:
+        return {
+            variable.full_key: str(variable.value)  # all values must be string or bytes
+            for variable in self._variables.values()
+        }
+
+    def __getattr__(self, item: str):
+        # Useful tool to ease the variable access (eg. substitution.MY_VAR_NAME)
+        return self._variables[item.upper()]
+
+
 class CloudBuild(GoogleCloudPilotAPI):
     _client_class = cloudbuild_v1.CloudBuildClient
 
@@ -88,7 +125,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             event: AnyEventType,
             tags: List[str],
             images: List[str] = None,
-            substitutions: Dict[str, str] = None,
+            substitutions: Substitutions = None,
     ) -> cloudbuild_v1.BuildTrigger:
 
         def _get_event_param():
@@ -113,7 +150,7 @@ class CloudBuild(GoogleCloudPilotAPI):
                 steps=steps,
                 images=images or [],
             ),
-            substitutions=substitutions,
+            substitutions=substitutions.as_dict,
             **params,
         )
 
@@ -257,44 +294,3 @@ class CloudBuild(GoogleCloudPilotAPI):
             push_to_url=push_to_url,
             use_oidc_auth=use_oidc_auth,
         )
-
-
-@dataclass
-class _SubstitutionVariable:
-    key: str
-    value: Any
-
-    @property
-    def as_kv(self) -> str:
-        return '%s=%s' % (self.key, str(self))
-
-    @property
-    def custom_key(self) -> str:
-        # Custom substitution variables must be prefixed with an underscore
-        return f'_{self.key}'
-
-    def __str__(self) -> str:
-        # When used in a template, $_NAME should work, but it requires to be isolated by blank spaces
-        # Thus, we use ${_NAME} by default, because it allows merging with other text.
-        return '${%s}' % self.custom_key
-
-
-@dataclass
-class SubstitutionHelper:
-    _variables: Dict[str, _SubstitutionVariable] = field(default_factory=dict)
-
-    def add(self, **kwargs):
-        for k, v in kwargs.items():
-            variable = _SubstitutionVariable(key=k.upper(), value=v)
-            self._variables[variable.key] = variable
-
-    @property
-    def as_dict(self) -> Dict[str, str]:
-        return {
-            variable.custom_key: str(variable.value)  # all values must be string or bytes
-            for variable in self._variables.values()
-        }
-
-    def __getattr__(self, item: str):
-        # Useful tool to ease the variable access (eg. substitution.MY_VAR_NAME)
-        return self._variables[item.upper()]

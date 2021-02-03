@@ -90,6 +90,8 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
 - Resource Manager
    - manage projects
    - manage permissions
+- Identity Aware Proxy
+   - generate OIDC token
 - Source Repositories
    - manage repositories
 - Cloud SQL

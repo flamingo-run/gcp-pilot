@@ -23,6 +23,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             args: list = None,
             env=None,
             entrypoint: str = None,
+            timeout: int = None,
     ) -> cloudbuild_v1.BuildStep:
         return cloudbuild_v1.BuildStep(
             id=identifier,
@@ -30,6 +31,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             args=args,
             env=env,
             entrypoint=entrypoint,
+            timeout=self._as_duration(timeout),
         )
 
     def make_source_repo_event(
@@ -139,7 +141,6 @@ class CloudBuild(GoogleCloudPilotAPI):
             project_id: str = None,
             images: List[str] = None,
             substitutions: Dict[str, str] = None,
-            timeout: int = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
             name=name,
@@ -154,7 +155,6 @@ class CloudBuild(GoogleCloudPilotAPI):
         response = self.client.create_build_trigger(
             trigger=trigger,
             project_id=project_id or self.project_id,
-            timeout=timeout,
         )
         return response
 
@@ -168,7 +168,6 @@ class CloudBuild(GoogleCloudPilotAPI):
             images: List[str] = None,
             substitutions: Dict[str, str] = None,
             project_id: str = None,
-            timeout: int = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
             name=name,
@@ -184,7 +183,6 @@ class CloudBuild(GoogleCloudPilotAPI):
             trigger_id=name,
             trigger=trigger,
             project_id=project_id or self.project_id,
-            timeout=timeout,
         )
         return response
 
@@ -198,7 +196,6 @@ class CloudBuild(GoogleCloudPilotAPI):
             project_id: str = None,
             images: List[str] = None,
             substitutions: Dict[str, str] = None,
-            timeout: int = None,
     ) -> TriggerType:
         create_args = dict(
             name=name,
@@ -209,7 +206,6 @@ class CloudBuild(GoogleCloudPilotAPI):
             project_id=project_id,
             images=images,
             substitutions=substitutions,
-            timeout=timeout,
         )
 
         try:

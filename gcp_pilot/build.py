@@ -139,6 +139,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             project_id: str = None,
             images: List[str] = None,
             substitutions: Dict[str, str] = None,
+            timeout: int = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
             name=name,
@@ -153,6 +154,7 @@ class CloudBuild(GoogleCloudPilotAPI):
         response = self.client.create_build_trigger(
             trigger=trigger,
             project_id=project_id or self.project_id,
+            timeout=timeout,
         )
         return response
 
@@ -166,6 +168,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             images: List[str] = None,
             substitutions: Dict[str, str] = None,
             project_id: str = None,
+            timeout: int = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
             name=name,
@@ -181,6 +184,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             trigger_id=name,
             trigger=trigger,
             project_id=project_id or self.project_id,
+            timeout=timeout,
         )
         return response
 
@@ -194,6 +198,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             project_id: str = None,
             images: List[str] = None,
             substitutions: Dict[str, str] = None,
+            timeout: int = None,
     ) -> TriggerType:
         create_args = dict(
             name=name,
@@ -204,6 +209,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             project_id=project_id,
             images=images,
             substitutions=substitutions,
+            timeout=timeout,
         )
 
         try:

@@ -237,7 +237,7 @@ class ServiceAgent:
     @classmethod
     def get_email(cls, service_name: str, project_id: str) -> str:
         domain, _ = cls._find(service_name=service_name)
-        project_number = cls._get_project_number(project_id=project_id)
+        project_number = cls.get_project_number(project_id=project_id)
         return f'service-{project_number}@{domain}'
 
     @classmethod
@@ -246,7 +246,8 @@ class ServiceAgent:
         return role
 
     @classmethod
-    def _get_project_number(cls, project_id: str) -> int:
+    def get_project_number(cls, project_id: str) -> int:
+        # TODO: cache this
         project = ResourceManager().get_project(project_id=project_id)
         return project['projectNumber']
 
@@ -263,12 +264,14 @@ class ServiceAgent:
                 except exceptions.ValidationError:
                     print(f'[X] {service_name}')
 
-    def get_compute_service_account(self, project_id: str) -> str:
-        project_number = self._get_project_number(project_id=project_id)
+    @classmethod
+    def get_compute_service_account(cls, project_id: str) -> str:
+        project_number = cls.get_project_number(project_id=project_id)
         return f'{project_number}-compute@developer.gserviceaccount.com'
 
-    def get_cloud_build_service_account(self, project_id: str = None) -> str:
-        project_number = self._get_project_number(project_id=project_id)
+    @classmethod
+    def get_cloud_build_service_account(cls, project_id: str = None) -> str:
+        project_number = cls.get_project_number(project_id=project_id)
         return f'{project_number}@cloudbuild.gserviceaccount.com'
 
 

@@ -7,7 +7,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI, AccountManagerMixin, PolicyType,
 AccountType = Dict[str, Any]
 
 
-class IAM(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
+class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
     def __init__(self, **kwargs):
         super().__init__(
             serviceName='iam',

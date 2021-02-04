@@ -204,7 +204,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         return project['projectNumber']
 
     def _as_duration(self, seconds):
-        return Duration(seconds=seconds)
+        return Duration(seconds=seconds) if seconds else None
 
 
 class AccountManagerMixin:

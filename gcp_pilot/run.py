@@ -127,7 +127,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             if not project_id:
                 location = self.location
             else:
-                location = _get_project_default_location(credentials=self.credentials, project_id=project_id)
+                location = _get_project_default_location(project_id=project_id)
         return self._build_client(location=location)
 
     def _build_client(self, location: str = None, **kwargs) -> Resource:
@@ -139,3 +139,8 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             client_options=options,
         ))
         return super()._build_client(**kwargs)
+
+
+__all__ = (
+    'CloudRun',
+)

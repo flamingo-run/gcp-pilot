@@ -155,3 +155,10 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
             calendarId=calendar_id,
             eventId=event_id,
         )
+
+
+__all__ = (
+    'Calendar',
+    'Attendee',
+    'Color',
+)

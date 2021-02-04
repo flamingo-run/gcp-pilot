@@ -122,3 +122,8 @@ class CloudStorage(GoogleCloudPilotAPI):
 
     def get_uri(self, blob: Blob) -> str:
         return f'gs://{blob.bucket.name}/{blob.name}'
+
+
+__all__ = (
+    'CloudStorage',
+)

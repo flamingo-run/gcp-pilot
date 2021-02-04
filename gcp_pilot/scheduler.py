@@ -156,3 +156,8 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
                 timeout_in_seconds=timeout_in_seconds,
             )
         return response
+
+
+__all__ = (
+    'CloudScheduler',
+)

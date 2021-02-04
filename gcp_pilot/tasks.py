@@ -100,3 +100,8 @@ class CloudTasks(GoogleCloudPilotAPI):
             parent=parent,
             queue=queue,
         )
+
+
+__all__ = (
+    'CloudTasks',
+)

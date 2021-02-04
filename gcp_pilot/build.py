@@ -313,3 +313,10 @@ class CloudBuild(GoogleCloudPilotAPI):
             push_to_url=push_to_url,
             use_oidc_auth=use_oidc_auth,
         )
+
+
+__all__ = (
+    'CloudBuild',
+    'Substitutions',
+    'ScopedSubstitutions',
+)

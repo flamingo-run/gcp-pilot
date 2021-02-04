@@ -109,3 +109,8 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
             groupKey=group_id,
             memberKey=member_id,
         )
+
+
+__all__ = (
+    'Directory',
+)

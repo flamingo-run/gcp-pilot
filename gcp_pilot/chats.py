@@ -306,3 +306,11 @@ class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):
             parent=self._room_path(room_id=room_id),
             body=body,
         )
+
+
+__all__ = (
+    'Text',
+    'Section',
+    'Card',
+    'ChatsBot',
+)

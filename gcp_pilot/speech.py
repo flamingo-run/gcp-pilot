@@ -43,3 +43,8 @@ class Speech(GoogleCloudPilotAPI):
             result.alternatives[0].transcript
             for result in results
         ]
+
+
+__all__ = (
+    'Speech',
+)

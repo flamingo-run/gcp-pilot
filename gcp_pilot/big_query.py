@@ -236,3 +236,8 @@ class _BigQueryParam:
             param_type = cls._get_type(variable=value)
             param_class = bigquery.ScalarQueryParameter
         return param_class(key, param_type, cls._get_value(value))
+
+
+__all__ = (
+    'BigQuery',
+)

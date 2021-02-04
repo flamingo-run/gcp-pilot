@@ -339,3 +339,11 @@ class Document(EmbeddedDocument):
 
     def delete(self) -> None:
         self.documents.delete(pk=self.id)
+
+
+__all__ = (
+    'DoesNotExist',
+    'MultipleObjectsFound',
+    'EmbeddedDocument',
+    'Document',
+)

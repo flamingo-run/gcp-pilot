@@ -38,3 +38,8 @@ class IdentityAwareProxy(GoogleCloudPilotAPI):
     @property
     def headers(self) -> Dict[str, str]:
         return {'Authorization': f'Bearer {self.token}'}
+
+
+__all__ = (
+    'IdentityAwareProxy',
+)

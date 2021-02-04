@@ -147,3 +147,8 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             project=project_id or self.project_id,
             body=body,
         )
+
+
+__all__ = (
+    'CloudSQL',
+)

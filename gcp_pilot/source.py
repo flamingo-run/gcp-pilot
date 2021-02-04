@@ -58,3 +58,8 @@ class SourceRepository(DiscoveryMixin, GoogleCloudPilotAPI):
             if not exists_ok:
                 raise
             return await self.get_repo(repo_name=repo_name, project_id=project_id)
+
+
+__all__ = (
+    'SourceRepository',
+)

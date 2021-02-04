@@ -109,3 +109,8 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             resource=resource,
             body={'policy': policy, 'updateMask': 'bindings'},
         )
+
+
+__all__ = (
+    'IdentityAccessManager',
+)

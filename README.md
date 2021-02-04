@@ -19,6 +19,7 @@ Some APIs need extra packages, thus you must use `extras` to add them:
 - Sheets: `pip install gcp-pilot[sheets]`
 - Pub/Sub: `pip install gcp-pilot[pubsub]`
 - Datastore: `pip install gcp-pilot[datastore]`
+- Cloud DNS: `pip install gcp-pilot[dns]`
 
 
 ## Usage
@@ -118,6 +119,9 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
    - interact as bot
 - Cloud Directory
    - manage groups
+- Cloud DNS
+   - manage DNS zones
+   - manage zone's registers
 - Sheets
    - manage spreadsheets (powered by gspread)
 - Speech

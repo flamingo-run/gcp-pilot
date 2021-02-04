@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Generator
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import AccountManagerMixin, GoogleCloudPilotAPI, PolicyType, DiscoveryMixin, ResourceType
@@ -210,9 +210,15 @@ class ServiceAgent:
         'Transcoder Service Account': ('gcp-sa-transcoder.iam.gserviceaccount.com', None)
     }
 
+    _suffixes = ['Service Agent', 'Agent', 'Service Account']
+
     @classmethod
-    def get_available_agents(cls) -> List[str]:
-        return list(cls.agents.keys())
+    def get_available_agents(cls) -> Generator[str, None, None]:
+        for agent in cls.agents:
+            name = agent
+            for suffix in cls._suffixes:
+                name = name.replace(suffix, '')
+            yield name
 
     @classmethod
     def _load_from_tsv(cls, filepath: str):
@@ -229,10 +235,15 @@ class ServiceAgent:
 
     @classmethod
     def _find(cls, service_name: str) -> Tuple[str, str]:
-        try:
-            return cls.agents[service_name]
-        except KeyError as e:
-            raise exceptions.NotFound(f"Service {service_name} not found") from e
+        candidates = [f'{service_name} {suffix}' for suffix in cls._suffixes]
+
+        for candidate in candidates:
+            try:
+                return cls.agents[candidate]
+            except KeyError:
+                continue
+
+        raise exceptions.NotFound(f"Service {service_name} not found")
 
     @classmethod
     def get_email(cls, service_name: str, project_id: str) -> str:

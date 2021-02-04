@@ -32,19 +32,13 @@ logger = logging.getLogger()
 _CACHED_LOCATIONS = {}  # TODO: Implement a smarter solution for caching project's location
 
 
-def _get_project_default_location(credentials, project_id: str, default_zone: str = '1') -> str:
-    location = _CACHED_LOCATIONS.get(project_id, None)
-
-    if not location:
-        service = build(serviceName='appengine', version='v1', credentials=credentials, cache_discovery=False)
-        data = service.apps().get(appsId=project_id).execute()
-        location = data['locationId']
-        try:
-            int(location[-1])
-        except ValueError:
-            location = data['locationId'] + default_zone
-        _CACHED_LOCATIONS[project_id] = location
-    return location
+def _get_project_default_location(project_id: str) -> Union[str, None]:
+    from gcp_pilot.app_engine import AppEngine
+    try:
+        app_engine = AppEngine(project_id=project_id)
+        return app_engine.location
+    except exceptions.NotFound:
+        return None
 
 
 MINIMAL_SCOPES = [
@@ -73,11 +67,17 @@ class GoogleCloudPilotAPI(abc.ABC):
             impersonate_account=impersonate_account or DEFAULT_SERVICE_ACCOUNT,
         )
         self.project_id = self._set_project_id(project_id=project_id, credential_project_id=credential_project_id)
-        self.location = self._set_location(location=location)
 
         self.client = self._build_client(**kwargs)
 
+        self.location = self._set_location(location=location)
+
+    def _get_client_extra_kwargs(self):
+        return {}
+
     def _build_client(self, **kwargs) -> Union[Resource, _client_class]:
+        kwargs.update(self._get_client_extra_kwargs())
+
         return (self._client_class or build)(
             credentials=self.credentials,
             **kwargs
@@ -88,7 +88,6 @@ class GoogleCloudPilotAPI(abc.ABC):
 
     def _set_location(self, location: str = None) -> str:
         return location or DEFAULT_LOCATION or _get_project_default_location(
-            credentials=self.credentials,
             project_id=self.project_id,
         )
 
@@ -158,7 +157,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         else:
             credentials, project_id = cls._cached_credentials
 
-        if impersonate_account:
+        if impersonate_account and getattr(credentials, 'service_account_email') != impersonate_account:
             credentials, impersonated_project_id = cls._impersonate_account(
                 credentials=credentials,
                 service_account=impersonate_account,
@@ -251,7 +250,7 @@ class AppEngineBasedService:
     # So these clients cannot just choose a desired region to work on, they must use the App Engine's
     # previously chosen region.
     def _set_location(self, location: str = None):
-        project_location = _get_project_default_location(credentials=self.credentials, project_id=self.project_id)
+        project_location = _get_project_default_location(project_id=self.project_id)
 
         explicit_location = location
         if explicit_location and explicit_location != project_location:

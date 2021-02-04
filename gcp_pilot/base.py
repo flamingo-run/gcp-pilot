@@ -33,7 +33,7 @@ _CACHED_LOCATIONS = {}  # TODO: Implement a smarter solution for caching project
 
 
 def _get_project_default_location(project_id: str) -> Union[str, None]:
-    from gcp_pilot.app_engine import AppEngine
+    from gcp_pilot.app_engine import AppEngine  # pylint: disable=import-outside-toplevel
     try:
         app_engine = AppEngine(project_id=project_id)
         return app_engine.location

@@ -61,6 +61,7 @@ class CloudDNS(GoogleCloudPilotAPI):
             return zone.create()
         if not exists_ok:
             raise exceptions.AlreadyExists()
+        return zone
 
     def delete_zone(self, name: str, dns_name: str, exists_ok: bool = True) -> None:
         zone = self._build_zone(name=name, dns_name=dns_name)

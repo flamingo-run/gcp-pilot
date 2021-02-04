@@ -30,6 +30,36 @@ from gcp_pilot.resource import ResourceManager
 grm = ResourceManager()
 ```
 
+## Default Values
+
+### Credentials
+
+`gcp-pilot` uses [ADC](https://cloud.google.com/docs/authentication/production#automatically) to detect credentials. This means that you must have one of the following setups:
+- Environment variable `GOOGLE_APPLICATION_CREDENTIALS` pointing to the JSON file with the credentials
+- Run inside GCP (Compute Engine, Cloud Run, GKE, AppEngine), so the machine's credentials will be used
+
+You can also globally set a service account using the environment variable `DEFAULT_SERVICE_ACCOUNT`, which will require impersonation.
+
+### Project
+
+When creating a client, a default project is defined by using the project that the credentials belongs to.
+
+Clients that support managing resources from other projects can be overwritten per call.
+
+> Example: you create a `BigQuery` client using credentials from  `project_a`.
+All calls will query datasets from `project_a`, unless another project is passed as parameter when performing the call.
+
+You can also globally set a project using the environment variable `DEFAULT_PROJECT`
+
+### Location
+
+Very similar to default project, a default location is defined by using the project's location.
+The project's location will exist if you ever enabled AppEngine, so you had to set a location then.
+Otherwise, no default location will be set.
+
+You can also globally set a location using the environment variable `DEFAULT_LOCATION` and reduce the amount of API calls 
+when creating clients.
+
 ## Why Use ``gcp-pilot``
 
 _"Since Google already has a [generic API client](https://github.com/googleapis/google-api-python-client) and so many [specific clients](https://github.com/googleapis?q=python&type=&language=), why should I use this library?"_
@@ -108,6 +138,9 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
    - manage schedules
 - Cloud Tasks
    - manage tasks & queues
+- Cloud Run
+   - read services
+   - manage domain mappings [[1]](https://cloud.google.com/run/docs/mapping-custom-domains#adding_verified_domain_owners_to_other_users_or_service_accounts)
 - BigQuery
    - manage datasets
    - perform queries

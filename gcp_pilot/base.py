@@ -32,15 +32,6 @@ logger = logging.getLogger()
 _CACHED_LOCATIONS = {}  # TODO: Implement a smarter solution for caching project's location
 
 
-def _get_project_default_location(project_id: str, credentials: Credentials = None) -> Union[str, None]:
-    from gcp_pilot.app_engine import AppEngine  # pylint: disable=import-outside-toplevel
-    try:
-        app_engine = AppEngine(project_id=project_id, credentials=credentials)
-        return app_engine.location
-    except exceptions.NotFound:
-        return None
-
-
 MINIMAL_SCOPES = [
     'https://www.googleapis.com/auth/cloud-platform',
 ]
@@ -91,10 +82,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         return project_id or DEFAULT_PROJECT or credential_project_id
 
     def _set_location(self, location: str = None) -> str:
-        return location or DEFAULT_LOCATION or _get_project_default_location(
-            project_id=self.project_id,
-            credentials=self.credentials,
-        )
+        return location or DEFAULT_LOCATION or self._get_project_default_location()
 
     @classmethod
     def _impersonate_account(
@@ -210,6 +198,21 @@ class GoogleCloudPilotAPI(abc.ABC):
     def _as_duration(self, seconds):
         return Duration(seconds=seconds) if seconds else None
 
+    @classmethod
+    def build_from(cls, client: 'GoogleCloudPilotAPI', project_id: str = None):
+        return cls(
+            credentials=client.credentials,
+            project_id=project_id or client.project_id,
+        )
+
+    def _get_project_default_location(self, project_id: str = None) -> Union[str, None]:
+        from gcp_pilot.app_engine import AppEngine  # pylint: disable=import-outside-toplevel
+        try:
+            app_engine = AppEngine.build_from(client=self, project_id=project_id)
+            return app_engine.location
+        except exceptions.NotFound:
+            return None
+
 
 class AccountManagerMixin:
     def as_member(self, email: str) -> str:
@@ -255,7 +258,7 @@ class AppEngineBasedService:
     # So these clients cannot just choose a desired region to work on, they must use the App Engine's
     # previously chosen region.
     def _set_location(self, location: str = None):
-        project_location = _get_project_default_location(project_id=self.project_id)
+        project_location = self._get_project_default_location()
 
         explicit_location = location
         if explicit_location and explicit_location != project_location:

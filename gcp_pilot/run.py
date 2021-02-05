@@ -8,7 +8,6 @@ from gcp_pilot.base import (
     GoogleCloudPilotAPI,
     ResourceType,
     DiscoveryMixin,
-    _get_project_default_location,
 )
 from gcp_pilot.resource import ServiceAgent
 
@@ -185,7 +184,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             if not project_id:
                 location = self.location
             else:
-                location = _get_project_default_location(project_id=project_id)
+                location = self._get_project_default_location(project_id=project_id)
         return self._build_client(location=location)
 
     def _build_client(self, location: str = None, **kwargs) -> Resource:

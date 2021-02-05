@@ -32,10 +32,10 @@ logger = logging.getLogger()
 _CACHED_LOCATIONS = {}  # TODO: Implement a smarter solution for caching project's location
 
 
-def _get_project_default_location(project_id: str) -> Union[str, None]:
+def _get_project_default_location(project_id: str, credentials: Credentials = None) -> Union[str, None]:
     from gcp_pilot.app_engine import AppEngine  # pylint: disable=import-outside-toplevel
     try:
-        app_engine = AppEngine(project_id=project_id)
+        app_engine = AppEngine(project_id=project_id, credentials=credentials)
         return app_engine.location
     except exceptions.NotFound:
         return None
@@ -93,6 +93,7 @@ class GoogleCloudPilotAPI(abc.ABC):
     def _set_location(self, location: str = None) -> str:
         return location or DEFAULT_LOCATION or _get_project_default_location(
             project_id=self.project_id,
+            credentials=self.credentials,
         )
 
     @classmethod

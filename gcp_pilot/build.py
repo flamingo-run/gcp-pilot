@@ -145,6 +145,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             tags: List[str],
             images: List[str] = None,
             substitutions: Substitutions = None,
+            timeout: int = None,
     ) -> cloudbuild_v1.BuildTrigger:
 
         def _get_event_param():
@@ -168,6 +169,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             build=cloudbuild_v1.Build(
                 steps=steps,
                 images=images or [],
+                timeout=self._as_duration(timeout),
             ),
             substitutions=substitutions.as_dict,
             **params,
@@ -197,6 +199,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             project_id: str = None,
             images: List[str] = None,
             substitutions: Substitutions = None,
+            timeout: int = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
             name=name,
@@ -206,6 +209,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             tags=tags,
             images=images,
             substitutions=substitutions,
+            timeout=timeout,
         )
 
         response = self.client.create_build_trigger(
@@ -224,6 +228,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             images: List[str] = None,
             substitutions: Substitutions = None,
             project_id: str = None,
+            timeout: int = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
             name=name,
@@ -233,6 +238,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             tags=tags,
             images=images,
             substitutions=substitutions,
+            timeout=timeout,
         )
 
         response = self.client.update_build_trigger(
@@ -252,6 +258,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             project_id: str = None,
             images: List[str] = None,
             substitutions: Substitutions = None,
+            timeout: int = None,
     ) -> TriggerType:
         create_args = dict(
             name=name,
@@ -262,6 +269,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             project_id=project_id,
             images=images,
             substitutions=substitutions,
+            timeout=timeout,
         )
 
         try:

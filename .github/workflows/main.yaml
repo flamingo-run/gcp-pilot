@@ -87,8 +87,6 @@ jobs:
       - name: Unit test with nose test suite
         run: |
           make unit
-        env:
-          LOG_LEVEL: ERROR
 
       - name: Report coverage
         run: |

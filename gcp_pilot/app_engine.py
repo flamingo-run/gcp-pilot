@@ -2,6 +2,10 @@ from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, _CACHED_LOCATION
 
 
 class AppEngine(AppEngineBasedService, DiscoveryMixin, GoogleCloudPilotAPI):
+    _scopes = [
+        'https://www.googleapis.com/auth/appengine.admin',
+    ]
+
     def __init__(self, **kwargs):
         super().__init__(
             serviceName='appengine',

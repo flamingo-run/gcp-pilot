@@ -1,7 +1,8 @@
 import unittest
 
-from gcp_pilot.storage import CloudStorage  # pylint: disable=unused-import
+from gcp_pilot.storage import CloudStorage
+from tests import ClientTestMixin
 
 
-class TestCloudStorage(unittest.TestCase):
-    pass
+class TestCloudStorage(ClientTestMixin, unittest.TestCase):
+    _CLIENT_KLASS = CloudStorage

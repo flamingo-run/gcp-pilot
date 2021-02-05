@@ -1,15 +1,16 @@
 import json
 import unittest
 
-from gcp_pilot.pubsub import CloudPublisher, CloudSubscriber, Message  # pylint: disable=unused-import
+from gcp_pilot.pubsub import CloudPublisher, CloudSubscriber, Message
+from tests import ClientTestMixin
 
 
-class TestCloudPublisher(unittest.TestCase):
-    pass
+class TestCloudPublisher(ClientTestMixin, unittest.TestCase):
+    _CLIENT_KLASS = CloudPublisher
 
 
-class TestCloudSubscriber(unittest.TestCase):
-    pass
+class TestCloudSubscriber(ClientTestMixin, unittest.TestCase):
+    _CLIENT_KLASS = CloudSubscriber
 
 
 class TestPubSubMessage(unittest.TestCase):

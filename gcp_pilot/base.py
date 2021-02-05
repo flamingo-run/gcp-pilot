@@ -161,7 +161,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         if subject:
             credentials = cls._delegated_credential(credentials=credentials, subject=subject, scopes=all_scopes)
 
-        return credentials, (project_id or getattr(credentials, 'project_id'))
+        return credentials, (project_id or getattr(credentials, 'project_id', None))
 
     @property
     def oidc_token(self) -> Dict[str, Dict[str, str]]:

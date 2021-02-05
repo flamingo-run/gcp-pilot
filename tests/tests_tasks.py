@@ -1,7 +1,8 @@
 import unittest
 
-from gcp_pilot.tasks import CloudTasks  # pylint: disable=unused-import
+from gcp_pilot.tasks import CloudTasks
+from tests import ClientTestMixin
 
 
-class TestCloudTasks(unittest.TestCase):
-    pass
+class TestCloudTasks(ClientTestMixin, unittest.TestCase):
+    _CLIENT_KLASS = CloudTasks

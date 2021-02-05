@@ -1,7 +1,8 @@
 import unittest
 
-from gcp_pilot.big_query import BigQuery  # pylint: disable=unused-import
+from gcp_pilot.big_query import BigQuery
+from tests import ClientTestMixin
 
 
-class TestBigQuery(unittest.TestCase):
-    pass
+class TestBigQuery(ClientTestMixin, unittest.TestCase):
+    _CLIENT_KLASS = BigQuery

@@ -1,7 +1,8 @@
 import unittest
 
-from gcp_pilot.run import CloudRun  # pylint: disable=unused-import
+from gcp_pilot.run import CloudRun
+from tests import ClientTestMixin
 
 
-class TestCloudRun(unittest.TestCase):
-    pass
+class TestCloudRun(ClientTestMixin, unittest.TestCase):
+    _CLIENT_KLASS = CloudRun

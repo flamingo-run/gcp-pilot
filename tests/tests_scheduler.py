@@ -1,7 +1,8 @@
 import unittest
 
-from gcp_pilot.scheduler import CloudScheduler  # pylint: disable=unused-import
+from gcp_pilot.scheduler import CloudScheduler
+from tests import ClientTestMixin
 
 
-class TestCloudScheduler(unittest.TestCase):
-    pass
+class TestCloudScheduler(ClientTestMixin, unittest.TestCase):
+    _CLIENT_KLASS = CloudScheduler

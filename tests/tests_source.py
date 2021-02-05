@@ -1,7 +1,8 @@
 import unittest
 
-from gcp_pilot.source import SourceRepository  # pylint: disable=unused-import
+from gcp_pilot.source import SourceRepository
+from tests import ClientTestMixin
 
 
-class TestSourceRepository(unittest.TestCase):
-    pass
+class TestSourceRepository(ClientTestMixin, unittest.TestCase):
+    _CLIENT_KLASS = SourceRepository

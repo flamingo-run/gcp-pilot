@@ -1,7 +1,8 @@
 import unittest
 
-from gcp_pilot.sql import CloudSQL  # pylint: disable=unused-import
+from gcp_pilot.sql import CloudSQL
+from tests import ClientTestMixin
 
 
-class TestCloudSQL(unittest.TestCase):
-    pass
+class TestCloudSQL(ClientTestMixin, unittest.TestCase):
+    _CLIENT_KLASS = CloudSQL

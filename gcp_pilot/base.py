@@ -60,12 +60,16 @@ class GoogleCloudPilotAPI(abc.ABC):
             location: str = None,
             project_id: str = None,
             impersonate_account: str = None,
+            credentials: Credentials = None,
             **kwargs,
     ):
-        self.credentials, credential_project_id = self._set_credentials(
-            subject=subject,
-            impersonate_account=impersonate_account or DEFAULT_SERVICE_ACCOUNT,
-        )
+        if credentials:
+            self.credentials, credential_project_id = credentials, getattr(credentials, 'project_id', None)
+        else:
+            self.credentials, credential_project_id = self._set_credentials(
+                subject=subject,
+                impersonate_account=impersonate_account or DEFAULT_SERVICE_ACCOUNT,
+            )
         self.project_id = self._set_project_id(project_id=project_id, credential_project_id=credential_project_id)
 
         self.client = self._build_client(**kwargs)

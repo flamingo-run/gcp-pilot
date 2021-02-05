@@ -196,7 +196,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             tags: List[str] = None,
             project_id: str = None,
             images: List[str] = None,
-            substitutions: Dict[str, str] = None,
+            substitutions: Substitutions = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
             name=name,
@@ -222,7 +222,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             steps: List[cloudbuild_v1.BuildStep],
             tags: List[str] = None,
             images: List[str] = None,
-            substitutions: Dict[str, str] = None,
+            substitutions: Substitutions = None,
             project_id: str = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
@@ -251,7 +251,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             tags: List[str] = None,
             project_id: str = None,
             images: List[str] = None,
-            substitutions: Dict[str, str] = None,
+            substitutions: Substitutions = None,
     ) -> TriggerType:
         create_args = dict(
             name=name,

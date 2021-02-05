@@ -10,6 +10,7 @@ from gcp_pilot.base import (
     DiscoveryMixin,
     _get_project_default_location,
 )
+from gcp_pilot.resource import ServiceAgent
 
 
 class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
@@ -48,6 +49,63 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
         return self._execute(
             method=client.namespaces().services().get,
             name=name,
+        )
+
+    def create_service(
+            self,
+            service_name: str,
+            project_id: str = None,
+            location: str = None,
+            service_account: str = None,
+            trigger_id: str = None,
+            image: str = 'gcr.io/cloudrun/placeholder',
+            ram: int = 256,
+            concurrency: int = 80,
+            timeout: int = 300,
+            port: int = 8080,
+    ) -> ResourceType:
+        parent = self._namespace_path(project_id=project_id)
+        client = self._get_localized_client(project_id=project_id, location=location)
+
+        service_account = service_account or ServiceAgent.get_compute_service_account(
+            project_id=project_id or self.project_id
+        )
+        labels = {
+            'managed-by': 'gcp-cloud-build-deploy-cloud-run',
+            'cloud.googleapis.com/location': location,
+        }
+        if trigger_id:
+            labels['gcb-trigger-id'] = trigger_id
+
+        body = {
+            'apiVersion': 'serving.knative.dev/v1',
+            'kind': 'Service',
+            'metadata': {
+                'name': service_name,
+                'labels': labels,
+                'annotations': {
+                    'client.knative.dev/user-image': image,
+                },
+            },
+            'spec': {
+                'template': {
+                    'spec': {
+                        'containerConcurrency': concurrency,
+                        'timeoutSeconds': timeout,
+                        'serviceAccountName': service_account,
+                        'containers': [{
+                            'image': image,
+                            'resources': {'limits': {'cpu': '1000m', 'memory': f'{ram}Mi'}},
+                            'ports': [{'containerPort': port}]
+                        }]
+                    }
+                },
+            },
+        }
+        return self._execute(
+            method=client.namespaces().services().create,
+            parent=parent,
+            body=body,
         )
 
     def list_locations(self, project_id: str = None) -> Generator[ResourceType, None, None]:

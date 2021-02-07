@@ -17,6 +17,10 @@ AnyEventType = Union[cloudbuild_v1.GitHubEventsConfig, cloudbuild_v1.RepoSource]
 class _SubstitutionVariable:
     key: str
     value: Any
+    escape_delimiter: str = None
+
+    def __post_init__(self):
+        self.escape_delimiter = '|' if ',' in self.value else None
 
     @property
     def full_key(self) -> str:
@@ -27,6 +31,15 @@ class _SubstitutionVariable:
         # When used in a template, $_NAME should work, but it requires to be isolated by blank spaces
         # Thus, we use ${_NAME} by default, because it allows merging with other text.
         return '${%s}' % self.full_key
+
+    @property
+    def _escape(self):
+        # <https://cloud.google.com/run/docs/configuring/environment-variables#setting>
+        return f"^{self.escape_delimiter}^" if self.escape_delimiter else ''
+
+    @property
+    def as_env_var(self):
+        return f'{self._escape}{self.key}={str(self)}'
 
 
 @dataclass

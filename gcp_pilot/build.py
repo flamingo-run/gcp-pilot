@@ -63,25 +63,6 @@ class Substitutions:
         return self._variables[item.upper()]
 
 
-@dataclass
-class _ScopedSubstitutionVariable(_SubstitutionVariable):
-    scope: str
-
-    @property
-    def full_key(self) -> str:
-        return f'_{self.scope}_{self.key}'
-
-
-@dataclass
-class ScopedSubstitutions(Substitutions):
-    _variables: Dict[str, _ScopedSubstitutionVariable] = field(default_factory=dict)
-
-    def add(self, scope: str, **kwargs):
-        for k, v in kwargs.items():
-            variable = _ScopedSubstitutionVariable(scope=scope, key=k.upper(), value=v)
-            self._variables[variable.key] = variable
-
-
 class CloudBuild(GoogleCloudPilotAPI):
     _client_class = cloudbuild_v1.CloudBuildClient
 
@@ -339,5 +320,4 @@ class CloudBuild(GoogleCloudPilotAPI):
 __all__ = (
     'CloudBuild',
     'Substitutions',
-    'ScopedSubstitutions',
 )

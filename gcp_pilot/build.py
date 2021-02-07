@@ -271,6 +271,31 @@ class CloudBuild(GoogleCloudPilotAPI):
         except AlreadyExists:
             return await self.update_trigger(**create_args)
 
+    async def run_trigger(
+            self,
+            name: str,
+            tag_name: str = None,
+            branch_name: str = None,
+            commit_sha: str = None,
+            project_id: str = None,
+    ) -> TriggerType:
+        params = [tag_name, branch_name, commit_sha]
+        if len([x for x in params if x]) != 1:
+            raise exceptions.ValidationError("Only one of {tag_name, branch_name, commit_sha} must be provided")
+
+        event = cloudbuild_v1.RepoSource(
+            project_id=project_id or self.project_id,
+            tag_name=tag_name,
+            branch_name=branch_name,
+            commit_sha=commit_sha,
+        )
+        response = self.client.run_build_trigger(
+            trigger_id=name,
+            source=event,
+            project_id=project_id or self.project_id,
+        )
+        return response
+
     def get_builds(
             self,
             trigger_id: str = None,

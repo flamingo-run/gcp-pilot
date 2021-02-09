@@ -37,9 +37,8 @@ class _SubstitutionVariable:
         # <https://cloud.google.com/run/docs/configuring/environment-variables#setting>
         return f"^{self.escape_delimiter}^" if self.escape_delimiter else ''
 
-    @property
-    def as_env_var(self):
-        return f'{self._escape}{self.key}={str(self)}'
+    def as_env_var(self, key: str = None):
+        return f'{self._escape}{key or self.key}={str(self)}'
 
 
 @dataclass

@@ -20,7 +20,7 @@ class _SubstitutionVariable:
     escape_delimiter: str = None
 
     def __post_init__(self):
-        self.escape_delimiter = '|' if ',' in self.value else None
+        self.escape_delimiter = '|' if ',' in str(self.value) else None
 
     @property
     def full_key(self) -> str:

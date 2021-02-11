@@ -1,3 +1,6 @@
+from google.api_core.exceptions import FailedPrecondition
+
+
 class UnsupportedFormatException(Exception):
     pass
 
@@ -14,7 +17,7 @@ class NotFound(Exception):
     pass
 
 
-class DeletedRecently(Exception):
+class DeletedRecently(FailedPrecondition):
     def __init__(self, resource, blocked_period='1 week'):
         message = f"{resource} was probably deleted recently. Cannot reuse name for {blocked_period}."
         super().__init__(message)

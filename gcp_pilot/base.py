@@ -274,6 +274,7 @@ def friendly_http_error(func):
         'notFound': exceptions.NotFound,
         'deleted': exceptions.AlreadyDeleted,
         'forbidden': exceptions.NotAllowed,
+        'duplicate': exceptions.AlreadyExists,
     }
     _statuses = {
         'INVALID_ARGUMENT': exceptions.ValidationError,

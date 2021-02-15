@@ -161,3 +161,6 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
    - recognize speech from audio
 - Datastore
    - Object Mapping ("ORM-ish" management of documents)
+- Monitoring
+  - reporting errors
+  - logging

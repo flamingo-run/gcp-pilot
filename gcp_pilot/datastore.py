@@ -49,7 +49,8 @@ class Manager:
 
     def build_key(self, pk: Any = None) -> datastore.Key:
         if pk:
-            return self.get_client().key(self.kind, pk)
+            typed_pk = self.doc_klass.Meta.fields[self.pk_field](pk)
+            return self.get_client().key(self.kind, typed_pk)
         # If no primary key is provided, we let the server create a new ID
         return self.get_client().allocate_ids(self.get_client().key(self.kind), 1)[0]
 

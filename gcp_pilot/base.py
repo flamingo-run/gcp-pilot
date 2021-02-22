@@ -240,7 +240,14 @@ class AccountManagerMixin:
             binding['members'].append(member)
         except (StopIteration, KeyError):
             binding = {'role': role_id, 'members': [member]}
-            new_policy.get('bindings', []).append(binding)
+
+            new_bindings = new_policy.get('bindings', []).copy()
+            new_bindings.append(binding)
+
+            new_policy['bindings'] = new_bindings
+
+        if 'version' not in new_policy:
+            new_policy['version'] = 1  # TODO: handle version 2 and 3 as its conditional roles
         return new_policy
 
     def _unbind_email_from_policy(self, email: str, role: str, policy: Dict):

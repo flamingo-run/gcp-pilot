@@ -78,14 +78,14 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             resource=resource,
         )
 
-    def as_member(self, email: str) -> str:
+    def _as_member(self, email: str) -> str:
         is_service_account = email.endswith('.gserviceaccount.com')
         prefix = 'serviceAccount' if is_service_account else 'member'
         return f'{prefix}:{email}'
 
     async def bind_member(self, target_email: str, member_email: str, role: str, project_id=None) -> PolicyType:
         policy = self.get_policy(email=target_email, project_id=project_id)
-        changed_policy = self.bind_email_to_policy(email=member_email, role=role, policy=policy)
+        changed_policy = self._bind_email_to_policy(email=member_email, role=role, policy=policy)
         return self.set_policy(email=target_email, policy=changed_policy, project_id=project_id)
 
     async def remove_member(
@@ -96,7 +96,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             project_id: str = None,
     ) -> PolicyType:
         policy = self.get_policy(email=target_email, project_id=project_id)
-        changed_policy = self.unbind_email_from_policy(email=member_email, role=role, policy=policy)
+        changed_policy = self._unbind_email_from_policy(email=member_email, role=role, policy=policy)
         return self.set_policy(email=target_email, policy=changed_policy, project_id=project_id)
 
     def set_policy(self, email: str, policy: PolicyType, project_id: str = None) -> PolicyType:

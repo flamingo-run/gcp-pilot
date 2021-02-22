@@ -32,12 +32,12 @@ class ResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
 
     async def add_member(self, email: str, role: str, project_id: str = None) -> PolicyType:
         policy = self.get_policy(project_id=project_id)
-        changed_policy = self.bind_email_to_policy(email=email, role=role, policy=policy)
+        changed_policy = self._bind_email_to_policy(email=email, role=role, policy=policy)
         return self.set_policy(policy=changed_policy, project_id=project_id)
 
     async def remove_member(self, email: str, role: str, project_id: str = None) -> PolicyType:
         policy = self.get_policy(project_id=project_id)
-        changed_policy = self.unbind_email_from_policy(email=email, role=role, policy=policy)
+        changed_policy = self._unbind_email_from_policy(email=email, role=role, policy=policy)
         return self.set_policy(policy=changed_policy, project_id=project_id)
 
     def get_project(self, project_id: str) -> ResourceType:

@@ -222,16 +222,16 @@ class GoogleCloudPilotAPI(abc.ABC):
 
 
 class AccountManagerMixin:
-    def as_member(self, email: str) -> str:
+    def _as_member(self, email: str) -> str:
         is_service_account = email.endswith('.gserviceaccount.com')
         prefix = 'serviceAccount' if is_service_account else 'member'
         return f'{prefix}:{email}'
 
-    def bind_email_to_policy(self, email: str, role: str, policy: Dict) -> Dict:
+    def _bind_email_to_policy(self, email: str, role: str, policy: Dict) -> Dict:
         new_policy = policy.copy()
 
         role_id = role if (role.startswith('organizations/') or role.startswith('roles/')) else f'roles/{role}'
-        member = self.as_member(email=email)
+        member = self._as_member(email=email)
 
         try:
             binding = next(b for b in new_policy['bindings'] if b['role'] == role_id)
@@ -243,9 +243,9 @@ class AccountManagerMixin:
             new_policy.get('bindings', []).append(binding)
         return new_policy
 
-    def unbind_email_from_policy(self, email: str, role: str, policy: Dict):
+    def _unbind_email_from_policy(self, email: str, role: str, policy: Dict):
         role_id = f'roles/{role}'
-        member = self.as_member(email=email)
+        member = self._as_member(email=email)
 
         try:
             binding = next(b for b in policy['bindings'] if b['role'] == role_id)

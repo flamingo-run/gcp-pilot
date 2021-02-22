@@ -195,7 +195,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         project = ResourceManager().get_project(project_id=project_id)
         return project['projectNumber']
 
-    def _as_duration(self, seconds):
+    def _as_duration(self, seconds) -> Duration:
         return Duration(seconds=seconds) if seconds else None
 
     @classmethod

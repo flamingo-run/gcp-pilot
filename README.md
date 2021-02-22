@@ -133,7 +133,10 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
    - manage buckets
    - manage files
 - Cloud Build
-   - manager triggers
+   - manage triggers
+- Cloud Functions
+  - manager functions
+  - manage permissions
 - Cloud Scheduler
    - manage schedules
 - Cloud Tasks

@@ -223,9 +223,25 @@ class GoogleCloudPilotAPI(abc.ABC):
 
 class AccountManagerMixin:
     def _as_member(self, email: str) -> str:
+        if email == 'allUsers':
+            return email
         is_service_account = email.endswith('.gserviceaccount.com')
         prefix = 'serviceAccount' if is_service_account else 'member'
         return f'{prefix}:{email}'
+
+    def _make_public(self, role: str, policy: Dict) -> Dict:
+        return self._bind_email_to_policy(
+            email='allUsers',
+            role=role,
+            policy=policy
+        )
+
+    def _make_private(self, role: str, policy: Dict) -> Dict:
+        return self._unbind_email_from_policy(
+            email='allUsers',
+            role=role,
+            policy=policy
+        )
 
     def _bind_email_to_policy(self, email: str, role: str, policy: Dict) -> Dict:
         new_policy = policy.copy()

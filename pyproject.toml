@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gcp-pilot"
-version = "0.18.2"
+version = "0.19.0"
 description = "Google Cloud Platform Friendly Pilot"
 authors = ["Joao Daher <joao@daher.dev>"]
 repository = "https://github.com/flamingo-run/gcp-pilot"
@@ -12,7 +12,7 @@ packages = [
 
 
 [tool.poetry.dependencies]
-python = ">=3.8,<4"
+python = ">=3.8,<3.10"
 google-api-python-client = "^1"
 google-cloud-tasks = { version = "^2", optional = true}
 google-cloud-scheduler = { version = "^2", optional = true}

@@ -213,6 +213,13 @@ class GoogleCloudPilotAPI(abc.ABC):
         except exceptions.NotFound:
             return None
 
+    def _project_path(self, project_id: str = None) -> str:
+        return f'projects/{project_id or self.project_id}'
+
+    def _location_path(self, project_id: str = None, location: str = None) -> str:
+        project_path = self._project_path(project_id=project_id)
+        return f'{project_path}/locations/{location or self.location}'
+
 
 class AccountManagerMixin:
     def as_member(self, email: str) -> str:

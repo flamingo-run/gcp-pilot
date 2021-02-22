@@ -20,7 +20,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         super().__init__(**kwargs)
 
     def _parent_path(self, project_id: str = None) -> str:
-        return f'projects/{project_id or self.project_id}/locations/{self.location}'
+        return self._location_path(project_id=project_id, location=self.location)
 
     def _job_path(self, job, project_id: str = None) -> str:
         parent_name = self._parent_path(project_id=project_id)

@@ -21,9 +21,6 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
     def _namespace_path(self, project_id: str = None):
         return f'namespaces/{project_id or self.project_id}'
 
-    def _project_path(self, project_id: str = None):
-        return f'projects/{project_id or self.project_id}'
-
     def _service_path(self, service_name: str, project_id: str = None):
         parent = self._namespace_path(project_id=project_id)
         return f'{parent}/services/{service_name}'

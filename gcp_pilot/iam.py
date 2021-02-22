@@ -16,11 +16,8 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             **kwargs,
         )
 
-    def _parent_path(self, project_id: str = None) -> str:
-        return f'projects/{project_id or self.project_id}'
-
     def _service_account_path(self, email: str, project_id: str = None) -> str:
-        parent_path = self._parent_path(project_id=project_id)
+        parent_path = self._project_path(project_id=project_id)
         return f'{parent_path}/serviceAccounts/{email}'
 
     def _build_service_account_email(self, name: str, project_id: str = None) -> str:
@@ -53,7 +50,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             }
             service_account = self._execute(
                 method=self.client.projects().serviceAccounts().create,
-                name=self._parent_path(project_id=project_id),
+                name=self._project_path(project_id=project_id),
                 body=body,
             )
         except exceptions.AlreadyExists:
@@ -64,7 +61,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
 
     async def list_service_accounts(self, project_id: str = None) -> Generator[AccountType, None, None]:
         params = dict(
-            name=self._parent_path(project_id=project_id),
+            name=self._project_path(project_id=project_id),
         )
         pagination = self._paginate(
             method=self.client.projects().serviceAccounts().list,

@@ -14,7 +14,12 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 class CloudStorage(GoogleCloudPilotAPI):
     _client_class = storage.Client
 
-    async def create_bucket(self, name: str, region: str, project_id: str = None, exists_ok: bool = True) -> Bucket:
+    async def create_bucket(
+            self, name: str,
+            region: str = None,
+            project_id: str = None,
+            exists_ok: bool = True,
+    ) -> Bucket:
         bucket = self.client.bucket(name)
         try:
             return self.client.create_bucket(

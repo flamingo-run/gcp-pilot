@@ -52,7 +52,7 @@ class BigQuery(GoogleCloudPilotAPI):
         return self._wait_for_job(job=query_job)
 
     async def insert_rows(self, dataset_name: str, table_name: str, rows, project_id: str = None):
-        table = self.get_table(
+        table = await self.get_table(
             table_name=table_name,
             project_id=project_id,
             dataset_name=dataset_name,
@@ -138,13 +138,14 @@ class BigQuery(GoogleCloudPilotAPI):
 
     async def copy(
             self,
+            source_dataset_name: str,
             source_table_name: str,
             destination_table_name: str,
             destination_dataset_name: str,
             destination_project: str = None,
             wait: bool = False,
     ) -> None:
-        source_ref = self.get_table(table_name=source_table_name)
+        source_ref = await self.get_table(dataset_name=source_dataset_name, table_name=source_table_name)
         dataset_ref = self._dataset_ref(
             project_id=destination_project or self.project_id,
             dataset_name=destination_dataset_name,

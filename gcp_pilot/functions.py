@@ -44,8 +44,9 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
             name=function_name,
         )
 
-    def _build_repo_source(
-            self,
+    @classmethod
+    def build_repo_source(
+            cls,
             name,
             branch: str = None,
             commit: str = None,
@@ -70,7 +71,7 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
         path = f'/paths/{directory}' if directory else ''
 
         REPO_SOURCE_URL = 'https://source.developers.google.com'
-        url = f'{REPO_SOURCE_URL}/projects/{project_id or self.project_id}/repos/{name}/{ref}{path}'
+        url = f'{REPO_SOURCE_URL}/projects/{project_id}/repos/{name}/{ref}{path}'
         repo = dict(url=url)
 
         return repo
@@ -96,13 +97,13 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
             service_account_email: str = None,
             is_public: bool = False,
     ) -> FunctionType:
-        repo = self._build_repo_source(
+        repo = self.build_repo_source(
             name=repo_name,
             commit=repo_commit,
             tag=repo_tag,
             branch=repo_branch,
             directory=repo_directory,
-            project_id=project_id,
+            project_id=project_id or self.project_id,
         )
         body = dict(
             name=self._function_path(name=name, project_id=project_id, location=location),

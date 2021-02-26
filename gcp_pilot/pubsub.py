@@ -22,7 +22,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
             topic=topic_id,
         )
         try:
-            topic = self.client.create_topic(request={"name": topic_path})
+            topic = self.client.create_topic(name=topic_path)
         except AlreadyExists:
             if not exists_ok:
                 raise

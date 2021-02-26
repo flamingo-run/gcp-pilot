@@ -70,8 +70,15 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
 
         path = f'/paths/{directory}' if directory else ''
 
+        if '/' in name:
+            # Assume it's a repository integrated through Github App
+            org, repo = name.split('/')
+            repo_name = f'github_{org}_{repo}'
+        else:
+            repo_name = name
+
         REPO_SOURCE_URL = 'https://source.developers.google.com'
-        url = f'{REPO_SOURCE_URL}/projects/{project_id}/repos/{name}/{ref}{path}'
+        url = f'{REPO_SOURCE_URL}/projects/{project_id}/repos/{repo_name}/{ref}{path}'
         repo = dict(url=url)
 
         return repo

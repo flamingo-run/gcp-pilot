@@ -2,7 +2,7 @@
 import base64
 import json
 from dataclasses import dataclass
-from typing import Callable, Dict, Any, AsyncIterator, Union
+from typing import Callable, Dict, Any, AsyncIterator, Union, Generator
 
 from google.api_core.exceptions import AlreadyExists, NotFound
 from google.cloud import pubsub_v1
@@ -30,7 +30,20 @@ class CloudPublisher(GoogleCloudPilotAPI):
         return topic
 
     async def get_topic(self, topic_id: str, project_id: str = None):
-        pass
+        topic_path = self.client.topic_path(
+            project=project_id or self.project_id,
+            topic=topic_id,
+        )
+        return self.client.get_topic(
+            topic=topic_path,
+        )
+
+    async def list_topics(self, project_id: str = None) -> Generator[types.Topic, None, None]:
+        project_path = self._project_path(project_id=project_id)
+        topics = self.client.list_topics(
+            project=project_path,
+        )
+        return topics
 
     async def publish(
             self,

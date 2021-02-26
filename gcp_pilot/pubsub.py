@@ -85,8 +85,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         all_subscriptions = self.client.list_subscriptions(
             project=f'projects/{project_id or self.project_id}',
         )
-        for subscription in all_subscriptions:
-            yield subscription
+        return all_subscriptions
 
     async def get_subscription(self, subscription_id: str, project_id: str = None) -> Subscription:
         subscription_path = self.client.subscription_path(

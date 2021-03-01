@@ -10,6 +10,13 @@ from google.cloud import datastore
 from gcp_pilot import exceptions
 
 DEFAULT_PK_FIELD = 'id'
+MAX_ITEMS_PER_OPERATIONS = 500  # Datastore cannot write more than 500 items per call
+
+
+def _chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
 
 
 @dataclass
@@ -133,7 +140,8 @@ class Manager:
             self.get_client().delete(key=self.build_key(pk=pk))
         else:
             keys = [entity.key for entity in self.query()]
-            self.get_client().delete_multi(keys=keys)
+            for chunk in _chunks(keys, MAX_ITEMS_PER_OPERATIONS):
+                self.get_client().delete_multi(keys=chunk)
 
     def _build_filter(self, key: str, value: Any) -> Tuple[str, str, Any]:
         lookup_fields = []

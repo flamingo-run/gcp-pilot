@@ -313,4 +313,5 @@ __all__ = (
     'Section',
     'Card',
     'ChatsBot',
+    'ChatsHook',
 )

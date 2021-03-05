@@ -240,11 +240,11 @@ class Metadata:
             return value
 
         data = {}
-        for field, field_klass in self.fields.items():
+        for field_name, field_klass in self.fields.items():
             if select_fields and field not in select_fields:
                 continue
 
-            raw_value = getattr(obj, field)
+            raw_value = getattr(obj, field_name)
 
             if getattr(field_klass, '_name', '') == 'List':
                 item = [_unbuild(value=i) for i in raw_value]
@@ -256,7 +256,7 @@ class Metadata:
             else:
                 item = _unbuild(value=raw_value)
 
-            data[field] = item
+            data[field_name] = item
 
         return data
 
@@ -320,7 +320,9 @@ class ORM(type):
     @classmethod
     def _extract_fields(cls, klass: type) -> Dict[str, type]:
         def _ignore(t: str, k: type):
-            return t.startswith('_') or getattr(k, '__origin__', None) == ClassVar
+            is_private = t.startswith('_')
+            is_class_var = getattr(k, '__origin__', None) == ClassVar  # pylint: disable=comparison-with-callable
+            return is_private or is_class_var
 
         hints = get_type_hints(klass)
         typed_fields = {t: k for t, k in hints.items() if not _ignore(t, k)}

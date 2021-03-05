@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Type, Generator, get_args, Dict, ClassVar, Any, Tuple, get_type_hints, Union, Callable, List
@@ -31,15 +31,24 @@ class MultipleObjectsFound(Exception):
     filters: Dict
 
 
+def _starts_with_operator(lookup_fields, value):
+    field_name = '.'.join(lookup_fields)
+    return [
+        [field_name, '>=', value],
+        [field_name, '<=', f'{value}\ufffd'],
+    ]
+
+
 @dataclass
 class Manager:
-    lookup_operators = {
+    lookup_operators: ClassVar[Dict[str, Union[str, Callable]]] = {
         'eq': '=',
         'gt': '>',
         'gte': '>=',
         'lt': '<',
         'lte': '<=',
         'in': 'in',
+        'startswith': _starts_with_operator,
     }
 
     _client: ClassVar[datastore.Client] = None
@@ -79,8 +88,9 @@ class Manager:
 
         # parse lookup args
         for key, value in kwargs.items():
-            field, operator, value = self._build_filter(key=key, value=value)
-            query.add_filter(field, operator, value)
+            all_filters = self._build_filter(key=key, value=value)
+            for field_name, operator, field_value in all_filters:
+                query.add_filter(field_name, operator, field_value)
 
         # prepare iterator
         cursor = None
@@ -145,7 +155,7 @@ class Manager:
             for chunk in _chunks(keys, MAX_ITEMS_PER_OPERATIONS):
                 self.get_client().delete_multi(keys=chunk)
 
-    def _build_filter(self, key: str, value: Any) -> Tuple[str, str, Any]:
+    def _build_filter(self, key: str, value: Any) -> List[Tuple[str, str, Any]]:
         lookup_fields = []
         operator = None
 
@@ -155,7 +165,9 @@ class Manager:
             if part in self.lookup_operators:
                 if not is_last:
                     raise exceptions.UnsupportedFormatException(f"Unsupported lookup key format {key}")
-                operator = part
+                operator = self.lookup_operators[part]
+                if callable(operator):
+                    return operator(lookup_fields, value)
             elif idx == 0 and part not in self.fields:
                 raise exceptions.ValidationError(
                     f"{part} is not a valid field. Excepted one of {' | '.join(self.fields)}"
@@ -168,7 +180,7 @@ class Manager:
                 f"Querying with OR clause is not supported"
             )
 
-        return '.'.join(lookup_fields), (operator or '='), value
+        return ['.'.join(lookup_fields), (operator or '='), value]
 
     def to_entity(self, obj: Document) -> datastore.Entity:
         entity = datastore.Entity(key=self.build_key(pk=obj.pk))

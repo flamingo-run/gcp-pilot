@@ -48,11 +48,13 @@ class Manager:
     doc_klass: Type[Document]
     kind: str
 
-    @classmethod
-    def get_client(cls) -> datastore.Client:
-        if not cls._client:
-            cls._client = datastore.Client()
-        return cls._client
+    def get_client(self) -> datastore.Client:
+        if not self._client:
+            self._client = datastore.Client(namespace=self.get_namespace())
+        return self._client
+
+    def get_namespace(self):
+        return self.doc_klass.Meta.namespace
 
     def build_key(self, pk: Any = None) -> datastore.Key:
         if pk:
@@ -187,6 +189,7 @@ class Metadata:
     fields: Dict[str, type]
     doc_klass: Type[EmbeddedDocument]
     pk_field: str = None
+    namespace: str = None
 
     def from_dict(self, data: Dict) -> EmbeddedDocument:
         data = data.copy()
@@ -279,6 +282,7 @@ class ORM(type):
         new_cls.Meta = Metadata(
             fields=typed_fields,
             doc_klass=new_cls,
+            namespace=getattr(new_cls, '__namespace__', None),
         )
 
         # Manager initialization

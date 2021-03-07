@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -9,6 +10,7 @@ from google.cloud import datastore
 
 from gcp_pilot import exceptions
 
+DEFAULT_NAMESPACE = os.environ.get('GCP_DATASTORE_NAMESPACE', default=None)
 DEFAULT_PK_FIELD = 'id'
 MAX_ITEMS_PER_OPERATIONS = 500  # Datastore cannot write more than 500 items per call
 
@@ -201,7 +203,7 @@ class Metadata:
     fields: Dict[str, type]
     doc_klass: Type[EmbeddedDocument]
     pk_field: str = None
-    namespace: str = None
+    namespace: str = DEFAULT_NAMESPACE
 
     def from_dict(self, data: Dict) -> EmbeddedDocument:
         data = data.copy()

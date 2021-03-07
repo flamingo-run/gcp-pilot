@@ -33,11 +33,11 @@ class MultipleObjectsFound(Exception):
     filters: Dict
 
 
-def _starts_with_operator(lookup_fields, value):
+def _starts_with_operator(lookup_fields, value) -> List[Tuple[str, str, Any]]:
     field_name = '.'.join(lookup_fields)
     return [
-        [field_name, '>=', value],
-        [field_name, '<=', f'{value}\ufffd'],
+        (field_name, '>=', value),
+        (field_name, '<=', f'{value}\ufffd'),
     ]
 
 
@@ -182,7 +182,7 @@ class Manager:
                 f"Querying with OR clause is not supported"
             )
 
-        return ['.'.join(lookup_fields), (operator or '='), value]
+        return [('.'.join(lookup_fields), (operator or '='), value)]
 
     def to_entity(self, obj: Document) -> datastore.Entity:
         entity = datastore.Entity(key=self.build_key(pk=obj.pk))

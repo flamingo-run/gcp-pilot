@@ -56,6 +56,21 @@ class ButtonWidget(Widget):
         }
 
 
+class ButtonGroupWidget(Widget):
+    _key = 'buttons'
+
+    def __init__(self, buttons):
+        data = dict(
+            buttons=buttons,
+        )
+        super().__init__(data)
+
+    def as_data(self):
+        return {
+            self._key: [button.as_data() for button in self['buttons']]
+        }
+
+
 class OnClickWidget(Widget):
     _key = 'onClick'
 
@@ -151,7 +166,7 @@ class Section:
         if append and self.widgets and 'buttons' in self.widgets[-1]:
             self.widgets[-1]['buttons'].append(button)
         else:
-            self.widgets.append(Widget(buttons=[button]))
+            self.widgets.append(ButtonGroupWidget(buttons=[button]))
 
     def add_image(self, image_url: str, click_url: str = None):
         widget = ImageWidget(

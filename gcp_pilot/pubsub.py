@@ -2,11 +2,11 @@
 import base64
 import json
 from dataclasses import dataclass
-from typing import Callable, Dict, Any, AsyncIterator, Union, Generator
+from typing import Callable, Dict, Any, AsyncIterator, Union
 
 from google.api_core.exceptions import AlreadyExists, NotFound
 from google.cloud import pubsub_v1
-from google.pubsub_v1 import PushConfig, Subscription, types
+from google.pubsub_v1 import PushConfig, Subscription, Topic, types
 
 from gcp_pilot.base import GoogleCloudPilotAPI
 
@@ -38,12 +38,14 @@ class CloudPublisher(GoogleCloudPilotAPI):
             topic=topic_path,
         )
 
-    async def list_topics(self, project_id: str = None) -> Generator[types.Topic, None, None]:
+    async def list_topics(self, prefix: str = '', project_id: str = None) -> AsyncIterator[Topic]:
         project_path = self._project_path(project_id=project_id)
         topics = self.client.list_topics(
             project=project_path,
         )
-        return topics
+        for topic in topics:
+            if topic.name.split('/topics/')[-1].startswith(prefix):
+                yield topic
 
     async def publish(
             self,
@@ -81,11 +83,13 @@ class CloudSubscriber(GoogleCloudPilotAPI):
     _service_name = 'Cloud Pub/Sub'
     _google_managed_service = True
 
-    async def list_subscriptions(self, project_id: str = None) -> AsyncIterator[Subscription]:
+    async def list_subscriptions(self, prefix: str = '', project_id: str = None) -> AsyncIterator[Subscription]:
         all_subscriptions = self.client.list_subscriptions(
             project=f'projects/{project_id or self.project_id}',
         )
-        return all_subscriptions
+        for subscription in all_subscriptions:
+            if subscription.name.split('/subscriptions/')[-1].startswith(prefix):
+                yield subscription
 
     async def get_subscription(self, subscription_id: str, project_id: str = None) -> Subscription:
         subscription_path = self.client.subscription_path(

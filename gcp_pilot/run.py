@@ -10,6 +10,7 @@ from gcp_pilot.base import (
     DiscoveryMixin,
 )
 from gcp_pilot.resource import ServiceAgent
+from gcp_pilot import exceptions
 
 
 class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
@@ -159,6 +160,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             service_name: str,
             project_id: str = None,
             location: str = None,
+            exists_ok: bool = True,
     ) -> ResourceType:
         parent = self._namespace_path(project_id=project_id)
         client = self._get_localized_client(project_id=project_id, location=location)
@@ -169,11 +171,20 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             'metadata': {'name': domain},
             'spec': {'routeName': service_name, 'certificateMode': 'AUTOMATIC'},
         }
-        return self._execute(
-            method=client.namespaces().domainmappings().create,
-            parent=parent,
-            body=body,
-        )
+        try:
+            return self._execute(
+                method=client.namespaces().domainmappings().create,
+                parent=parent,
+                body=body,
+            )
+        except exceptions.AlreadyExists:
+            if not exists_ok:
+                raise
+            return self.get_domain_mapping(
+                domain=domain,
+                project_id=project_id,
+                location=location,
+            )
 
     def _get_localized_client(self, project_id: str = None, location: str = None) -> Resource:
         # Reminder: List methods do not require a localized client

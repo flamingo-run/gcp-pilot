@@ -38,13 +38,14 @@ class CloudPublisher(GoogleCloudPilotAPI):
             topic=topic_path,
         )
 
-    async def list_topics(self, prefix: str = '', project_id: str = None) -> AsyncIterator[Topic]:
+    async def list_topics(self, prefix: str = '', suffix: str = '', project_id: str = None) -> AsyncIterator[Topic]:
         project_path = self._project_path(project_id=project_id)
         topics = self.client.list_topics(
             project=project_path,
         )
         for topic in topics:
-            if topic.name.split('/topics/')[-1].startswith(prefix):
+            name = topic.name.split('/topics/')[-1]
+            if name.startswith(prefix) and name.endswith(suffix):
                 yield topic
 
     async def publish(
@@ -83,12 +84,13 @@ class CloudSubscriber(GoogleCloudPilotAPI):
     _service_name = 'Cloud Pub/Sub'
     _google_managed_service = True
 
-    async def list_subscriptions(self, prefix: str = '', project_id: str = None) -> AsyncIterator[Subscription]:
+    async def list_subscriptions(self, prefix: str = '', suffix: str = '', project_id: str = None) -> AsyncIterator[Subscription]:
         all_subscriptions = self.client.list_subscriptions(
             project=f'projects/{project_id or self.project_id}',
         )
         for subscription in all_subscriptions:
-            if subscription.name.split('/subscriptions/')[-1].startswith(prefix):
+            name = subscription.name.split('/subscriptions/')[-1]
+            if name.startswith(prefix) and name.endswith(suffix):
                 yield subscription
 
     async def get_subscription(self, subscription_id: str, project_id: str = None) -> Subscription:

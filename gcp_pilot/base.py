@@ -313,6 +313,7 @@ def friendly_http_error(func):
         'INVALID_ARGUMENT': exceptions.ValidationError,
         'PERMISSION_DENIED': exceptions.NotAllowed,
         'NOT_FOUND': exceptions.NotFound,
+        'ALREADY_EXISTS': exceptions.AlreadyExists,
     }
 
     def inner_function(*args, **kwargs):

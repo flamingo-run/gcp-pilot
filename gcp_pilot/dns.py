@@ -3,6 +3,7 @@ import time
 from enum import Enum
 from typing import Generator, List
 
+from google.api_core.exceptions import BadRequest
 from google.cloud import dns
 
 from gcp_pilot import exceptions
@@ -106,7 +107,12 @@ class CloudDNS(GoogleCloudPilotAPI):
         else:
             raise exceptions.ValidationError(f"Action {action} is not support for record sets")
 
-        changes.create()
+        try:
+            changes.create()
+        except BadRequest as e:
+            if 'is only permitted to have one record' in e.message:
+                raise exceptions.AlreadyExists(e.message) from e
+            raise
 
         if wait:
             while changes.status != 'done':
@@ -124,17 +130,22 @@ class CloudDNS(GoogleCloudPilotAPI):
             record_data: List[str],
             ttl: int = 5 * 60,
             wait: bool = True,
+            exists_ok: bool = True,
     ) -> dns.ResourceRecordSet:
-        return self._change_record(
-            action='add',
-            zone_name=zone_name,
-            zone_dns=zone_dns,
-            name=name,
-            record_type=record_type,
-            record_data=record_data,
-            ttl=ttl,
-            wait=wait,
-        )
+        try:
+            return self._change_record(
+                action='add',
+                zone_name=zone_name,
+                zone_dns=zone_dns,
+                name=name,
+                record_type=record_type,
+                record_data=record_data,
+                ttl=ttl,
+                wait=wait,
+            )
+        except exceptions.AlreadyExists:
+            if not exists_ok:
+                raise
 
     def delete_record(
             self,

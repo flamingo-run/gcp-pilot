@@ -130,7 +130,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         if push_to_url:
             push_config = PushConfig(
                 push_endpoint=push_to_url,
-                **(self.oidc_token if use_oidc_auth else {}),
+                **(self.get_oidc_token(audience=push_to_url) if use_oidc_auth else {}),
             )
 
         try:

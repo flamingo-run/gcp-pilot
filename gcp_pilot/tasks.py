@@ -63,7 +63,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
                 http_method=method,
                 url=url,
                 body=payload.encode(),
-                **(self.oidc_token if use_oidc_auth else {}),
+                **(self.get_oidc_token(audience=url) if use_oidc_auth else {}),
             )
         )
 

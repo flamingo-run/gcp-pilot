@@ -51,7 +51,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
                 http_method=method,
                 body=payload.encode(),
                 headers=headers or {},
-                **(self.oidc_token if use_oidc_auth else {}),
+                **(self.get_oidc_token(audience=url) if use_oidc_auth else {}),
             )
         )
 
@@ -87,7 +87,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
                 http_method=method,
                 body=payload.encode(),
                 headers=headers or {},
-                **(self.oidc_token if use_oidc_auth else {}),
+                **(self.get_oidc_token(audience=url) if use_oidc_auth else {}),
             )
         )
 

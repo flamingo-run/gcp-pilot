@@ -163,9 +163,12 @@ class GoogleCloudPilotAPI(abc.ABC):
 
         return credentials, (project_id or getattr(credentials, 'project_id', None))
 
-    @property
-    def oidc_token(self) -> Dict[str, Dict[str, str]]:
-        return {'oidc_token': {'service_account_email': self.credentials.service_account_email}}
+    def get_oidc_token(self, audience: str = None) -> Dict[str, Dict[str, str]]:
+        oidc_token = {'service_account_email': self.credentials.service_account_email}
+        if audience:
+            # TODO: make sure that, if URL, the query params are removed
+            oidc_token['audience'] = audience
+        return {'oidc_token': oidc_token}
 
     async def set_up_permissions(self, email: str, project_id: str = None) -> None:
         from gcp_pilot.resource import ResourceManager, ServiceAgent  # pylint: disable=import-outside-toplevel

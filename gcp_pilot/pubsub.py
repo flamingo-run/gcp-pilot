@@ -168,6 +168,70 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 raise
             return await self.get_subscription(subscription_id=subscription_id, project_id=project_id)
 
+    async def update_subscription(
+            self,
+            topic_id: str,
+            subscription_id: str,
+            project_id: str = None,
+            push_to_url: str = None,
+            use_oidc_auth: bool = False,
+    ) -> Subscription:
+        topic_path = self.client.topic_path(
+            project=project_id or self.project_id,
+            topic=topic_id,
+        )
+        subscription_path = self.client.subscription_path(
+            project=project_id or self.project_id,
+            subscription=subscription_id,
+        )
+
+        push_config = None
+        if push_to_url:
+            push_config = PushConfig(
+                push_endpoint=push_to_url,
+                **(self.get_oidc_token(audience=push_to_url) if use_oidc_auth else {}),
+            )
+
+        subscription = Subscription(
+            name=subscription_path,
+            topic=topic_path,
+            push_config=push_config,
+        )
+
+        update_mask = {"paths": {"push_config"}}
+
+        return self.client.update_subscription(
+            request={"subscription": subscription, "update_mask": update_mask}
+        )
+
+    async def create_or_update_subscription(
+            self,
+            topic_id: str,
+            subscription_id: str,
+            project_id: str = None,
+            auto_create_topic: bool = True,
+            push_to_url: str = None,
+            use_oidc_auth: bool = False,
+    ) -> Subscription:
+        try:
+            return await self.create_subscription(
+                topic_id=topic_id,
+                subscription_id=subscription_id,
+                project_id=project_id,
+                exists_ok=False,
+                auto_create_topic=auto_create_topic,
+                push_to_url=push_to_url,
+                use_oidc_auth=use_oidc_auth,
+            )
+        except AlreadyExists:
+            return await self.update_subscription(
+                topic_id=topic_id,
+                subscription_id=subscription_id,
+                project_id=project_id,
+                push_to_url=push_to_url,
+                use_oidc_auth=use_oidc_auth,
+            )
+
     async def subscribe(self, topic_id: str, subscription_id: str, callback: Callable, project_id: str = None):
         await self.create_subscription(
             topic_id=topic_id,

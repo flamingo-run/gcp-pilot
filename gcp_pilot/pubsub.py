@@ -84,7 +84,12 @@ class CloudSubscriber(GoogleCloudPilotAPI):
     _service_name = 'Cloud Pub/Sub'
     _google_managed_service = True
 
-    async def list_subscriptions(self, prefix: str = '', suffix: str = '', project_id: str = None) -> AsyncIterator[Subscription]:
+    async def list_subscriptions(
+            self,
+            prefix: str = '',
+            suffix: str = '',
+            project_id: str = None,
+    ) -> AsyncIterator[Subscription]:
         all_subscriptions = self.client.list_subscriptions(
             project=f'projects/{project_id or self.project_id}',
         )

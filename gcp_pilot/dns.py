@@ -121,7 +121,7 @@ class CloudDNS(GoogleCloudPilotAPI):
                 changes.reload()
         return record_set
 
-    def add_record(
+    def add_record(  # pylint: disable=inconsistent-return-statements
             self,
             zone_name: str,
             zone_dns: str,
@@ -146,6 +146,7 @@ class CloudDNS(GoogleCloudPilotAPI):
         except exceptions.AlreadyExists:
             if not exists_ok:
                 raise
+            # return  # TODO Fetch current record to return
 
     def delete_record(
             self,

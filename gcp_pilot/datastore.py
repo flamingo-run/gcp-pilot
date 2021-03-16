@@ -209,7 +209,7 @@ class Metadata:
         data = data.copy()
 
         def _build(klass: Union[EmbeddedDocument, Callable], value: Any):
-            if value is None or klass == Any:
+            if value is None or klass == Any:  # pylint: disable=comparison-with-callable
                 return value
 
             if issubclass(klass, EmbeddedDocument):

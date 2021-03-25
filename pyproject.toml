@@ -26,6 +26,7 @@ google-cloud-datastore = { version = "^2", optional = true}
 google-cloud-dns = { version = "^0", optional = true}
 google-cloud-logging = { version = "^2", optional = true}
 google-cloud-error-reporting = { version = "^1", optional = true}
+google-cloud-secret-manager = { version = "*", optional = true}
 
 [tool.poetry.extras]
 tasks = ["google-cloud-tasks", "google-cloud-scheduler"]
@@ -37,6 +38,7 @@ sheets = ["gspread"]
 pubsub = ["google-cloud-pubsub"]
 datastore = ["google-cloud-datastore"]
 dns = ["google-cloud-dns"]
+secret = ["google-cloud-secret-manager"]
 monitoring = ["google-cloud-logging", "google-cloud-error-reporting"]
 
 

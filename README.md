@@ -20,6 +20,7 @@ Some APIs need extra packages, thus you must use `extras` to add them:
 - Pub/Sub: `pip install gcp-pilot[pubsub]`
 - Datastore: `pip install gcp-pilot[datastore]`
 - Cloud DNS: `pip install gcp-pilot[dns]`
+- Secret Manager: `pip install gcp-pilot[secret]`
 
 
 ## Usage
@@ -121,6 +122,8 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
 - Resource Manager
    - manage projects
    - manage permissions
+- Secret Manager
+  - manage secrets
 - Identity Aware Proxy
    - generate OIDC token
 - Source Repositories

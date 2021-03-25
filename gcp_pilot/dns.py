@@ -3,7 +3,7 @@ import time
 from enum import Enum
 from typing import Generator, List
 
-from google.api_core.exceptions import BadRequest
+from google.api_core.exceptions import BadRequest, Conflict
 from google.cloud import dns
 
 from gcp_pilot import exceptions
@@ -113,6 +113,8 @@ class CloudDNS(GoogleCloudPilotAPI):
             if 'is only permitted to have one record' in e.message:
                 raise exceptions.AlreadyExists(e.message) from e
             raise
+        except Conflict as e:
+            raise exceptions.AlreadyExists(e.message) from e
 
         if wait:
             while changes.status != 'done':

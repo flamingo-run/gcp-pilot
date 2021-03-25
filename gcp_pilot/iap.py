@@ -40,7 +40,7 @@ class IdentityAwareProxy(GoogleCloudPilotAPI):
     def token(self) -> str:
         try:
             return self._get_gcp_token()
-        except ConnectionError:
+        except requests.exceptions.ConnectionError:
             credentials = self._get_id_credentials()
             return credentials.token
 

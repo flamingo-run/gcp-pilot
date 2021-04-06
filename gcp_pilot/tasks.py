@@ -33,13 +33,13 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
 
     async def push(
             self,
-            task_name: str,
             queue_name: str,
             url: str,
-            payload: str,
+            payload: str = '',
             method: int = DEFAULT_METHOD,
             delay_in_seconds: int = 0,
             project_id: str = None,
+            task_name: str = None,
             unique: bool = True,
             use_oidc_auth: bool = True,
     ) -> tasks_v2.Task:
@@ -48,7 +48,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             location=self.location,
             queue=queue_name,
         )
-        if unique:
+        if unique and task_name:
             task_name = f"{task_name}-{str(uuid.uuid4())}"
 
         task_path = self.client.task_path(
@@ -56,7 +56,8 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             location=self.location,
             queue=queue_name,
             task=task_name,
-        )
+        ) if task_name else None
+
         task = tasks_v2.Task(
             name=task_path,
             http_request=tasks_v2.HttpRequest(

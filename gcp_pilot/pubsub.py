@@ -6,6 +6,7 @@ from typing import Callable, Dict, Any, AsyncIterator, Union
 
 from google.api_core.exceptions import AlreadyExists, NotFound
 from google.cloud import pubsub_v1
+from google.protobuf.field_mask_pb2 import FieldMask
 from google.pubsub_v1 import PushConfig, Subscription, Topic, types
 
 from gcp_pilot.base import GoogleCloudPilotAPI
@@ -16,18 +17,52 @@ class CloudPublisher(GoogleCloudPilotAPI):
     _service_name = 'Cloud Pub/Sub'
     _google_managed_service = True
 
-    async def create_topic(self, topic_id: str, project_id: str = None, exists_ok: bool = True) -> types.Topic:
+    async def create_topic(
+            self,
+            topic_id: str,
+            project_id: str = None,
+            exists_ok: bool = True,
+            labels: Dict[str, str] = None,
+    ) -> types.Topic:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
             topic=topic_id,
         )
+        topic_obj = types.Topic(
+            name=topic_path,
+            labels=labels,
+        )
         try:
-            topic = self.client.create_topic(name=topic_path)
+            topic = self.client.create_topic(
+                request=topic_obj,
+            )
         except AlreadyExists:
             if not exists_ok:
                 raise
             topic = await self.get_topic(topic_id=topic_id, project_id=project_id)
         return topic
+
+    async def update_topic(
+            self,
+            topic_id: str,
+            project_id: str = None,
+            labels: Dict[str, str] = None,
+    ) -> types.Topic:
+        topic_path = self.client.topic_path(
+            project=project_id or self.project_id,
+            topic=topic_id,
+            labels=labels,
+        )
+        topic_obj = types.Topic(
+            name=topic_path,
+            labels=labels,
+        )
+        return self.client.update_topic(
+            request=types.UpdateTopicRequest(
+                topic=topic_obj,
+                update_mask=FieldMask(paths=["labels"]),
+            ),
+        )
 
     async def get_topic(self, topic_id: str, project_id: str = None):
         topic_path = self.client.topic_path(

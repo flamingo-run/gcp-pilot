@@ -49,7 +49,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             queue=queue_name,
         )
         if unique and task_name:
-            task_name = f"{task_name}-{str(uuid.uuid4())}"
+            task_name = f"{str(uuid.uuid4())}-{task_name}"
 
         task_path = self.client.task_path(
             project=project_id or self.project_id,

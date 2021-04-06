@@ -209,6 +209,10 @@ class GoogleCloudPilotAPI(abc.ABC):
         )
 
     def _get_project_default_location(self, project_id: str = None) -> Union[str, None]:
+        location = _CACHED_LOCATIONS.get(project_id or self.project_id, None)
+        if location:
+            return location
+
         from gcp_pilot.app_engine import AppEngine  # pylint: disable=import-outside-toplevel
         try:
             app_engine = AppEngine.build_from(client=self, project_id=project_id)

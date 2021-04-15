@@ -45,11 +45,6 @@ class IdentityAwareProxy(GoogleCloudPilotAPI):
             return credentials.token
 
     @property
-    def expires_at(self):
-        credentials = self._get_id_credentials()
-        return credentials.expiry
-
-    @property
     def headers(self) -> Dict[str, str]:
         return {'Authorization': f'Bearer {self.token}'}
 

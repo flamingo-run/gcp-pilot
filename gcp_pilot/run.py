@@ -161,6 +161,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             project_id: str = None,
             location: str = None,
             exists_ok: bool = True,
+            force: bool = True,
     ) -> ResourceType:
         parent = self._namespace_path(project_id=project_id)
         client = self._get_localized_client(project_id=project_id, location=location)
@@ -169,7 +170,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             'apiVersion': 'domains.cloudrun.com/v1',
             'kind': 'DomainMapping',
             'metadata': {'name': domain},
-            'spec': {'routeName': service_name, 'certificateMode': 'AUTOMATIC'},
+            'spec': {'routeName': service_name, 'certificateMode': 'AUTOMATIC', 'forceOverride': force},
         }
         try:
             return self._execute(

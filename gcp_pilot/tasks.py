@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, timedelta
+from typing import Dict
 
 from google.api_core.exceptions import FailedPrecondition
 from google.cloud import tasks_v2
@@ -42,6 +43,8 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             task_name: str = None,
             unique: bool = True,
             use_oidc_auth: bool = True,
+            content_type: str = None,
+            headers: Dict[str, str] = None,
     ) -> tasks_v2.Task:
         queue_path = self.client.queue_path(
             project=project_id or self.project_id,
@@ -58,12 +61,17 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             task=task_name,
         ) if task_name else None
 
+        headers = (headers or {})
+        if content_type:
+            headers['Content-Type'] = content_type
+
         task = tasks_v2.Task(
             name=task_path,
             http_request=tasks_v2.HttpRequest(
                 http_method=method,
                 url=url,
                 body=payload.encode(),
+                headers=headers,
                 **(self.get_oidc_token(audience=url) if use_oidc_auth else {}),
             )
         )

@@ -308,6 +308,8 @@ def friendly_http_error(func):
         "PERMISSION_DENIED": exceptions.NotAllowed,
         "NOT_FOUND": exceptions.NotFound,
         "ALREADY_EXISTS": exceptions.AlreadyExists,
+        "INVALID_PASSWORD": exceptions.InvalidPassword,
+        "MISSING_ID_TOKEN": exceptions.MissingUserIdentification,
     }
 
     def inner_function(*args, **kwargs):
@@ -315,11 +317,16 @@ def friendly_http_error(func):
             return func(*args, **kwargs)
         except HttpError as exc:
             errors = json.loads(exc.content)["error"]
+            exception_klass = None
+            details = ""
 
             if "errors" in errors:
                 exception_klass = _reasons.get(errors["errors"][0]["reason"], None)
-                details = ""  # TODO: add more details to the exceptions
-            else:
+
+            if not exception_klass and "message" in errors:
+                exception_klass = _statuses.get(errors["message"], None)
+
+            if not exception_klass:
                 exception_klass = _statuses.get(errors["status"], None)
                 details = f"{errors['code']}: {errors['message']}"
 

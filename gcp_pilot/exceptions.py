@@ -39,3 +39,11 @@ class AlreadyDeleted(Exception):
 
 class NotAllowed(Exception):
     pass
+
+
+class InvalidPassword(Exception):
+    pass
+
+
+class MissingUserIdentification(Exception):
+    pass

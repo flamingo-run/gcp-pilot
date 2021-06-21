@@ -1,9 +1,9 @@
+# Reference <https://cloud.google.com/identity-platform/docs/apis>
 import json
-import urllib
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import List, Dict, Optional, Union, Iterable, Iterator
+from typing import Dict, Optional, Union, Iterator
 from urllib.parse import urlparse, parse_qs
 
 from gcp_pilot import exceptions
@@ -127,11 +127,29 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         query = parse_qs(urlparse(url).query)
         return {"url": url, "code": query["oobCode"][0]}
 
-    def update_user(self, user_id: str):
+    def delete_user(self, user_id: str):
         data = {
             "localId": user_id,
         }
         response = self._execute(method=self.client.accounts().delete, body=data)
+        return response
+
+    def disable_user(self, user_id: str, project_id: str = None):
+        data = {
+            "localId": user_id,
+            "disableUser": True,
+            "targetProjectId": project_id or self.project_id,
+        }
+        response = self._execute(method=self.client.accounts().update, body=data)
+        return response
+
+    def enable_user(self, user_id: str, project_id: str = None):
+        data = {
+            "localId": user_id,
+            "disableUser": False,
+            "targetProjectId": project_id or self.project_id,
+        }
+        response = self._execute(method=self.client.accounts().update, body=data)
         return response
 
     def sign_up(

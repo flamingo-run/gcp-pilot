@@ -19,7 +19,7 @@ check:
 
 lint:
 	@echo "Checking code style ..."
-	@poetry run pylint --rcfile=./.pylintrc gcp_pilot
+	@poetry run pylint gcp_pilot
 	@poetry run black --check .
 
 unit:

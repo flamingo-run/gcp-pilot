@@ -44,6 +44,7 @@ monitoring = ["google-cloud-logging", "google-cloud-error-reporting"]
 
 [tool.poetry.dev-dependencies]
 pylint = "*"
+black = "*"
 nose = "*"
 coverage = "*"
 

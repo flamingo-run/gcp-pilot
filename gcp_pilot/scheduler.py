@@ -7,7 +7,7 @@ from google.cloud import scheduler
 
 from gcp_pilot.base import GoogleCloudPilotAPI, AppEngineBasedService
 
-DEFAULT_TIMEZONE = os.environ.get('TIMEZONE', 'Europe/London')  # UTC
+DEFAULT_TIMEZONE = os.environ.get("TIMEZONE", "Europe/London")  # UTC
 MAX_TIMEOUT = 30 * 60  # max allowed to HTTP endpoints is 30 minutes
 
 
@@ -16,7 +16,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
     DEFAULT_METHOD = scheduler.HttpMethod.POST
 
     def __init__(self, **kwargs):
-        self.timezone = kwargs.pop('timezone', DEFAULT_TIMEZONE)
+        self.timezone = kwargs.pop("timezone", DEFAULT_TIMEZONE)
         super().__init__(**kwargs)
 
     def _parent_path(self, project_id: str = None) -> str:
@@ -24,20 +24,20 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
 
     def _job_path(self, job, project_id: str = None) -> str:
         parent_name = self._parent_path(project_id=project_id)
-        return f'{parent_name}/jobs/{job}'
+        return f"{parent_name}/jobs/{job}"
 
     async def create(
-            self,
-            name: str,
-            url: str,
-            payload: str,
-            cron: str,
-            timezone: str = None,
-            method: int = DEFAULT_METHOD,
-            headers: Dict[str, str] = None,
-            project_id: str = None,
-            use_oidc_auth: bool = True,
-            timeout_in_seconds: int = MAX_TIMEOUT,
+        self,
+        name: str,
+        url: str,
+        payload: str,
+        cron: str,
+        timezone: str = None,
+        method: int = DEFAULT_METHOD,
+        headers: Dict[str, str] = None,
+        project_id: str = None,
+        use_oidc_auth: bool = True,
+        timeout_in_seconds: int = MAX_TIMEOUT,
     ) -> scheduler.Job:
         parent = self._parent_path(project_id=project_id)
         job_name = self._job_path(job=name, project_id=project_id)
@@ -52,29 +52,24 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
                 body=payload.encode(),
                 headers=headers or {},
                 **(self.get_oidc_token(audience=url) if use_oidc_auth else {}),
-            )
+            ),
         )
 
-        response = self.client.create_job(
-            request={
-                'parent': parent,
-                'job': job
-            }
-        )
+        response = self.client.create_job(request={"parent": parent, "job": job})
         return response
 
     async def update(
-            self,
-            name: str,
-            url: str,
-            payload: str,
-            cron: str,
-            timezone: str = None,
-            method: int = DEFAULT_METHOD,
-            headers: Dict[str, str] = None,
-            project_id: str = None,
-            use_oidc_auth: bool = True,
-            timeout_in_seconds: int = MAX_TIMEOUT,
+        self,
+        name: str,
+        url: str,
+        payload: str,
+        cron: str,
+        timezone: str = None,
+        method: int = DEFAULT_METHOD,
+        headers: Dict[str, str] = None,
+        project_id: str = None,
+        use_oidc_auth: bool = True,
+        timeout_in_seconds: int = MAX_TIMEOUT,
     ) -> scheduler.Job:
         job_name = self._job_path(job=name, project_id=project_id)
         job = scheduler.Job(
@@ -88,7 +83,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
                 body=payload.encode(),
                 headers=headers or {},
                 **(self.get_oidc_token(audience=url) if use_oidc_auth else {}),
-            )
+            ),
         )
 
         response = self.client.update_job(
@@ -96,10 +91,10 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         )
         return response
 
-    def list(self, prefix: str = '', project_id: str = None) -> Generator[scheduler.Job, None, None]:
+    def list(self, prefix: str = "", project_id: str = None) -> Generator[scheduler.Job, None, None]:
         parent = self._parent_path(project_id=project_id)
         for job in self.client.list_jobs(parent=parent):
-            if job.name.split('/jobs/')[-1].startswith(prefix):
+            if job.name.split("/jobs/")[-1].startswith(prefix):
                 yield job
 
     def get(self, name: str, project_id: str = None) -> scheduler.Job:
@@ -117,17 +112,17 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         return response
 
     async def put(
-            self,
-            name: str,
-            url: str,
-            payload: str,
-            cron: str,
-            timezone: str = None,
-            method: int = DEFAULT_METHOD,
-            headers: Dict[str, str] = None,
-            project_id: str = None,
-            use_oidc_auth: bool = True,
-            timeout_in_seconds: int = MAX_TIMEOUT,
+        self,
+        name: str,
+        url: str,
+        payload: str,
+        cron: str,
+        timezone: str = None,
+        method: int = DEFAULT_METHOD,
+        headers: Dict[str, str] = None,
+        project_id: str = None,
+        use_oidc_auth: bool = True,
+        timeout_in_seconds: int = MAX_TIMEOUT,
     ) -> scheduler.Job:
         try:
             response = await self.update(
@@ -158,6 +153,4 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         return response
 
 
-__all__ = (
-    'CloudScheduler',
-)
+__all__ = ("CloudScheduler",)

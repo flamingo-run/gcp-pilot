@@ -28,10 +28,10 @@ class IdentityAwareProxy(GoogleCloudPilotAPI):
 
     def _get_gcp_token(self):
         email = self.credentials.service_account_email
-        metadata_server_token_url = f'http://metadata/computeMetadata/v1/instance/service-accounts/{email}/identity'
+        metadata_server_token_url = f"http://metadata/computeMetadata/v1/instance/service-accounts/{email}/identity"
 
         token_request_url = f"{metadata_server_token_url}?audience={self.audience}"
-        token_request_headers = {'Metadata-Flavor': 'Google'}
+        token_request_headers = {"Metadata-Flavor": "Google"}
 
         token_response = requests.get(url=token_request_url, headers=token_request_headers)
         return token_response.content.decode("utf-8")
@@ -46,9 +46,7 @@ class IdentityAwareProxy(GoogleCloudPilotAPI):
 
     @property
     def headers(self) -> Dict[str, str]:
-        return {'Authorization': f'Bearer {self.token}'}
+        return {"Authorization": f"Bearer {self.token}"}
 
 
-__all__ = (
-    'IdentityAwareProxy',
-)
+__all__ = ("IdentityAwareProxy",)

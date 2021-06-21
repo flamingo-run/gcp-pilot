@@ -6,7 +6,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 class Speech(GoogleCloudPilotAPI):
     _client_class = SpeechClient
 
-    def speech_file_to_text(self, flac_content, language='en', rate=44100, long_running=False):
+    def speech_file_to_text(self, flac_content, language="en", rate=44100, long_running=False):
         audio = RecognitionAudio(content=flac_content)
         return self._speech_to_text(
             audio=audio,
@@ -15,7 +15,7 @@ class Speech(GoogleCloudPilotAPI):
             long_running=long_running,
         )
 
-    def speech_uri_to_text(self, uri, language='en', rate=44100, long_running=False):
+    def speech_uri_to_text(self, uri, language="en", rate=44100, long_running=False):
         audio = RecognitionAudio(uri=uri)
         return self._speech_to_text(
             audio=audio,
@@ -39,12 +39,7 @@ class Speech(GoogleCloudPilotAPI):
 
             results = operation.result().results
 
-        return [
-            result.alternatives[0].transcript
-            for result in results
-        ]
+        return [result.alternatives[0].transcript for result in results]
 
 
-__all__ = (
-    'Speech',
-)
+__all__ = ("Speech",)

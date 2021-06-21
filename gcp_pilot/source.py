@@ -8,19 +8,19 @@ RepoType = Dict[str, Any]
 
 
 class SourceRepository(DiscoveryMixin, GoogleCloudPilotAPI):
-    _iam_roles = ['source.repos.create']
+    _iam_roles = ["source.repos.create"]
 
     def __init__(self, **kwargs):
         super().__init__(
-            serviceName='sourcerepo',
-            version='v1',
+            serviceName="sourcerepo",
+            version="v1",
             cache_discovery=False,
             **kwargs,
         )
 
     def _repo_path(self, repo: str, project_id: str = None) -> str:
         parent_path = self._project_path(project_id=project_id)
-        return f'{parent_path}/repos/{repo}'
+        return f"{parent_path}/repos/{repo}"
 
     async def list_repos(self, project_id: str = None) -> RepoType:
         params = dict(
@@ -28,7 +28,7 @@ class SourceRepository(DiscoveryMixin, GoogleCloudPilotAPI):
         )
         items = self._paginate(
             method=self.client.projects().repos().list,
-            result_key='repos',
+            result_key="repos",
             params=params,
         )
         for item in items:
@@ -48,7 +48,7 @@ class SourceRepository(DiscoveryMixin, GoogleCloudPilotAPI):
                 method=self.client.projects().repos().create,
                 parent=parent,
                 body={
-                    'name': repo_path,
+                    "name": repo_path,
                 },
             )
         except exceptions.AlreadyExists:
@@ -57,6 +57,4 @@ class SourceRepository(DiscoveryMixin, GoogleCloudPilotAPI):
             return await self.get_repo(repo_name=repo_name, project_id=project_id)
 
 
-__all__ = (
-    'SourceRepository',
-)
+__all__ = ("SourceRepository",)

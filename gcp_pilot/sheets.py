@@ -6,8 +6,8 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 
 class Spreadsheet(GoogleCloudPilotAPI):
     _scopes = [
-        'https://www.googleapis.com/auth/spreadsheets',
-        'https://www.googleapis.com/auth/drive',
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive",
     ]
 
     def __init__(self, sheet_id: str, **kwargs):
@@ -26,9 +26,7 @@ class Spreadsheet(GoogleCloudPilotAPI):
 
     @property
     def url(self) -> str:
-        return f'https://docs.google.com/spreadsheets/d/{self.sheet_id}/edit'
+        return f"https://docs.google.com/spreadsheets/d/{self.sheet_id}/edit"
 
 
-__all__ = (
-    'Spreadsheet',
-)
+__all__ = ("Spreadsheet",)

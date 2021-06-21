@@ -8,4 +8,4 @@ class TestSheets(ClientTestMixin, unittest.TestCase):
     _CLIENT_KLASS = Spreadsheet
 
     def get_client(self, **kwargs):
-        return super().get_client(sheet_id='chuck_norris')
+        return super().get_client(sheet_id="chuck_norris")

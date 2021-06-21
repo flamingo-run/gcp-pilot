@@ -10,7 +10,7 @@ class CloudLogging(GoogleCloudPilotAPI):
     _client_class = logging.Client
 
     def _get_client_extra_kwargs(self):
-        return {'project': self.project_id}
+        return {"project": self.project_id}
 
     def enable(self, log_level=INFO):
         self.client.setup_logging(log_level=log_level)
@@ -20,6 +20,4 @@ class CloudLogging(GoogleCloudPilotAPI):
         return self.client.get_default_handler()
 
 
-__all__ = (
-    'CloudLogging',
-)
+__all__ = ("CloudLogging",)

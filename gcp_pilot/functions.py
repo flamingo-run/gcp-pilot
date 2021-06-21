@@ -9,13 +9,13 @@ FunctionType = Dict[str, Any]
 
 class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
     _scopes = [
-        'https://www.googleapis.com/auth/cloudfunctions',
+        "https://www.googleapis.com/auth/cloudfunctions",
     ]
 
     def __init__(self, **kwargs):
         super().__init__(
-            serviceName='cloudfunctions',
-            version='v1',
+            serviceName="cloudfunctions",
+            version="v1",
             cache_discovery=False,
             **kwargs,
         )
@@ -25,7 +25,7 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
 
     def _function_path(self, name: str, project_id: str = None, location: str = None) -> str:
         location_path = self._location_path(project_id=project_id, location=location)
-        return f'{location_path}/functions/{name}'
+        return f"{location_path}/functions/{name}"
 
     def get_functions(self, project_id: str = None, location: str = None) -> Generator[FunctionType, None, None]:
         params = dict(
@@ -33,7 +33,7 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
         )
         yield from self._list(
             method=self.client.projects().locations().functions().list,
-            result_key='functions',
+            result_key="functions",
             params=params,
         )
 
@@ -46,13 +46,13 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
 
     @classmethod
     def build_repo_source(
-            cls,
-            name,
-            branch: str = None,
-            commit: str = None,
-            tag: str = None,
-            directory: str = None,
-            project_id: str = None,
+        cls,
+        name,
+        branch: str = None,
+        commit: str = None,
+        tag: str = None,
+        directory: str = None,
+        project_id: str = None,
     ) -> Dict[str, Any]:
 
         valid_references = [ref for ref in [branch, commit, tag] if ref]
@@ -60,49 +60,49 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
             raise exceptions.ValidationError("Only one of branch|tag|commit must be provided")
 
         if branch:
-            ref = f'moveable-aliases/{branch}'
+            ref = f"moveable-aliases/{branch}"
         elif commit:
-            ref = f'revisions{commit}'
+            ref = f"revisions{commit}"
         elif tag:
-            ref = f'fixed-aliases/{tag}'
+            ref = f"fixed-aliases/{tag}"
         else:
-            ref = f'moveable-aliases/master'
+            ref = f"moveable-aliases/master"
 
-        path = f'/paths/{directory}' if directory else ''
+        path = f"/paths/{directory}" if directory else ""
 
-        if '/' in name:
+        if "/" in name:
             # Assume it's a repository integrated through Github App
-            org, repo = name.split('/')
-            repo_name = f'github_{org}_{repo}'
+            org, repo = name.split("/")
+            repo_name = f"github_{org}_{repo}"
         else:
             repo_name = name
 
-        REPO_SOURCE_URL = 'https://source.developers.google.com'
-        url = f'{REPO_SOURCE_URL}/projects/{project_id}/repos/{repo_name}/{ref}{path}'
+        REPO_SOURCE_URL = "https://source.developers.google.com"
+        url = f"{REPO_SOURCE_URL}/projects/{project_id}/repos/{repo_name}/{ref}{path}"
         repo = dict(url=url)
 
         return repo
 
     def create_or_update_function(
-            self,
-            name: str,
-            description: str,
-            entry_point: str,
-            repo_name: str,
-            runtime: str = 'python39',
-            timeout: int = 60,
-            ram: int = 128,
-            repo_branch: str = None,
-            repo_tag: str = None,
-            repo_commit: str = None,
-            repo_directory: str = None,
-            labels: Dict[str, str] = None,
-            env_vars: Dict[str, str] = None,
-            max_instances: int = None,
-            project_id: str = None,
-            location: str = None,
-            service_account_email: str = None,
-            is_public: bool = False,
+        self,
+        name: str,
+        description: str,
+        entry_point: str,
+        repo_name: str,
+        runtime: str = "python39",
+        timeout: int = 60,
+        ram: int = 128,
+        repo_branch: str = None,
+        repo_tag: str = None,
+        repo_commit: str = None,
+        repo_directory: str = None,
+        labels: Dict[str, str] = None,
+        env_vars: Dict[str, str] = None,
+        max_instances: int = None,
+        project_id: str = None,
+        location: str = None,
+        service_account_email: str = None,
+        is_public: bool = False,
     ) -> FunctionType:
         repo = self.build_repo_source(
             name=repo_name,
@@ -124,11 +124,11 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
             service_account_email=service_account_email,
             max_instances=max_instances,
             source_repository=repo,
-            https_trigger=dict(security_level='SECURE_ALWAYS'),
+            https_trigger=dict(security_level="SECURE_ALWAYS"),
         )
 
         try:
-            fields_to_update = ','.join(body.keys())
+            fields_to_update = ",".join(body.keys())
             function_name = self._function_path(name=name, project_id=project_id, location=location)
             operation = self._execute(
                 method=self.client.projects().locations().functions().patch,
@@ -146,7 +146,7 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
 
         self.set_permissions(name=name, project_id=project_id, location=location, is_public=is_public)
 
-        return {'name': operation['metadata']['target']}
+        return {"name": operation["metadata"]["target"]}
 
     def get_permissions(self, name: str, project_id: str = None, location: str = None) -> PolicyType:
         function_name = self._function_path(name=name, project_id=project_id, location=location)
@@ -158,7 +158,7 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
 
     def set_permissions(self, name: str, is_public: bool, project_id: str = None, location: str = None) -> PolicyType:
         policy = self.get_permissions(name=name, project_id=project_id, location=location)
-        role = 'roles/cloudfunctions.invoker'
+        role = "roles/cloudfunctions.invoker"
         if is_public:
             new_policy = self._make_public(role=role, policy=policy)
         else:
@@ -167,7 +167,7 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
         function_name = self._function_path(name=name, project_id=project_id, location=location)
         body = dict(
             policy=new_policy,
-            updateMask='bindings',
+            updateMask="bindings",
         )
 
         return self._execute(
@@ -182,9 +182,7 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
             method=self.client.projects().locations().functions().delete,
             name=function_name,
         )
-        return {'name': operation['metadata']['target']}
+        return {"name": operation["metadata"]["target"]}
 
 
-__all__ = (
-    'CloudFunctions',
-)
+__all__ = ("CloudFunctions",)

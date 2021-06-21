@@ -20,25 +20,25 @@ class _SubstitutionVariable:
     escape_delimiter: str = None
 
     def __post_init__(self):
-        self.escape_delimiter = '|' if ',' in str(self.value) else None
+        self.escape_delimiter = "|" if "," in str(self.value) else None
 
     @property
     def full_key(self) -> str:
         # Custom substitution variables must be prefixed with an underscore
-        return f'_{self.key}'
+        return f"_{self.key}"
 
     def __str__(self) -> str:
         # When used in a template, $_NAME should work, but it requires to be isolated by blank spaces
         # Thus, we use ${_NAME} by default, because it allows merging with other text.
-        return '${%s}' % self.full_key
+        return "${%s}" % self.full_key
 
     @property
     def _escape(self):
         # <https://cloud.google.com/run/docs/configuring/environment-variables#setting>
-        return f"^{self.escape_delimiter}^" if self.escape_delimiter else ''
+        return f"^{self.escape_delimiter}^" if self.escape_delimiter else ""
 
     def as_env_var(self, key: str = None):
-        return f'{self._escape}{key or self.key}={str(self)}'
+        return f"{self._escape}{key or self.key}={str(self)}"
 
 
 @dataclass
@@ -66,13 +66,13 @@ class CloudBuild(GoogleCloudPilotAPI):
     _client_class = cloudbuild_v1.CloudBuildClient
 
     def make_build_step(
-            self,
-            name: str,
-            identifier: str = None,
-            args: list = None,
-            env=None,
-            entrypoint: str = None,
-            timeout: int = None,
+        self,
+        name: str,
+        identifier: str = None,
+        args: list = None,
+        env=None,
+        entrypoint: str = None,
+        timeout: int = None,
     ) -> cloudbuild_v1.BuildStep:
         return cloudbuild_v1.BuildStep(
             id=identifier,
@@ -84,20 +84,20 @@ class CloudBuild(GoogleCloudPilotAPI):
         )
 
     def make_source_repo_event(
-            self,
-            repo_name: str,
-            branch_name: str = None,
-            tag_name: str = None,
-            project_id: str = None,
+        self,
+        repo_name: str,
+        branch_name: str = None,
+        tag_name: str = None,
+        project_id: str = None,
     ) -> cloudbuild_v1.RepoSource:
         if not branch_name and not tag_name:
-            branch_name = 'master'
+            branch_name = "master"
 
         params = {}
         if branch_name:
-            params['branch_name'] = branch_name
+            params["branch_name"] = branch_name
         if tag_name:
-            params['tag_name'] = tag_name
+            params["tag_name"] = tag_name
         return cloudbuild_v1.RepoSource(
             project_id=project_id or self.project_id,
             repo_name=repo_name,
@@ -105,22 +105,22 @@ class CloudBuild(GoogleCloudPilotAPI):
         )
 
     def make_github_event(
-            self,
-            url,
-            branch_name: str = None,
-            tag_name: str = None,
+        self,
+        url,
+        branch_name: str = None,
+        tag_name: str = None,
     ) -> cloudbuild_v1.GitHubEventsConfig:
         if not branch_name and not tag_name:
-            branch_name = 'master'
+            branch_name = "master"
 
         params = {}
         if branch_name:
-            params['branch'] = branch_name
+            params["branch"] = branch_name
         if tag_name:
-            params['tag'] = tag_name
+            params["tag"] = tag_name
 
         path = urlparse(url).path
-        owner, name = path.split('/')[1:]
+        owner, name = path.split("/")[1:]
         return cloudbuild_v1.GitHubEventsConfig(
             owner=owner,
             name=name,
@@ -130,30 +130,27 @@ class CloudBuild(GoogleCloudPilotAPI):
         )
 
     def _make_trigger(
-            self,
-            name: str,
-            description: str,
-            steps: List[cloudbuild_v1.BuildStep],
-            event: AnyEventType,
-            tags: List[str],
-            images: List[str] = None,
-            substitutions: Substitutions = None,
-            timeout: int = None,
+        self,
+        name: str,
+        description: str,
+        steps: List[cloudbuild_v1.BuildStep],
+        event: AnyEventType,
+        tags: List[str],
+        images: List[str] = None,
+        substitutions: Substitutions = None,
+        timeout: int = None,
     ) -> cloudbuild_v1.BuildTrigger:
-
         def _get_event_param():
             valid_events = {
-                'trigger_template': cloudbuild_v1.RepoSource,
-                'github': cloudbuild_v1.GitHubEventsConfig,
+                "trigger_template": cloudbuild_v1.RepoSource,
+                "github": cloudbuild_v1.GitHubEventsConfig,
             }
             for key, klass in valid_events.items():
                 if isinstance(event, klass):
                     return key
             raise exceptions.ValidationError(f"Unsupported event type {event.__class__.__name__,}")
 
-        params = {
-            _get_event_param(): event
-        }
+        params = {_get_event_param(): event}
 
         return cloudbuild_v1.BuildTrigger(
             name=name,
@@ -183,16 +180,16 @@ class CloudBuild(GoogleCloudPilotAPI):
         return response
 
     async def create_trigger(
-            self,
-            name: str,
-            description: str,
-            event: AnyEventType,
-            steps: List[cloudbuild_v1.BuildStep],
-            tags: List[str] = None,
-            project_id: str = None,
-            images: List[str] = None,
-            substitutions: Substitutions = None,
-            timeout: int = None,
+        self,
+        name: str,
+        description: str,
+        event: AnyEventType,
+        steps: List[cloudbuild_v1.BuildStep],
+        tags: List[str] = None,
+        project_id: str = None,
+        images: List[str] = None,
+        substitutions: Substitutions = None,
+        timeout: int = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
             name=name,
@@ -212,16 +209,16 @@ class CloudBuild(GoogleCloudPilotAPI):
         return response
 
     async def update_trigger(
-            self,
-            name: str,
-            description: str,
-            event: AnyEventType,
-            steps: List[cloudbuild_v1.BuildStep],
-            tags: List[str] = None,
-            images: List[str] = None,
-            substitutions: Substitutions = None,
-            project_id: str = None,
-            timeout: int = None,
+        self,
+        name: str,
+        description: str,
+        event: AnyEventType,
+        steps: List[cloudbuild_v1.BuildStep],
+        tags: List[str] = None,
+        images: List[str] = None,
+        substitutions: Substitutions = None,
+        project_id: str = None,
+        timeout: int = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
             name=name,
@@ -242,16 +239,16 @@ class CloudBuild(GoogleCloudPilotAPI):
         return response
 
     async def create_or_update_trigger(
-            self,
-            name: str,
-            description: str,
-            event: AnyEventType,
-            steps: List[cloudbuild_v1.BuildStep],
-            tags: List[str] = None,
-            project_id: str = None,
-            images: List[str] = None,
-            substitutions: Substitutions = None,
-            timeout: int = None,
+        self,
+        name: str,
+        description: str,
+        event: AnyEventType,
+        steps: List[cloudbuild_v1.BuildStep],
+        tags: List[str] = None,
+        project_id: str = None,
+        images: List[str] = None,
+        substitutions: Substitutions = None,
+        timeout: int = None,
     ) -> TriggerType:
         create_args = dict(
             name=name,
@@ -271,12 +268,12 @@ class CloudBuild(GoogleCloudPilotAPI):
             return await self.update_trigger(**create_args)
 
     async def run_trigger(
-            self,
-            name: str,
-            tag_name: str = None,
-            branch_name: str = None,
-            commit_sha: str = None,
-            project_id: str = None,
+        self,
+        name: str,
+        tag_name: str = None,
+        branch_name: str = None,
+        commit_sha: str = None,
+        project_id: str = None,
     ) -> TriggerType:
         params = [tag_name, branch_name, commit_sha]
         if len([x for x in params if x]) != 1:
@@ -296,10 +293,10 @@ class CloudBuild(GoogleCloudPilotAPI):
         return response
 
     def get_builds(
-            self,
-            trigger_id: str = None,
-            project_id: str = None,
-            status: str = None,
+        self,
+        trigger_id: str = None,
+        project_id: str = None,
+        status: str = None,
     ) -> Generator[cloudbuild_v1.Build, None, None]:
         # https://cloud.google.com/cloud-build/docs/view-build-results#filtering_build_results_using_queries
         filters = []
@@ -310,18 +307,18 @@ class CloudBuild(GoogleCloudPilotAPI):
             filters.append(f'status="{status}"')
 
         all_builds = self.client.list_builds(
-            filter=' AND '.join(filters),
+            filter=" AND ".join(filters),
             project_id=project_id or self.project_id,
         )
         for build in all_builds:
             yield build
 
     async def subscribe(
-            self,
-            subscription_id: str,
-            project_id: str = None,
-            push_to_url: str = None,
-            use_oidc_auth: bool = False,
+        self,
+        subscription_id: str,
+        project_id: str = None,
+        push_to_url: str = None,
+        use_oidc_auth: bool = False,
     ):
         # https://cloud.google.com/cloud-build/docs/subscribe-build-notifications
         try:
@@ -331,7 +328,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             raise ImportError("Add `pubsub` extras dependency in order to use CloudBuild notifications") from e
         subscriber = CloudSubscriber()
         await subscriber.create_subscription(
-            topic_id='cloud-builds',  # pre-defined by GCP
+            topic_id="cloud-builds",  # pre-defined by GCP
             subscription_id=subscription_id,
             project_id=project_id,
             exists_ok=True,
@@ -342,6 +339,6 @@ class CloudBuild(GoogleCloudPilotAPI):
 
 
 __all__ = (
-    'CloudBuild',
-    'Substitutions',
+    "CloudBuild",
+    "Substitutions",
 )

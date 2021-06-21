@@ -14,15 +14,15 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 
 class CloudPublisher(GoogleCloudPilotAPI):
     _client_class = pubsub_v1.PublisherClient
-    _service_name = 'Cloud Pub/Sub'
+    _service_name = "Cloud Pub/Sub"
     _google_managed_service = True
 
     async def create_topic(
-            self,
-            topic_id: str,
-            project_id: str = None,
-            exists_ok: bool = True,
-            labels: Dict[str, str] = None,
+        self,
+        topic_id: str,
+        project_id: str = None,
+        exists_ok: bool = True,
+        labels: Dict[str, str] = None,
     ) -> types.Topic:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -43,10 +43,10 @@ class CloudPublisher(GoogleCloudPilotAPI):
         return topic
 
     async def update_topic(
-            self,
-            topic_id: str,
-            project_id: str = None,
-            labels: Dict[str, str] = None,
+        self,
+        topic_id: str,
+        project_id: str = None,
+        labels: Dict[str, str] = None,
     ) -> types.Topic:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -73,22 +73,22 @@ class CloudPublisher(GoogleCloudPilotAPI):
             topic=topic_path,
         )
 
-    async def list_topics(self, prefix: str = '', suffix: str = '', project_id: str = None) -> AsyncIterator[Topic]:
+    async def list_topics(self, prefix: str = "", suffix: str = "", project_id: str = None) -> AsyncIterator[Topic]:
         project_path = self._project_path(project_id=project_id)
         topics = self.client.list_topics(
             project=project_path,
         )
         for topic in topics:
-            name = topic.name.split('/topics/')[-1]
+            name = topic.name.split("/topics/")[-1]
             if name.startswith(prefix) and name.endswith(suffix):
                 yield topic
 
     async def publish(
-            self,
-            message: str,
-            topic_id: str,
-            project_id: str = None,
-            attributes: Dict[str, Any] = None,
+        self,
+        message: str,
+        topic_id: str,
+        project_id: str = None,
+        attributes: Dict[str, Any] = None,
     ) -> types.PublishResponse:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -116,20 +116,20 @@ class CloudPublisher(GoogleCloudPilotAPI):
 
 class CloudSubscriber(GoogleCloudPilotAPI):
     _client_class = pubsub_v1.SubscriberClient
-    _service_name = 'Cloud Pub/Sub'
+    _service_name = "Cloud Pub/Sub"
     _google_managed_service = True
 
     async def list_subscriptions(
-            self,
-            prefix: str = '',
-            suffix: str = '',
-            project_id: str = None,
+        self,
+        prefix: str = "",
+        suffix: str = "",
+        project_id: str = None,
     ) -> AsyncIterator[Subscription]:
         all_subscriptions = self.client.list_subscriptions(
-            project=f'projects/{project_id or self.project_id}',
+            project=f"projects/{project_id or self.project_id}",
         )
         for subscription in all_subscriptions:
-            name = subscription.name.split('/subscriptions/')[-1]
+            name = subscription.name.split("/subscriptions/")[-1]
             if name.startswith(prefix) and name.endswith(suffix):
                 yield subscription
 
@@ -154,14 +154,14 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         )
 
     async def create_subscription(
-            self,
-            topic_id: str,
-            subscription_id: str,
-            project_id: str = None,
-            exists_ok: bool = True,
-            auto_create_topic: bool = True,
-            push_to_url: str = None,
-            use_oidc_auth: bool = False,
+        self,
+        topic_id: str,
+        subscription_id: str,
+        project_id: str = None,
+        exists_ok: bool = True,
+        auto_create_topic: bool = True,
+        push_to_url: str = None,
+        use_oidc_auth: bool = False,
     ) -> Subscription:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -204,12 +204,12 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             return await self.get_subscription(subscription_id=subscription_id, project_id=project_id)
 
     async def update_subscription(
-            self,
-            topic_id: str,
-            subscription_id: str,
-            project_id: str = None,
-            push_to_url: str = None,
-            use_oidc_auth: bool = False,
+        self,
+        topic_id: str,
+        subscription_id: str,
+        project_id: str = None,
+        push_to_url: str = None,
+        use_oidc_auth: bool = False,
     ) -> Subscription:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -235,18 +235,16 @@ class CloudSubscriber(GoogleCloudPilotAPI):
 
         update_mask = {"paths": {"push_config"}}
 
-        return self.client.update_subscription(
-            request={"subscription": subscription, "update_mask": update_mask}
-        )
+        return self.client.update_subscription(request={"subscription": subscription, "update_mask": update_mask})
 
     async def create_or_update_subscription(
-            self,
-            topic_id: str,
-            subscription_id: str,
-            project_id: str = None,
-            auto_create_topic: bool = True,
-            push_to_url: str = None,
-            use_oidc_auth: bool = False,
+        self,
+        topic_id: str,
+        subscription_id: str,
+        project_id: str = None,
+        auto_create_topic: bool = True,
+        push_to_url: str = None,
+        use_oidc_auth: bool = False,
     ) -> Subscription:
         try:
             return await self.create_subscription(
@@ -293,7 +291,7 @@ class Message:
     subscription: str
 
     @classmethod
-    def load(cls, body: Union[str, bytes, Dict], parser: Callable = json.loads) -> 'Message':
+    def load(cls, body: Union[str, bytes, Dict], parser: Callable = json.loads) -> "Message":
         # https://cloud.google.com/pubsub/docs/push#receiving_messages
         if isinstance(body, bytes):
             body = body.decode()
@@ -301,15 +299,15 @@ class Message:
             body = json.loads(body)
 
         return Message(
-            id=body['message']['messageId'],
-            attributes=body['message']['attributes'],
-            subscription=body['subscription'],
-            data=parser(base64.b64decode(body['message']['data']).decode('utf-8'))
+            id=body["message"]["messageId"],
+            attributes=body["message"]["attributes"],
+            subscription=body["subscription"],
+            data=parser(base64.b64decode(body["message"]["data"]).decode("utf-8")),
         )
 
 
 __all__ = (
-    'CloudPublisher',
-    'CloudSubscriber',
-    'Message',
+    "CloudPublisher",
+    "CloudSubscriber",
+    "Message",
 )

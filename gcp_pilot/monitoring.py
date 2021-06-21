@@ -5,12 +5,12 @@ from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType
 
 
 class Monitoring(DiscoveryMixin, GoogleCloudPilotAPI):
-    _scopes = ['https://www.googleapis.com/auth/monitoring']
+    _scopes = ["https://www.googleapis.com/auth/monitoring"]
 
     def __init__(self, **kwargs):
         super().__init__(
-            serviceName='monitoring',
-            version='v3',
+            serviceName="monitoring",
+            version="v3",
             cache_discovery=False,
             **kwargs,
         )
@@ -18,7 +18,6 @@ class Monitoring(DiscoveryMixin, GoogleCloudPilotAPI):
     def _service_path(self, service_id: str, project_id: str = None) -> str:
         parent = self._project_path(project_id=project_id)
         return f"{parent}/services/{service_id}"
-
 
     def list_services(self, project_id: str = None) -> Generator[ResourceType, None, None]:
         parent = self._project_path(project_id=project_id)
@@ -29,7 +28,7 @@ class Monitoring(DiscoveryMixin, GoogleCloudPilotAPI):
 
         yield from self._paginate(
             method=self.client.services().list,
-            result_key='services',
+            result_key="services",
             params=params,
         )
 
@@ -42,9 +41,9 @@ class Monitoring(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
     def create_service(
-            self,
-            name: str,
-            project_id: str = None,
+        self,
+        name: str,
+        project_id: str = None,
     ):
         parent = self._project_path(project_id=project_id)
 
@@ -61,6 +60,4 @@ class Monitoring(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
 
-__all__ = (
-    'Monitoring',
-)
+__all__ = ("Monitoring",)

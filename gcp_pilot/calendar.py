@@ -16,43 +16,43 @@ class Attendee:
 
     def as_data(self) -> Dict:
         return {
-            'email': self.email,
-            'optional': self.optional,
+            "email": self.email,
+            "optional": self.optional,
         }
 
 
 class Color(Enum):
     # Predefined colors.
     # For more color, use the endpoint: <https://developers.google.com/calendar/v3/reference/colors>
-    light_blue = ('1', '#a4bdfc')
-    light_green = ('2', '#7ae7bf')
-    light_purple = ('3', '#dbadff')
-    light_red = ('4', '#ff887c')
-    yellow = ('5', '#fbd75b')
-    light_orange = ('6', '#ffb878')
-    water_green = ('7', '#46d6db')
-    gray = ('8', '#e1e1e1')
-    blue = ('9', '#5484ed')
-    green = ('10', '#51b749')
-    red = ('11', '#dc2127')
+    light_blue = ("1", "#a4bdfc")
+    light_green = ("2", "#7ae7bf")
+    light_purple = ("3", "#dbadff")
+    light_red = ("4", "#ff887c")
+    yellow = ("5", "#fbd75b")
+    light_orange = ("6", "#ffb878")
+    water_green = ("7", "#46d6db")
+    gray = ("8", "#e1e1e1")
+    blue = ("9", "#5484ed")
+    green = ("10", "#51b749")
+    red = ("11", "#dc2127")
 
 
 class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
-    _scopes = ['https://www.googleapis.com/auth/calendar']
+    _scopes = ["https://www.googleapis.com/auth/calendar"]
 
-    def __init__(self, email: str, timezone: str = 'UTC', **kwargs):
+    def __init__(self, email: str, timezone: str = "UTC", **kwargs):
         self.email = email
         self.timezone = pytz.timezone(timezone)
 
         super().__init__(
-            serviceName='calendar',
-            version='v3',
+            serviceName="calendar",
+            version="v3",
             cache_discovery=False,
             subject=email,
             **kwargs,
         )
 
-    def _date_to_str(self, dt: datetime.date, fmt='%Y-%m-%dT%H:%M:%SZ'):
+    def _date_to_str(self, dt: datetime.date, fmt="%Y-%m-%dT%H:%M:%SZ"):
         if isinstance(dt, datetime.datetime):
             if not dt.tzinfo:
                 dt = self.timezone.localize(dt)
@@ -63,9 +63,9 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         return dt.strftime(fmt)
 
     def get_events(
-            self,
-            calendar_id: str = 'primary',
-            starts_at: datetime.date = None,
+        self,
+        calendar_id: str = "primary",
+        starts_at: datetime.date = None,
     ) -> Generator[ResourceType, None, None]:
         min_date = self._date_to_str(starts_at) if starts_at else None
 
@@ -78,9 +78,9 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
 
         yield from self._paginate(
             method=self.client.events().list,
-            result_key='items',
+            result_key="items",
             params=params,
-            order_by='startTime',
+            order_by="startTime",
             limit=page_size,
         )
 
@@ -88,52 +88,50 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         params = {}
         yield from self._paginate(
             method=self.client.calendarList().list,
-            result_key='items',
+            result_key="items",
             params=params,
         )
 
     def create_or_update_event(
-            self,
-            summary: str,
-            location: str,
-            start_at: datetime.date,
-            end_at: datetime.date,
-            event_id: str = None,
-            description: str = None,
-            attendees: List[Attendee] = None,
-            recurrence_type: str = None,
-            recurrence_amount: str = None,
-            calendar_id: str = 'primary',
-            color: Color = None,
+        self,
+        summary: str,
+        location: str,
+        start_at: datetime.date,
+        end_at: datetime.date,
+        event_id: str = None,
+        description: str = None,
+        attendees: List[Attendee] = None,
+        recurrence_type: str = None,
+        recurrence_amount: str = None,
+        calendar_id: str = "primary",
+        color: Color = None,
     ) -> ResourceType:
         def _build_time_field(dt):
             if isinstance(start_at, datetime.datetime):
                 return {
-                    'dateTime': self._date_to_str(dt),
+                    "dateTime": self._date_to_str(dt),
                 }
             else:
                 return {
-                    'date': self._date_to_str(dt, fmt='%Y-%m-%d'),
+                    "date": self._date_to_str(dt, fmt="%Y-%m-%d"),
                 }
 
         data = {
-            'summary': summary,
-            'location': location,
-            'description': description,
-            'start': _build_time_field(dt=start_at),
-            'end': _build_time_field(dt=end_at),
+            "summary": summary,
+            "location": location,
+            "description": description,
+            "start": _build_time_field(dt=start_at),
+            "end": _build_time_field(dt=end_at),
         }
 
         if color:
-            data['colorId'] = color[0]
+            data["colorId"] = color[0]
 
         if recurrence_type and recurrence_amount:
-            data['recurrence'] = [
-                f'RRULE:FREQ={recurrence_type};COUNT={recurrence_amount}'
-            ]
+            data["recurrence"] = [f"RRULE:FREQ={recurrence_type};COUNT={recurrence_amount}"]
 
         if attendees:
-            data['attendees'] = [attendee.as_data() for attendee in attendees]
+            data["attendees"] = [attendee.as_data() for attendee in attendees]
 
         if event_id:
             return self._execute(
@@ -149,7 +147,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
                 body=data,
             )
 
-    def delete_event(self, event_id: str, calendar_id: str = 'primary') -> ResourceType:
+    def delete_event(self, event_id: str, calendar_id: str = "primary") -> ResourceType:
         return self._execute(
             method=self.client.events().delete,
             calendarId=calendar_id,
@@ -158,7 +156,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
 
 
 __all__ = (
-    'Calendar',
-    'Attendee',
-    'Color',
+    "Calendar",
+    "Attendee",
+    "Color",
 )

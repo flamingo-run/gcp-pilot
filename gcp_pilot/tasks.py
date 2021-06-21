@@ -15,7 +15,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
     DEFAULT_METHOD = tasks_v2.HttpMethod.POST
 
     def _parent_path(self, project_id: str = None) -> str:
-        return f'projects/{project_id or self.project_id}/locations/{self.location}'
+        return f"projects/{project_id or self.project_id}/locations/{self.location}"
 
     def _queue_path(self, queue: str, project_id: str = None) -> str:
         return self.client.queue_path(
@@ -33,18 +33,18 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
         )
 
     async def push(
-            self,
-            queue_name: str,
-            url: str,
-            payload: str = '',
-            method: int = DEFAULT_METHOD,
-            delay_in_seconds: int = 0,
-            project_id: str = None,
-            task_name: str = None,
-            unique: bool = True,
-            use_oidc_auth: bool = True,
-            content_type: str = None,
-            headers: Dict[str, str] = None,
+        self,
+        queue_name: str,
+        url: str,
+        payload: str = "",
+        method: int = DEFAULT_METHOD,
+        delay_in_seconds: int = 0,
+        project_id: str = None,
+        task_name: str = None,
+        unique: bool = True,
+        use_oidc_auth: bool = True,
+        content_type: str = None,
+        headers: Dict[str, str] = None,
     ) -> tasks_v2.Task:
         queue_path = self.client.queue_path(
             project=project_id or self.project_id,
@@ -54,16 +54,20 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
         if unique and task_name:
             task_name = f"{task_name}-{str(uuid.uuid4())}"
 
-        task_path = self.client.task_path(
-            project=project_id or self.project_id,
-            location=self.location,
-            queue=queue_name,
-            task=task_name,
-        ) if task_name else None
+        task_path = (
+            self.client.task_path(
+                project=project_id or self.project_id,
+                location=self.location,
+                queue=queue_name,
+                task=task_name,
+            )
+            if task_name
+            else None
+        )
 
-        headers = (headers or {})
+        headers = headers or {}
         if content_type:
-            headers['Content-Type'] = content_type
+            headers["Content-Type"] = content_type
 
         task = tasks_v2.Task(
             name=task_path,
@@ -73,7 +77,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
                 body=payload.encode(),
                 headers=headers,
                 **(self.get_oidc_token(audience=url) if use_oidc_auth else {}),
-            )
+            ),
         )
 
         if delay_in_seconds:
@@ -86,9 +90,9 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
         try:
             response = self.client.create_task(parent=queue_path, task=task)
         except FailedPrecondition as e:
-            if 'a queue with this name existed recently' in e.message:
+            if "a queue with this name existed recently" in e.message:
                 raise exceptions.DeletedRecently(resource=f"Queue {queue_name}") from e
-            if e.message != 'Queue does not exist.':
+            if e.message != "Queue does not exist.":
                 raise
 
             self._create_queue(queue_name=queue_name, project_id=project_id)
@@ -96,9 +100,9 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
         return response
 
     def _create_queue(
-            self,
-            queue_name: str,
-            project_id: str = None,
+        self,
+        queue_name: str,
+        project_id: str = None,
     ) -> tasks_v2.Queue:
         parent = self._parent_path(project_id=project_id)
         queue_path = self._queue_path(queue=queue_name, project_id=project_id)
@@ -112,6 +116,4 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
         )
 
 
-__all__ = (
-    'CloudTasks',
-)
+__all__ = ("CloudTasks",)

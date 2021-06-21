@@ -18,14 +18,14 @@ class NotFound(Exception):
 
 
 class DeletedRecently(FailedPrecondition):
-    def __init__(self, resource, blocked_period='1 week'):
+    def __init__(self, resource, blocked_period="1 week"):
         message = f"{resource} was probably deleted recently. Cannot reuse name for {blocked_period}."
         super().__init__(message)
 
 
 class BigQueryJobError(Exception):
     def __init__(self, job):
-        message = ' | '.join([error['message'] for error in job.errors])
+        message = " | ".join([error["message"] for error in job.errors])
         super().__init__(message)
 
 

@@ -19,13 +19,13 @@ class BigQuery(GoogleCloudPilotAPI):
         )
 
     async def execute(
-            self,
-            sql: str,
-            params: Dict[str, Any] = None,
-            destination_table_name: str = None,
-            destination_dataset_name: str = None,
-            destination_project: str = None,
-            truncate: bool = None
+        self,
+        sql: str,
+        params: Dict[str, Any] = None,
+        destination_table_name: str = None,
+        destination_dataset_name: str = None,
+        destination_project: str = None,
+        truncate: bool = None,
     ):
         job_config = bigquery.QueryJobConfig()
         if destination_table_name or destination_dataset_name:
@@ -35,7 +35,7 @@ class BigQuery(GoogleCloudPilotAPI):
                 )
             destination_project = destination_project or self.project_id
             destination_dataset = destination_dataset_name
-            destination = f'{destination_project}.{destination_dataset}.{destination_table_name}'
+            destination = f"{destination_project}.{destination_dataset}.{destination_table_name}"
             job_config.destination = destination
             if truncate:
                 job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
@@ -43,9 +43,7 @@ class BigQuery(GoogleCloudPilotAPI):
                 job_config.write_disposition = bigquery.WriteDisposition.WRITE_APPEND
 
         if params:
-            query_params = [
-                _BigQueryParam.parse(key, value) for key, value in params.items()
-            ]
+            query_params = [_BigQueryParam.parse(key, value) for key, value in params.items()]
             job_config.query_parameters = query_params
 
         query_job = self.client.query(sql, job_config=job_config)
@@ -59,7 +57,7 @@ class BigQuery(GoogleCloudPilotAPI):
         )
         errors = self.client.insert_rows(table=table, rows=rows)
         if errors:
-            raise Exception(f'Bigquery insert error: {errors}')
+            raise Exception(f"Bigquery insert error: {errors}")
 
     async def get_table(self, table_name: str, project_id: str = None, dataset_name: str = None) -> Table:
         dataset_ref = self._dataset_ref(project_id=project_id, dataset_name=dataset_name)
@@ -67,30 +65,30 @@ class BigQuery(GoogleCloudPilotAPI):
         return self.client.get_table(table_ref)
 
     async def load(
-            self,
-            table_name: str,
-            filename: str,
-            project_id: str = None,
-            dataset_name: str = None,
-            schema=None,
-            wait: bool = False,
-            truncate: bool = None,
-            gcs_bucket: str = None,
+        self,
+        table_name: str,
+        filename: str,
+        project_id: str = None,
+        dataset_name: str = None,
+        schema=None,
+        wait: bool = False,
+        truncate: bool = None,
+        gcs_bucket: str = None,
     ) -> None:
         job_config = bigquery.LoadJobConfig()
         if schema:
             job_config.schema = schema
         else:
             job_config.autodetect = True
-            job_config._properties['load']['schemaUpdateOptions'] = ['ALLOW_FIELD_ADDITION']
+            job_config._properties["load"]["schemaUpdateOptions"] = ["ALLOW_FIELD_ADDITION"]
 
-        extension = filename.split('.')[-1]
-        if extension == 'json':
+        extension = filename.split(".")[-1]
+        if extension == "json":
             source_format = bigquery.job.SourceFormat.NEWLINE_DELIMITED_JSON
-        elif extension == 'csv':
+        elif extension == "csv":
             source_format = bigquery.job.SourceFormat.CSV
         else:
-            message = 'Unsupported BigQuery Source format {}'.format(extension)
+            message = "Unsupported BigQuery Source format {}".format(extension)
             raise exceptions.UnsupportedFormatException(message)
 
         job_config.source_format = source_format
@@ -105,7 +103,7 @@ class BigQuery(GoogleCloudPilotAPI):
         )
         target_ref = dataset_ref.table(table_name)
 
-        is_gcs = filename.startswith('gs://')
+        is_gcs = filename.startswith("gs://")
         if not is_gcs:
             if gcs_bucket:
                 gcs = CloudStorage(project_id=self.project_id)
@@ -122,7 +120,7 @@ class BigQuery(GoogleCloudPilotAPI):
                 )
             else:
                 load_job = self.client.load_table_from_file(
-                    file_obj=open(filename, 'rb'),
+                    file_obj=open(filename, "rb"),
                     destination=target_ref,
                     job_config=job_config,
                 )
@@ -137,13 +135,13 @@ class BigQuery(GoogleCloudPilotAPI):
             self._wait_for_job(job=load_job)
 
     async def copy(
-            self,
-            source_dataset_name: str,
-            source_table_name: str,
-            destination_table_name: str,
-            destination_dataset_name: str,
-            destination_project: str = None,
-            wait: bool = False,
+        self,
+        source_dataset_name: str,
+        source_table_name: str,
+        destination_table_name: str,
+        destination_dataset_name: str,
+        destination_project: str = None,
+        wait: bool = False,
     ) -> None:
         source_ref = await self.get_table(dataset_name=source_dataset_name, table_name=source_table_name)
         dataset_ref = self._dataset_ref(
@@ -159,11 +157,11 @@ class BigQuery(GoogleCloudPilotAPI):
     @classmethod
     def date_to_str(cls, dt, table_suffix=False):
         if table_suffix:
-            mask = '%Y%m%d'
+            mask = "%Y%m%d"
         elif isinstance(dt, datetime):
-            mask = '%Y-%m-%d %H:%M:%S'
+            mask = "%Y-%m-%d %H:%M:%S"
         else:
-            mask = '%Y-%m-%d'
+            mask = "%Y-%m-%d"
         return dt.strftime(mask)
 
     def _wait_for_job(self, job):
@@ -173,15 +171,15 @@ class BigQuery(GoogleCloudPilotAPI):
             raise exceptions.BigQueryJobError(job) from e
 
     def add_external_gcs_source(
-            self,
-            gcs_url: str,
-            dataset_name: str,
-            table_name: str,
-            skip_rows: int = 0,
-            delimiter: str = ',',
-            quote: str = '\"',
-            source_format: str = 'CSV',
-            project_id: str = None
+        self,
+        gcs_url: str,
+        dataset_name: str,
+        table_name: str,
+        skip_rows: int = 0,
+        delimiter: str = ",",
+        quote: str = '"',
+        source_format: str = "CSV",
+        project_id: str = None,
     ):
         dataset_ref = self._dataset_ref(dataset_name=dataset_name, project_id=project_id)
         table = dataset_ref.table(table_name)
@@ -202,25 +200,25 @@ class _BigQueryParam:
     @classmethod
     def _get_type(cls, variable: Any) -> str:
         TYPES = {
-            'int': 'INT64',
-            'str': 'STRING',
-            'datetime': 'DATETIME',
-            'date': 'DATE',
-            'bool': 'BOOL',
-            'float': 'FLOAT64',
-            'Decimal': 'FLOAT64',
+            "int": "INT64",
+            "str": "STRING",
+            "datetime": "DATETIME",
+            "date": "DATE",
+            "bool": "BOOL",
+            "float": "FLOAT64",
+            "Decimal": "FLOAT64",
         }
 
         python_type = type(variable).__name__
         param_type = TYPES.get(python_type, None)
         if param_type is None:
-            raise exceptions.ValidationError(f'Parameter with type {param_type} not supported')
+            raise exceptions.ValidationError(f"Parameter with type {param_type} not supported")
         return param_type
 
     @classmethod
     def _get_value(cls, variable: Any) -> Any:
         TYPES = {
-            'Decimal': float,
+            "Decimal": float,
         }
         python_type = type(variable).__name__
         param_type = TYPES.get(python_type, None)
@@ -239,6 +237,4 @@ class _BigQueryParam:
         return param_class(key, param_type, cls._get_value(value))
 
 
-__all__ = (
-    'BigQuery',
-)
+__all__ = ("BigQuery",)

@@ -16,11 +16,11 @@ from googleapiclient.errors import HttpError
 
 from gcp_pilot import exceptions
 
-DEFAULT_PROJECT = os.environ.get('GCP_PROJECT', None)
-DEFAULT_LOCATION = os.environ.get('GCP_LOCATION', None)
-DEFAULT_SERVICE_ACCOUNT = os.environ.get('GCP_SERVICE_ACCOUNT', None)
+DEFAULT_PROJECT = os.environ.get("GCP_PROJECT", None)
+DEFAULT_LOCATION = os.environ.get("GCP_LOCATION", None)
+DEFAULT_SERVICE_ACCOUNT = os.environ.get("GCP_SERVICE_ACCOUNT", None)
 
-TOKEN_URI = 'https://accounts.google.com/o/oauth2/token'
+TOKEN_URI = "https://accounts.google.com/o/oauth2/token"
 
 PolicyType = Dict[str, Any]
 AuthType = Tuple[Credentials, str]
@@ -33,7 +33,7 @@ _CACHED_LOCATIONS = {}  # TODO: Implement a smarter solution for caching project
 
 
 MINIMAL_SCOPES = [
-    'https://www.googleapis.com/auth/cloud-platform',
+    "https://www.googleapis.com/auth/cloud-platform",
 ]
 
 
@@ -46,16 +46,16 @@ class GoogleCloudPilotAPI(abc.ABC):
     _google_managed_service = False  # Service agent requires impersonation
 
     def __init__(
-            self,
-            subject: str = None,
-            location: str = None,
-            project_id: str = None,
-            impersonate_account: str = None,
-            credentials: Credentials = None,
-            **kwargs,
+        self,
+        subject: str = None,
+        location: str = None,
+        project_id: str = None,
+        impersonate_account: str = None,
+        credentials: Credentials = None,
+        **kwargs,
     ):
         if credentials:
-            self.credentials, credential_project_id = credentials, getattr(credentials, 'project_id', None)
+            self.credentials, credential_project_id = credentials, getattr(credentials, "project_id", None)
         else:
             self.credentials, credential_project_id = self._set_credentials(
                 subject=subject,
@@ -73,10 +73,7 @@ class GoogleCloudPilotAPI(abc.ABC):
     def _build_client(self, **kwargs) -> Union[Resource, _client_class]:
         kwargs.update(self._get_client_extra_kwargs())
 
-        return (self._client_class or build)(
-            credentials=self.credentials,
-            **kwargs
-        )
+        return (self._client_class or build)(credentials=self.credentials, **kwargs)
 
     def _set_project_id(self, project_id: str, credential_project_id: str) -> str:
         return project_id or DEFAULT_PROJECT or credential_project_id
@@ -86,10 +83,10 @@ class GoogleCloudPilotAPI(abc.ABC):
 
     @classmethod
     def _impersonate_account(
-            cls,
-            credentials: Credentials,
-            service_account: str,
-            scopes: List[str],
+        cls,
+        credentials: Credentials,
+        service_account: str,
+        scopes: List[str],
     ) -> ImpersonatedAuthType:
         credentials = ImpersonatedCredentials(
             source_credentials=credentials,
@@ -101,16 +98,16 @@ class GoogleCloudPilotAPI(abc.ABC):
         # Fetch project from service account
         # Since we are impersonating this service account, use it's own project
         # TODO: regex this
-        project_id = credentials.service_account_email.split('@')[-1].replace('.iam.gserviceaccount.com', '')
+        project_id = credentials.service_account_email.split("@")[-1].replace(".iam.gserviceaccount.com", "")
 
         return credentials, project_id
 
     @classmethod
     def _delegated_credential(
-            cls,
-            credentials: Credentials,
-            subject: str,
-            scopes: List[str],
+        cls,
+        credentials: Credentials,
+        subject: str,
+        scopes: List[str],
     ) -> ServiceAccountCredentials:
         try:
             admin_credentials = credentials.with_subject(subject).with_scopes(scopes)
@@ -150,7 +147,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         else:
             credentials, project_id = cls._cached_credentials
 
-        if impersonate_account and getattr(credentials, 'service_account_email') != impersonate_account:
+        if impersonate_account and getattr(credentials, "service_account_email") != impersonate_account:
             credentials, impersonated_project_id = cls._impersonate_account(
                 credentials=credentials,
                 service_account=impersonate_account,
@@ -161,14 +158,14 @@ class GoogleCloudPilotAPI(abc.ABC):
         if subject:
             credentials = cls._delegated_credential(credentials=credentials, subject=subject, scopes=all_scopes)
 
-        return credentials, (project_id or getattr(credentials, 'project_id', None))
+        return credentials, (project_id or getattr(credentials, "project_id", None))
 
     def get_oidc_token(self, audience: str = None) -> Dict[str, Dict[str, str]]:
-        oidc_token = {'service_account_email': self.credentials.service_account_email}
+        oidc_token = {"service_account_email": self.credentials.service_account_email}
         if audience:
             # TODO: make sure that, if URL, the query params are removed
-            oidc_token['audience'] = audience
-        return {'oidc_token': oidc_token}
+            oidc_token["audience"] = audience
+        return {"oidc_token": oidc_token}
 
     async def set_up_permissions(self, email: str, project_id: str = None) -> None:
         from gcp_pilot.resource import ResourceManager, ServiceAgent  # pylint: disable=import-outside-toplevel
@@ -183,7 +180,7 @@ class GoogleCloudPilotAPI(abc.ABC):
 
         if self._google_managed_service:
             email = ServiceAgent.get_email(
-                service_name=f'{self._service_name} Service Account',
+                service_name=f"{self._service_name} Service Account",
                 project_id=self.project_id,
             )
 
@@ -196,13 +193,13 @@ class GoogleCloudPilotAPI(abc.ABC):
         from gcp_pilot.resource import ResourceManager  # pylint: disable=import-outside-toplevel
 
         project = ResourceManager().get_project(project_id=project_id)
-        return project['projectNumber']
+        return project["projectNumber"]
 
     def _as_duration(self, seconds) -> Duration:
         return Duration(seconds=seconds) if seconds else None
 
     @classmethod
-    def build_from(cls, client: 'GoogleCloudPilotAPI', project_id: str = None):
+    def build_from(cls, client: "GoogleCloudPilotAPI", project_id: str = None):
         return cls(
             credentials=client.credentials,
             project_id=project_id or client.project_id,
@@ -214,6 +211,7 @@ class GoogleCloudPilotAPI(abc.ABC):
             return location
 
         from gcp_pilot.app_engine import AppEngine  # pylint: disable=import-outside-toplevel
+
         try:
             app_engine = AppEngine.build_from(client=self, project_id=project_id)
             return app_engine.location
@@ -221,67 +219,59 @@ class GoogleCloudPilotAPI(abc.ABC):
             return None
 
     def _project_path(self, project_id: str = None) -> str:
-        return f'projects/{project_id or self.project_id}'
+        return f"projects/{project_id or self.project_id}"
 
     def _location_path(self, project_id: str = None, location: str = None) -> str:
         project_path = self._project_path(project_id=project_id)
-        return f'{project_path}/locations/{location or self.location}'
+        return f"{project_path}/locations/{location or self.location}"
 
 
 class AccountManagerMixin:
     def _as_member(self, email: str) -> str:
-        if email == 'allUsers':
+        if email == "allUsers":
             return email
-        is_service_account = email.endswith('.gserviceaccount.com')
-        prefix = 'serviceAccount' if is_service_account else 'member'
-        return f'{prefix}:{email}'
+        is_service_account = email.endswith(".gserviceaccount.com")
+        prefix = "serviceAccount" if is_service_account else "member"
+        return f"{prefix}:{email}"
 
     def _make_public(self, role: str, policy: Dict) -> Dict:
-        return self._bind_email_to_policy(
-            email='allUsers',
-            role=role,
-            policy=policy
-        )
+        return self._bind_email_to_policy(email="allUsers", role=role, policy=policy)
 
     def _make_private(self, role: str, policy: Dict) -> Dict:
-        return self._unbind_email_from_policy(
-            email='allUsers',
-            role=role,
-            policy=policy
-        )
+        return self._unbind_email_from_policy(email="allUsers", role=role, policy=policy)
 
     def _bind_email_to_policy(self, email: str, role: str, policy: Dict) -> Dict:
         new_policy = policy.copy()
 
-        role_id = role if (role.startswith('organizations/') or role.startswith('roles/')) else f'roles/{role}'
+        role_id = role if (role.startswith("organizations/") or role.startswith("roles/")) else f"roles/{role}"
         member = self._as_member(email=email)
 
         try:
-            binding = next(b for b in new_policy['bindings'] if b['role'] == role_id)
-            if member in binding['members']:
+            binding = next(b for b in new_policy["bindings"] if b["role"] == role_id)
+            if member in binding["members"]:
                 return new_policy
-            binding['members'].append(member)
+            binding["members"].append(member)
         except (StopIteration, KeyError):
-            binding = {'role': role_id, 'members': [member]}
+            binding = {"role": role_id, "members": [member]}
 
-            new_bindings = new_policy.get('bindings', []).copy()
+            new_bindings = new_policy.get("bindings", []).copy()
             new_bindings.append(binding)
 
-            new_policy['bindings'] = new_bindings
+            new_policy["bindings"] = new_bindings
 
-        if 'version' not in new_policy:
-            new_policy['version'] = 1  # TODO: handle version 2 and 3 as its conditional roles
+        if "version" not in new_policy:
+            new_policy["version"] = 1  # TODO: handle version 2 and 3 as its conditional roles
         return new_policy
 
     def _unbind_email_from_policy(self, email: str, role: str, policy: Dict):
-        role_id = f'roles/{role}'
+        role_id = f"roles/{role}"
         member = self._as_member(email=email)
 
         try:
-            binding = next(b for b in policy['bindings'] if b['role'] == role_id)
-            if member not in binding['members']:
+            binding = next(b for b in policy["bindings"] if b["role"] == role_id)
+            if member not in binding["members"]:
                 return policy
-            binding['members'].remove(member)
+            binding["members"].remove(member)
         except (StopIteration, KeyError):
             pass
         return policy
@@ -308,29 +298,29 @@ class AppEngineBasedService:
 
 def friendly_http_error(func):
     _reasons = {
-        'notFound': exceptions.NotFound,
-        'deleted': exceptions.AlreadyDeleted,
-        'forbidden': exceptions.NotAllowed,
-        'duplicate': exceptions.AlreadyExists,
+        "notFound": exceptions.NotFound,
+        "deleted": exceptions.AlreadyDeleted,
+        "forbidden": exceptions.NotAllowed,
+        "duplicate": exceptions.AlreadyExists,
     }
     _statuses = {
-        'INVALID_ARGUMENT': exceptions.ValidationError,
-        'PERMISSION_DENIED': exceptions.NotAllowed,
-        'NOT_FOUND': exceptions.NotFound,
-        'ALREADY_EXISTS': exceptions.AlreadyExists,
+        "INVALID_ARGUMENT": exceptions.ValidationError,
+        "PERMISSION_DENIED": exceptions.NotAllowed,
+        "NOT_FOUND": exceptions.NotFound,
+        "ALREADY_EXISTS": exceptions.AlreadyExists,
     }
 
     def inner_function(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except HttpError as exc:
-            errors = json.loads(exc.content)['error']
+            errors = json.loads(exc.content)["error"]
 
-            if 'errors' in errors:
-                exception_klass = _reasons.get(errors['errors'][0]['reason'], None)
-                details = ''  # TODO: add more details to the exceptions
+            if "errors" in errors:
+                exception_klass = _reasons.get(errors["errors"][0]["reason"], None)
+                details = ""  # TODO: add more details to the exceptions
             else:
-                exception_klass = _statuses.get(errors['status'], None)
+                exception_klass = _statuses.get(errors["status"], None)
                 details = f"{errors['code']}: {errors['message']}"
 
             if exception_klass:
@@ -346,10 +336,10 @@ class DiscoveryMixin:
         return method(**kwargs).execute()
 
     def _list(
-            self,
-            method: Callable,
-            result_key: str = 'items',
-            params: Dict[str, Any] = None,
+        self,
+        method: Callable,
+        result_key: str = "items",
+        params: Dict[str, Any] = None,
     ) -> Generator[ResourceType, None, None]:
         results = self._execute(
             method=method,
@@ -359,24 +349,24 @@ class DiscoveryMixin:
             yield item
 
     def _paginate(
-            self,
-            method: Callable,
-            result_key: str = 'items',
-            params: Dict[str, Any] = None,
-            order_by: str = None,
-            limit: int = None,
+        self,
+        method: Callable,
+        result_key: str = "items",
+        params: Dict[str, Any] = None,
+        order_by: str = None,
+        limit: int = None,
     ) -> Generator[ResourceType, None, None]:
         page_token = None
         params = params or {}
 
         if order_by:
-            if order_by.startswith('-'):
-                params['sortOrder'] = 'DESCENDING'
+            if order_by.startswith("-"):
+                params["sortOrder"] = "DESCENDING"
                 order_by = order_by[1:]
-            params['orderBy'] = order_by
+            params["orderBy"] = order_by
 
         if limit:
-            params['maxResults'] = limit
+            params["maxResults"] = limit
 
         while True:
             results = self._execute(
@@ -387,6 +377,6 @@ class DiscoveryMixin:
             for item in results.get(result_key, []):
                 yield item
 
-            page_token = results.get('nextPageToken')
+            page_token = results.get("nextPageToken")
             if not page_token:
                 break

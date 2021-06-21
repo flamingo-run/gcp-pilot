@@ -12,23 +12,21 @@ InstanceType = DatabaseType = UserType = Dict[str, Any]
 
 
 class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
-    _iam_roles = ['cloudsql.client']
+    _iam_roles = ["cloudsql.client"]
 
     def __init__(self, **kwargs):
         super().__init__(
-            serviceName='sqladmin',
-            version='v1beta4',
+            serviceName="sqladmin",
+            version="v1beta4",
             cache_discovery=False,
             **kwargs,
         )
 
     async def list_instances(self, project_id: str = None) -> Generator[InstanceType, None, None]:
-        params = dict(
-            project=project_id or self.project_id
-        )
+        params = dict(project=project_id or self.project_id)
         instances = self._paginate(
             method=self.client.instances().list,
-            result_key='items',
+            result_key="items",
             params=params,
         )
         for item in instances:
@@ -42,15 +40,15 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
     async def create_instance(
-            self,
-            name: str,
-            version: str,
-            tier: str,
-            region: str,
-            ha: bool = False,
-            project_id: str = None,
-            exists_ok: bool = True,
-            wait_ready: bool = True,
+        self,
+        name: str,
+        version: str,
+        tier: str,
+        region: str,
+        ha: bool = False,
+        project_id: str = None,
+        exists_ok: bool = True,
+        wait_ready: bool = True,
     ) -> InstanceType:
         body = dict(
             name=name,
@@ -58,7 +56,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             region=region,
             settings=dict(
                 tier=tier,
-                availability_type='ZONAL' if ha else 'REGIONAL',
+                availability_type="ZONAL" if ha else "REGIONAL",
             ),
         )
         try:
@@ -67,25 +65,25 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
                 project=project_id or self.project_id,
                 body=body,
             )
-            current_state = sql_instance['status']
+            current_state = sql_instance["status"]
         except exceptions.AlreadyExists:
             if not exists_ok:
                 raise
 
             try:
                 sql_instance = await self.get_instance(name=name, project_id=project_id)
-                current_state = sql_instance['state']
+                current_state = sql_instance["state"]
             except exceptions.NotFound as e:
                 raise exceptions.DeletedRecently(resource=f"Instance {name}") from e
 
         if not wait_ready:
             return sql_instance
 
-        while current_state != 'RUNNABLE':
+        while current_state != "RUNNABLE":
             print(f"Instance {name} is still {current_state}. Waiting until RUNNABLE.")
             time.sleep(1)  # TODO: improve this: exp backoff
             sql_instance = await self.get_instance(name=name, project_id=project_id)
-            current_state = sql_instance['state']
+            current_state = sql_instance["state"]
         print(f"Instance {name} is {current_state}!")
         return sql_instance
 
@@ -99,27 +97,31 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
     async def create_database(
-            self,
-            name: str,
-            instance: str,
-            project_id: str = None,
-            exists_ok: bool = True,
+        self,
+        name: str,
+        instance: str,
+        project_id: str = None,
+        exists_ok: bool = True,
     ) -> DatabaseType:
         body = dict(
             name=name,
         )
         try:
-            return self.client.databases().insert(
-                instance=instance,
-                project=project_id or self.project_id,
-                body=body,
-            ).execute()
+            return (
+                self.client.databases()
+                .insert(
+                    instance=instance,
+                    project=project_id or self.project_id,
+                    body=body,
+                )
+                .execute()
+            )
         except HttpError as e:
             # IDK. Weird bug that the error_details is empty if too fast
-            error_details = json.loads(e.content.decode())['error']['message']
+            error_details = json.loads(e.content.decode())["error"]["message"]
 
-            not_ready = e.resp.status == 400 and 'is not running' in error_details
-            already_exists = e.resp.status == 400 and 'already exists' in error_details and exists_ok
+            not_ready = e.resp.status == 400 and "is not running" in error_details
+            already_exists = e.resp.status == 400 and "already exists" in error_details and exists_ok
             if not_ready or already_exists:
                 return await self.get_database(instance=instance, database=name, project_id=project_id)
             raise
@@ -149,6 +151,4 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
 
-__all__ = (
-    'CloudSQL',
-)
+__all__ = ("CloudSQL",)

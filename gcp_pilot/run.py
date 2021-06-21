@@ -16,19 +16,19 @@ from gcp_pilot import exceptions
 class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
     def _service_endpoint(self, location: str = None):
         if not location:
-            return 'https://run.googleapis.com'
-        return f'https://{location}-run.googleapis.com'
+            return "https://run.googleapis.com"
+        return f"https://{location}-run.googleapis.com"
 
     def _namespace_path(self, project_id: str = None):
-        return f'namespaces/{project_id or self.project_id}'
+        return f"namespaces/{project_id or self.project_id}"
 
     def _service_path(self, service_name: str, project_id: str = None):
         parent = self._namespace_path(project_id=project_id)
-        return f'{parent}/services/{service_name}'
+        return f"{parent}/services/{service_name}"
 
     def _domain_mapping_path(self, domain: str, project_id: str = None):
         parent = self._namespace_path(project_id=project_id)
-        return f'{parent}/domainmappings/{domain}'
+        return f"{parent}/domainmappings/{domain}"
 
     def list_services(self, project_id: str = None) -> Generator[ResourceType, None, None]:
         params = dict(
@@ -36,7 +36,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
         )
         yield from self._list(
             method=self.client.namespaces().services().list,
-            result_key='items',
+            result_key="items",
             params=params,
         )
 
@@ -49,17 +49,17 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
     def create_service(
-            self,
-            service_name: str,
-            project_id: str = None,
-            location: str = None,
-            service_account: str = None,
-            trigger_id: str = None,
-            image: str = 'gcr.io/cloudrun/placeholder',
-            ram: int = 256,
-            concurrency: int = 80,
-            timeout: int = 300,
-            port: int = 8080,
+        self,
+        service_name: str,
+        project_id: str = None,
+        location: str = None,
+        service_account: str = None,
+        trigger_id: str = None,
+        image: str = "gcr.io/cloudrun/placeholder",
+        ram: int = 256,
+        concurrency: int = 80,
+        timeout: int = 300,
+        port: int = 8080,
     ) -> ResourceType:
         parent = self._namespace_path(project_id=project_id)
         client = self._get_localized_client(project_id=project_id, location=location)
@@ -68,33 +68,35 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             project_id=project_id or self.project_id
         )
         labels = {
-            'managed-by': 'gcp-cloud-build-deploy-cloud-run',
-            'cloud.googleapis.com/location': location,
+            "managed-by": "gcp-cloud-build-deploy-cloud-run",
+            "cloud.googleapis.com/location": location,
         }
         if trigger_id:
-            labels['gcb-trigger-id'] = trigger_id
+            labels["gcb-trigger-id"] = trigger_id
 
         body = {
-            'apiVersion': 'serving.knative.dev/v1',
-            'kind': 'Service',
-            'metadata': {
-                'name': service_name,
-                'labels': labels,
-                'annotations': {
-                    'client.knative.dev/user-image': image,
+            "apiVersion": "serving.knative.dev/v1",
+            "kind": "Service",
+            "metadata": {
+                "name": service_name,
+                "labels": labels,
+                "annotations": {
+                    "client.knative.dev/user-image": image,
                 },
             },
-            'spec': {
-                'template': {
-                    'spec': {
-                        'containerConcurrency': concurrency,
-                        'timeoutSeconds': timeout,
-                        'serviceAccountName': service_account,
-                        'containers': [{
-                            'image': image,
-                            'resources': {'limits': {'cpu': '1000m', 'memory': f'{ram}Mi'}},
-                            'ports': [{'containerPort': port}]
-                        }]
+            "spec": {
+                "template": {
+                    "spec": {
+                        "containerConcurrency": concurrency,
+                        "timeoutSeconds": timeout,
+                        "serviceAccountName": service_account,
+                        "containers": [
+                            {
+                                "image": image,
+                                "resources": {"limits": {"cpu": "1000m", "memory": f"{ram}Mi"}},
+                                "ports": [{"containerPort": port}],
+                            }
+                        ],
                     }
                 },
             },
@@ -111,7 +113,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
         )
         yield from self._paginate(
             method=self.client.projects().locations().list,
-            result_key='locations',
+            result_key="locations",
             params=params,
         )
 
@@ -121,11 +123,11 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
         )
         items = self._list(
             method=self.client.namespaces().revisions().list,
-            result_key='items',
+            result_key="items",
             params=params,
         )
         for item in items:
-            if not service_name or item['metadata']['labels']['serving.knative.dev/service'] == service_name:
+            if not service_name or item["metadata"]["labels"]["serving.knative.dev/service"] == service_name:
                 yield item
 
     def list_domain_mappings(self, project_id: str = None) -> Generator[ResourceType, None, None]:
@@ -134,7 +136,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
         )
         yield from self._list(
             method=self.client.namespaces().domainmappings().list,
-            result_key='items',
+            result_key="items",
             params=params,
         )
 
@@ -155,22 +157,22 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
     def create_domain_mapping(
-            self,
-            domain: str,
-            service_name: str,
-            project_id: str = None,
-            location: str = None,
-            exists_ok: bool = True,
-            force: bool = True,
+        self,
+        domain: str,
+        service_name: str,
+        project_id: str = None,
+        location: str = None,
+        exists_ok: bool = True,
+        force: bool = True,
     ) -> ResourceType:
         parent = self._namespace_path(project_id=project_id)
         client = self._get_localized_client(project_id=project_id, location=location)
 
         body = {
-            'apiVersion': 'domains.cloudrun.com/v1',
-            'kind': 'DomainMapping',
-            'metadata': {'name': domain},
-            'spec': {'routeName': service_name, 'certificateMode': 'AUTOMATIC', 'forceOverride': force},
+            "apiVersion": "domains.cloudrun.com/v1",
+            "kind": "DomainMapping",
+            "metadata": {"name": domain},
+            "spec": {"routeName": service_name, "certificateMode": "AUTOMATIC", "forceOverride": force},
         }
         try:
             return self._execute(
@@ -198,15 +200,15 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def _build_client(self, location: str = None, **kwargs) -> Resource:
         options = ClientOptions(api_endpoint=self._service_endpoint(location=location))
-        kwargs.update(dict(
-            serviceName='run',
-            version='v1',
-            cache_discovery=False,
-            client_options=options,
-        ))
+        kwargs.update(
+            dict(
+                serviceName="run",
+                version="v1",
+                cache_discovery=False,
+                client_options=options,
+            )
+        )
         return super()._build_client(**kwargs)
 
 
-__all__ = (
-    'CloudRun',
-)
+__all__ = ("CloudRun",)

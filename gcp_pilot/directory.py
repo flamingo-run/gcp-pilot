@@ -8,15 +8,15 @@ UserType = GroupType = MemberType = Dict[str, Any]
 
 class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
     _scopes = [
-        'https://www.googleapis.com/auth/admin.directory.group',
-        'https://www.googleapis.com/auth/admin.directory.user',
+        "https://www.googleapis.com/auth/admin.directory.group",
+        "https://www.googleapis.com/auth/admin.directory.user",
     ]
 
     def __init__(self, email: str, **kwargs):
         self.email = email
         super().__init__(
-            serviceName='admin',
-            version='directory_v1',
+            serviceName="admin",
+            version="directory_v1",
             cache_discovery=False,
             subject=email,
             **kwargs,
@@ -24,26 +24,26 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def _build_context(self, customer: str = None, domain: str = None) -> Dict[str, str]:
         context = {
-            'customer': customer or 'my_customer',
+            "customer": customer or "my_customer",
         }
         if domain:
-            context['domain'] = domain
+            context["domain"] = domain
         return context
 
     def get_users(self, customer: str = None, domain: str = None) -> Generator[UserType, None, None]:
         params = self._build_context(customer=customer, domain=domain)
         yield from self._paginate(
             method=self.client.users().list,
-            result_key='users',
+            result_key="users",
             params=params,
-            order_by='email',
+            order_by="email",
         )
 
     def get_groups(self, customer: str = None, domain: str = None) -> Generator[GroupType, None, None]:
         params = self._build_context(customer=customer, domain=domain)
         yield from self._paginate(
             method=self.client.groups().list,
-            result_key='groups',
+            result_key="groups",
             params=params,
         )
 
@@ -54,11 +54,11 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
     def create_or_update_group(
-            self,
-            email: str,
-            name: str = None,
-            description: str = None,
-            group_id: str = None,
+        self,
+        email: str,
+        name: str = None,
+        description: str = None,
+        group_id: str = None,
     ) -> GroupType:
         body = dict(
             email=email,
@@ -90,12 +90,12 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
 
         yield from self._paginate(
             method=self.client.members().list,
-            result_key='members',
+            result_key="members",
             params=params,
         )
 
-    def add_group_member(self, group_id: str, email: str, role: str = 'MEMBER') -> MemberType:
-        body = {'email': email, 'role': role}
+    def add_group_member(self, group_id: str, email: str, role: str = "MEMBER") -> MemberType:
+        body = {"email": email, "role": role}
 
         return self._execute(
             method=self.client.members().insert,
@@ -111,6 +111,4 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
 
-__all__ = (
-    'Directory',
-)
+__all__ = ("Directory",)

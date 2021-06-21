@@ -10,15 +10,15 @@ from google.cloud import datastore
 
 from gcp_pilot import exceptions
 
-DEFAULT_NAMESPACE = os.environ.get('GCP_DATASTORE_NAMESPACE', default=None)
-DEFAULT_PK_FIELD = 'id'
+DEFAULT_NAMESPACE = os.environ.get("GCP_DATASTORE_NAMESPACE", default=None)
+DEFAULT_PK_FIELD = "id"
 MAX_ITEMS_PER_OPERATIONS = 500  # Datastore cannot write more than 500 items per call
 
 
 def _chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
-        yield lst[i:i + n]
+        yield lst[i : i + n]
 
 
 @dataclass
@@ -34,23 +34,23 @@ class MultipleObjectsFound(Exception):
 
 
 def _starts_with_operator(lookup_fields, value) -> List[Tuple[str, str, Any]]:
-    field_name = '.'.join(lookup_fields)
+    field_name = ".".join(lookup_fields)
     return [
-        (field_name, '>=', value),
-        (field_name, '<=', f'{value}\ufffd'),
+        (field_name, ">=", value),
+        (field_name, "<=", f"{value}\ufffd"),
     ]
 
 
 @dataclass
 class Manager:
     lookup_operators: ClassVar[Dict[str, Union[str, Callable]]] = {
-        'eq': '=',
-        'gt': '>',
-        'gte': '>=',
-        'lt': '<',
-        'lte': '<=',
-        'in': 'in',
-        'startswith': _starts_with_operator,
+        "eq": "=",
+        "gt": ">",
+        "gte": ">=",
+        "lt": "<",
+        "lte": "<=",
+        "in": "in",
+        "startswith": _starts_with_operator,
     }
 
     _client: ClassVar[datastore.Client] = None
@@ -75,11 +75,11 @@ class Manager:
         return self.get_client().allocate_ids(self.get_client().key(self.kind), 1)[0]
 
     def query(
-            self,
-            distinct_on: str = None,
-            order_by: Union[str, List[str]] = None,
-            page_size: int = None,
-            **kwargs,
+        self,
+        distinct_on: str = None,
+        order_by: Union[str, List[str]] = None,
+        page_size: int = None,
+        **kwargs,
     ) -> datastore.query.Iterator:
         # base query
         query = self.get_client().query(kind=self.kind)
@@ -161,7 +161,7 @@ class Manager:
         lookup_fields = []
         operator = None
 
-        parts = key.split('__') if '__' in key else key.split('.')
+        parts = key.split("__") if "__" in key else key.split(".")
         for idx, part in enumerate(parts):
             is_last = idx == len(parts) - 1
             if part in self.lookup_operators:
@@ -178,11 +178,9 @@ class Manager:
                 lookup_fields.append(part)
 
         if isinstance(value, list):
-            raise exceptions.ValidationError(
-                f"Querying with OR clause is not supported"
-            )
+            raise exceptions.ValidationError(f"Querying with OR clause is not supported")
 
-        return [('.'.join(lookup_fields), (operator or '='), value)]
+        return [(".".join(lookup_fields), (operator or "="), value)]
 
     def to_entity(self, obj: Document) -> datastore.Entity:
         entity = datastore.Entity(key=self.build_key(pk=obj.pk))
@@ -227,10 +225,10 @@ class Metadata:
             except KeyError:
                 continue
 
-            if getattr(field_klass, '_name', '') == 'List':
+            if getattr(field_klass, "_name", "") == "List":
                 inner_klass = get_args(field_klass)[0]  # TODO: test composite types
                 item = [_build(klass=inner_klass, value=i) for i in raw_value]
-            elif getattr(field_klass, '_name', '') == 'Dict':
+            elif getattr(field_klass, "_name", "") == "Dict":
                 inner_klass_key, inner_klass_value = get_args(field_klass)
                 item = {
                     _build(klass=inner_klass_key, value=k): _build(klass=inner_klass_value, value=v)
@@ -260,13 +258,10 @@ class Metadata:
 
             raw_value = getattr(obj, field_name)
 
-            if getattr(field_klass, '_name', '') == 'List':
+            if getattr(field_klass, "_name", "") == "List":
                 item = [_unbuild(value=i) for i in raw_value]
-            elif getattr(field_klass, '_name', '') == 'Dict':
-                item = {
-                    _unbuild(value=k): _unbuild(value=v)
-                    for k, v in raw_value.items()
-                }
+            elif getattr(field_klass, "_name", "") == "Dict":
+                item = {_unbuild(value=k): _unbuild(value=v) for k, v in raw_value.items()}
             else:
                 item = _unbuild(value=raw_value)
 
@@ -283,7 +278,7 @@ class ORM(type):
         if not is_abstract_model:
             # Since it was not explicitly provided, add id: str = None
             if not cls._has_explicit_pk_field(attrs=attrs, bases=bases) and is_concrete_model:
-                attrs['__annotations__'][DEFAULT_PK_FIELD] = int
+                attrs["__annotations__"][DEFAULT_PK_FIELD] = int
                 attrs[DEFAULT_PK_FIELD] = None
 
         new_cls = super().__new__(cls, name, bases, attrs)
@@ -296,7 +291,7 @@ class ORM(type):
         new_cls.Meta = Metadata(
             fields=typed_fields,
             doc_klass=new_cls,
-            namespace=getattr(new_cls, '__namespace__', None),
+            namespace=getattr(new_cls, "__namespace__", None),
         )
 
         # Manager initialization
@@ -314,15 +309,15 @@ class ORM(type):
 
     @classmethod
     def _is_abstract(cls, name: str) -> bool:
-        return name in ['Document', 'EmbeddedDocument']
+        return name in ["Document", "EmbeddedDocument"]
 
     @classmethod
     def _is_concrete(cls, bases: Tuple[type]) -> bool:
-        return 'Document' in [base.__name__ for base in bases]
+        return "Document" in [base.__name__ for base in bases]
 
     @classmethod
     def _has_explicit_pk_field(cls, attrs: Dict, bases: Tuple[type]) -> bool:
-        if DEFAULT_PK_FIELD in attrs.get('__annotations__', []):
+        if DEFAULT_PK_FIELD in attrs.get("__annotations__", []):
             return True
 
         for base in bases:
@@ -334,8 +329,8 @@ class ORM(type):
     @classmethod
     def _extract_fields(cls, klass: type) -> Dict[str, type]:
         def _ignore(t: str, k: type):
-            is_private = t.startswith('_')
-            is_class_var = getattr(k, '__origin__', None) == ClassVar  # pylint: disable=comparison-with-callable
+            is_private = t.startswith("_")
+            is_class_var = getattr(k, "__origin__", None) == ClassVar  # pylint: disable=comparison-with-callable
             return is_private or is_class_var
 
         hints = get_type_hints(klass)
@@ -371,8 +366,8 @@ class Document(EmbeddedDocument):
 
 
 __all__ = (
-    'DoesNotExist',
-    'MultipleObjectsFound',
-    'EmbeddedDocument',
-    'Document',
+    "DoesNotExist",
+    "MultipleObjectsFound",
+    "EmbeddedDocument",
+    "Document",
 )

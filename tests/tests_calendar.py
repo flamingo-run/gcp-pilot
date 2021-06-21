@@ -8,4 +8,4 @@ class TestCalendar(ClientTestMixin, unittest.TestCase):
     _CLIENT_KLASS = Calendar
 
     def get_client(self, **kwargs):
-        return super().get_client(email='chuck@norris.com')
+        return super().get_client(email="chuck@norris.com")

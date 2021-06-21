@@ -17,18 +17,16 @@ class TestPubSubMessage(unittest.TestCase):
     def _sample_message(self):
         return {
             "message": {
-                "attributes": {
-                    "key": "value"
-                },
+                "attributes": {"key": "value"},
                 "data": "SGVsbG8gQ2xvdWQgUHViL1N1YiEgSGVyZSBpcyBteSBtZXNzYWdlIQ==",
-                "messageId": "136969346945"
+                "messageId": "136969346945",
             },
-            "subscription": "projects/myproject/subscriptions/mysubscription"
+            "subscription": "projects/myproject/subscriptions/mysubscription",
         }
 
     def assertSampleMessage(self, message):
-        self.assertEqual('136969346945', message.id)
-        self.assertEqual('Hello Cloud Pub/Sub! Here is my message!', message.data)
+        self.assertEqual("136969346945", message.id)
+        self.assertEqual("Hello Cloud Pub/Sub! Here is my message!", message.data)
         self.assertEqual({"key": "value"}, message.attributes)
         self.assertEqual("projects/myproject/subscriptions/mysubscription", message.subscription)
 

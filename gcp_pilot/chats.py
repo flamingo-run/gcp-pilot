@@ -10,7 +10,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, ResourceType
 
 class Text:
     @classmethod
-    def build_mention(cls, member_id: str = 'all') -> str:
+    def build_mention(cls, member_id: str = "all") -> str:
         return f"<users/{member_id}>"
 
     @classmethod
@@ -19,7 +19,7 @@ class Text:
 
     @classmethod
     def format_color(cls, hex_color: str, text: str) -> str:
-        return f"<font color=\"#{hex_color}\">{text}</font>"
+        return f'<font color="#{hex_color}">{text}</font>'
 
 
 class Widget(dict):
@@ -27,9 +27,7 @@ class Widget(dict):
 
     def as_data(self):
         if self._key:
-            return {
-                self._key: dict(self)
-            }
+            return {self._key: dict(self)}
         else:
             return dict(self)
 
@@ -38,14 +36,14 @@ class ButtonWidget(Widget):
     def __init__(self, url, text: str = None, image_url: str = None, icon: str = None):
         super().__init__()
         if text:
-            self._key = 'textButton'
-            self['text'] = text
+            self._key = "textButton"
+            self["text"] = text
         elif image_url:
             self._key = "imageButton"
-            self['iconUrl'] = image_url
+            self["iconUrl"] = image_url
         elif icon:
-            self._key = 'imageButton'
-            self['icon'] = icon
+            self._key = "imageButton"
+            self["icon"] = icon
         else:
             raise exceptions.UnsupportedFormatException("A button must have a text, image or icon")
 
@@ -57,7 +55,7 @@ class ButtonWidget(Widget):
 
 
 class ButtonGroupWidget(Widget):
-    _key = 'buttons'
+    _key = "buttons"
 
     def __init__(self, buttons):
         data = dict(
@@ -66,61 +64,57 @@ class ButtonGroupWidget(Widget):
         super().__init__(data)
 
     def as_data(self):
-        return {
-            self._key: [button.as_data() for button in self['buttons']]
-        }
+        return {self._key: [button.as_data() for button in self["buttons"]]}
 
 
 class OnClickWidget(Widget):
-    _key = 'onClick'
+    _key = "onClick"
 
     def __init__(self, url):
-        data = dict(
-            openLink=dict(url=url)
-        )
+        data = dict(openLink=dict(url=url))
         super().__init__(data)
 
 
 class KeyValueWidget(Widget):
-    _key = 'keyValue'
+    _key = "keyValue"
 
     def __init__(
-            self,
-            content: str,
-            top: str = None,
-            bottom: str = None,
-            break_lines: bool = True,
-            on_click: OnClickWidget = None,
-            icon: str = None,
-            button: ButtonWidget = None,
+        self,
+        content: str,
+        top: str = None,
+        bottom: str = None,
+        break_lines: bool = True,
+        on_click: OnClickWidget = None,
+        icon: str = None,
+        button: ButtonWidget = None,
     ):
         data = dict(
             content=content,
-            contentMultiline='true' if break_lines else 'false',
+            contentMultiline="true" if break_lines else "false",
         )
         if top:
-            data['topLabel'] = top
+            data["topLabel"] = top
         if bottom:
-            data['bottomLabel'] = bottom
+            data["bottomLabel"] = bottom
         if on_click:
-            data['onClick'] = on_click
+            data["onClick"] = on_click
         if icon:
-            data['icon'] = icon
+            data["icon"] = icon
         if button:
-            data['button'] = button
+            data["button"] = button
 
         super().__init__(data)
 
 
 class TextWidget(Widget):
-    _key = 'textParagraph'
+    _key = "textParagraph"
 
     def __init__(self, text: str):
         super().__init__(text=text)
 
 
 class ImageWidget(Widget):
-    _key = 'image'
+    _key = "image"
 
     def __init__(self, image_url: str, on_click: OnClickWidget = None):
         data = dict(imageUrl=image_url)
@@ -138,13 +132,13 @@ class Section:
         self.header = text
 
     def add_text(
-            self,
-            content: str,
-            title: str = '',
-            footer: str = '',
-            click_url: str = None,
-            icon: str = None,
-            button: str = None,
+        self,
+        content: str,
+        title: str = "",
+        footer: str = "",
+        click_url: str = None,
+        icon: str = None,
+        button: str = None,
     ):
 
         widget = KeyValueWidget(
@@ -163,8 +157,8 @@ class Section:
 
     def add_button(self, url, text: str = None, image_url: str = None, icon: str = None, append: bool = True):
         button = ButtonWidget(url=url, text=text, image_url=image_url, icon=icon)
-        if append and self.widgets and 'buttons' in self.widgets[-1]:
-            self.widgets[-1]['buttons'].append(button)
+        if append and self.widgets and "buttons" in self.widgets[-1]:
+            self.widgets[-1]["buttons"].append(button)
         else:
             self.widgets.append(ButtonGroupWidget(buttons=[button]))
 
@@ -177,10 +171,10 @@ class Section:
 
     def as_data(self):
         data = {
-            'widgets': [widget.as_data() for widget in self.widgets],
+            "widgets": [widget.as_data() for widget in self.widgets],
         }
         if self.header:
-            data['header'] = self.header
+            data["header"] = self.header
         return data
 
     def __bool__(self):
@@ -192,7 +186,7 @@ class Card:
     header: Widget = None
     sections: List[Section] = field(default_factory=list)
 
-    def add_header(self, title: str, subtitle: str = '', image_url: str = None, style: str = 'IMAGE'):
+    def add_header(self, title: str, subtitle: str = "", image_url: str = None, style: str = "IMAGE"):
         self.header = Widget(
             title=title,
             subtitle=subtitle,
@@ -205,9 +199,9 @@ class Card:
             self.sections.append(section)
 
     def as_data(self) -> Dict:
-        data = {'sections': [section.as_data() for section in self.sections]}
+        data = {"sections": [section.as_data() for section in self.sections]}
         if self.header:
-            data['header'] = self.header.as_data()
+            data["header"] = self.header.as_data()
         return data
 
 
@@ -218,46 +212,46 @@ class ChatsHook:
     def _post(self, body: Dict, thread_key: str = None) -> Dict:
         url = self.hook_url
         if thread_key:
-            url = f'{url}&threadKey={thread_key}'
+            url = f"{url}&threadKey={thread_key}"
 
         response = requests.post(
             url=url,
-            headers={'Content-Type': 'application/json; charset=UTF-8'},
+            headers={"Content-Type": "application/json; charset=UTF-8"},
             data=json.dumps(body),
         )
         response.raise_for_status()
         return response.json()
 
     def send_text(self, text: str, thread_key: str = None) -> Dict:
-        body = {'text': text}
+        body = {"text": text}
         return self._post(body=body, thread_key=thread_key)
 
     def send_card(self, card: Card, additional_text: str = None, thread_key: str = None) -> Dict:
         body = {
-            'cards': [card.as_data()],
+            "cards": [card.as_data()],
         }
 
         if additional_text:
-            body['text'] = additional_text
+            body["text"] = additional_text
 
         return self._post(body=body, thread_key=thread_key)
 
 
 class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):
-    _scopes = ['https://www.googleapis.com/auth/chat.bot']
+    _scopes = ["https://www.googleapis.com/auth/chat.bot"]
 
     def __init__(self, **kwargs):
         super().__init__(
-            serviceName='chat',
-            version='v1',
+            serviceName="chat",
+            version="v1",
             cache_discovery=False,
             **kwargs,
         )
 
     def _room_path(self, room_id: str) -> str:
-        prefix = 'spaces/'
+        prefix = "spaces/"
         if not room_id.startswith(prefix):
-            room_path = f'{prefix}{room_id}'
+            room_path = f"{prefix}{room_id}"
         else:
             room_path = room_id
         return room_path
@@ -265,13 +259,13 @@ class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):
     def _member_path(self, room_id: str, member_id: str) -> str:
         room_path = self._room_path(room_id=room_id)
 
-        prefix = 'members/'
+        prefix = "members/"
         if not member_id.startswith(prefix):
-            member_path = f'{prefix}{member_id}'
+            member_path = f"{prefix}{member_id}"
         else:
             member_path = member_id
 
-        return f'{room_path}/{member_path}'
+        return f"{room_path}/{member_path}"
 
     def get_room(self, room_id: str) -> ResourceType:
         return self._execute(
@@ -282,7 +276,7 @@ class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):
     def get_rooms(self) -> Generator[ResourceType, None, None]:
         yield from self._paginate(
             method=self.client.spaces().list,
-            result_key='spaces',
+            result_key="spaces",
         )
 
     def get_member(self, room_id: str, member_id: str) -> ResourceType:
@@ -295,12 +289,12 @@ class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):
     def get_members(self, room_id: str) -> Generator[ResourceType, None, None]:
         yield from self._paginate(
             method=self.client.spaces().members().list,
-            result_key='memberships',
-            params={'parent': self._room_path(room_id=room_id)}
+            result_key="memberships",
+            params={"parent": self._room_path(room_id=room_id)},
         )
 
     def send_text(self, room_id: str, text: str) -> ResourceType:
-        body = {'text': text}
+        body = {"text": text}
 
         return self._execute(
             method=self.client.spaces().messages().create,
@@ -310,11 +304,11 @@ class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def send_card(self, room_id: str, card: Card, additional_text: str = None) -> ResourceType:
         body = {
-            'cards': [card.as_data()],
+            "cards": [card.as_data()],
         }
 
         if additional_text:
-            body['text'] = additional_text
+            body["text"] = additional_text
 
         return self._execute(
             method=self.client.spaces().messages().create,
@@ -324,9 +318,9 @@ class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):
 
 
 __all__ = (
-    'Text',
-    'Section',
-    'Card',
-    'ChatsBot',
-    'ChatsHook',
+    "Text",
+    "Section",
+    "Card",
+    "ChatsBot",
+    "ChatsHook",
 )

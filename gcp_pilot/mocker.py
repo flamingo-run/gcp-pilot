@@ -6,19 +6,19 @@ from google.oauth2.service_account import Credentials
 
 
 class patch_auth:
-    def __init__(self, project_id: str = 'potato-dev', location: str = 'moon-dark1'):
+    def __init__(self, project_id: str = "potato-dev", location: str = "moon-dark1"):
         # Realistic: actual class to be accepted by clients during validation
         # But fake: with as few attributes as possible, any API call using the credential should fail
         credentials = Credentials(
-            service_account_email='chuck@norris.com',
+            service_account_email="chuck@norris.com",
             signer=None,
-            token_uri='',
+            token_uri="",
             project_id=project_id,
         )
         managers = [
-            patch('google.auth.default', return_value=(credentials, project_id)),
-            patch('gcp_pilot.base.GoogleCloudPilotAPI._set_location', return_value=location),
-            patch('gcp_pilot.base.AppEngineBasedService._set_location', return_value=location),
+            patch("google.auth.default", return_value=(credentials, project_id)),
+            patch("gcp_pilot.base.GoogleCloudPilotAPI._set_location", return_value=location),
+            patch("gcp_pilot.base.AppEngineBasedService._set_location", return_value=location),
         ]
         self.stack = ExitStack()
         for mgr in managers:
@@ -41,4 +41,5 @@ class patch_auth:
         def wrapper(*args, **kw):
             with self:
                 return f(*args, **kw)
+
         return wrapper

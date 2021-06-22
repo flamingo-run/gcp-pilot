@@ -122,9 +122,13 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
             "user_ip": ip_address,
             "continue_url": redirect_url,
             "target_project_id": project_id or self.project_id,
-            "returnOobLink": send_email,
+            "returnOobLink": not send_email,
         }
         response = self._execute(method=self.client.accounts().sendOobCode, body=data)
+
+        if send_email:
+            return {}
+
         url = response["oobLink"]
         query = parse_qs(urlparse(url).query)
         return {"url": url, "code": query["oobCode"][0]}

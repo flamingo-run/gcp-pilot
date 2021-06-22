@@ -111,6 +111,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         type: OOBCodeType,
         email: str,
+        ip_address: str = None,
         project_id: str = None,
         send_email: bool = False,
         redirect_url: str = None,
@@ -118,6 +119,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         data = {
             "requestType": type.value,
             "email": email,
+            "user_ip": ip_address,
             "continue_url": redirect_url,
             "target_project_id": project_id or self.project_id,
             "returnOobLink": send_email,

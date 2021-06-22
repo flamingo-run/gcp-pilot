@@ -179,7 +179,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
             "targetProjectId": project_id or self.project_id,
         }
         response = self._execute(method=self.client.accounts().signUp, body=data)
-        return response
+        return User.create(data=response)
 
     def update(
         self,

@@ -14,7 +14,6 @@ class OOBCodeType(Enum):
     RESET = "PASSWORD_RESET"
     VERIFY = "VERIFY_EMAIL"
     SIGNIN = "EMAIL_SIGNIN"
-    CHANGE_EMAIL = "VERIFY_AND_CHANGE_EMAIL"
 
 
 def parse_timestamp(timestamp: Union[str, int, float]) -> Optional[datetime]:

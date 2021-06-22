@@ -133,6 +133,22 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         query = parse_qs(urlparse(url).query)
         return {"url": url, "code": query["oobCode"][0]}
 
+    def reset_password(self, email: str, new_password: str, old_password: str = None, oob_code: str = None):
+        data = {
+            "newPassword": new_password,
+            "email": email,
+        }
+
+        if oob_code:
+            data["oobCode"] = oob_code
+        elif old_password:
+            data["oldPassword"] = old_password
+        else:
+            raise exceptions.ValidationError("Either `old_password` or `oob_code` must be provided")
+
+        response = self._execute(method=self.client.accounts().resetPassword, body=data)
+        return response
+
     def delete_user(self, user_id: str):
         data = {
             "localId": user_id,

@@ -43,9 +43,9 @@ class User:
             verified=data["emailVerified"],
             disabled=data["disabled"],
             created_at=parse_timestamp(timestamp=data["createdAt"]),
-            last_login_at=parse_timestamp(timestamp=data["lastLoginAt"]),
-            password_changed_at=parse_timestamp(timestamp=data["passwordUpdatedAt"]),
-            extra_attributes=json.loads(data["customAttributes"]),
+            last_login_at=parse_timestamp(timestamp=data.get("lastLoginAt")),
+            password_changed_at=parse_timestamp(timestamp=data.get("passwordUpdatedAt")),
+            extra_attributes=json.loads(data.get("customAttributes", "{}")),
         )
 
 

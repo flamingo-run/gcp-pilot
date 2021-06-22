@@ -309,6 +309,7 @@ def friendly_http_error(func):
         "NOT_FOUND": exceptions.NotFound,
         "ALREADY_EXISTS": exceptions.AlreadyExists,
         "INVALID_PASSWORD": exceptions.InvalidPassword,
+        "EMAIL_NOT_FOUND": exceptions.NotFound,
         "MISSING_ID_TOKEN": exceptions.MissingUserIdentification,
     }
 

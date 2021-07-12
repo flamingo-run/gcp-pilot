@@ -47,3 +47,7 @@ class InvalidPassword(Exception):
 
 class MissingUserIdentification(Exception):
     pass
+
+
+class PushWebhookInvalid(ValidationError):
+    pass

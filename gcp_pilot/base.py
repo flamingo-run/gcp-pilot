@@ -302,6 +302,7 @@ def friendly_http_error(func):
         "deleted": exceptions.AlreadyDeleted,
         "forbidden": exceptions.NotAllowed,
         "duplicate": exceptions.AlreadyExists,
+        "push.webhookUrlUnauthorized": exceptions.PushWebhookInvalid,
     }
     _statuses = {
         "INVALID_ARGUMENT": exceptions.ValidationError,

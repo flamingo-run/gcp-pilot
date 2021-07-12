@@ -3,6 +3,7 @@ import datetime
 from dataclasses import dataclass
 from enum import Enum
 from typing import Generator, List, Dict
+from uuid import uuid4
 
 import pytz
 
@@ -62,34 +63,93 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
 
         return dt.strftime(fmt)
 
-    def get_events(
-        self,
-        calendar_id: str = "primary",
-        starts_at: datetime.date = None,
-    ) -> Generator[ResourceType, None, None]:
-        min_date = self._date_to_str(starts_at) if starts_at else None
-
-        page_size = 100
-        params = dict(
-            calendarId=calendar_id,
-            timeMin=min_date,
-            singleEvents=True,
-        )
-
-        yield from self._paginate(
-            method=self.client.events().list,
-            result_key="items",
-            params=params,
-            order_by="startTime",
-            limit=page_size,
-        )
-
     def get_calendars(self) -> Generator[ResourceType, None, None]:
         params = {}
         yield from self._paginate(
             method=self.client.calendarList().list,
             result_key="items",
             params=params,
+        )
+
+    def get_calendar(self, calendar_id: str = "primary") -> ResourceType:
+        params = {}
+        return self._execute(
+            method=self.client.calendars().get,
+            calendarId=calendar_id,
+            params=params,
+        )
+
+    def clear_calendar(self, calendar_id: str = "primary") -> ResourceType:
+        params = {}
+        return self._execute(
+            method=self.client.calendars().clear,
+            calendarId=calendar_id,
+            params=params,
+        )
+
+    def delete_calendar(self, calendar_id: str = "primary") -> ResourceType:
+        params = {}
+        return self._execute(
+            method=self.client.calendars().delete,
+            calendarId=calendar_id,
+            params=params,
+        )
+    
+    def create_or_update_calendar(self, summary: str, description: str = "", timezone: str = None, calendar_id: str = None) -> ResourceType:
+        if not calendar_id:
+            return self.create_calendar(summary=summary, description=description, timezone=timezone)
+        return self.update_calendar(calendar_id=calendar_id, summary=summary, description=description, timezone=timezone)
+
+    def create_calendar(self, summary: str, description: str = "", timezone: str = None) -> ResourceType:
+        data = {
+            "summary": summary,
+            "description": description,
+            "timeZone": timezone or self.timezone,
+        }
+        return self._execute(
+            method=self.client.calendars().insert,
+            body=data,
+        )
+
+    def update_calendar(
+        self, calendar_id: str, summary: str = None, description: str = None, timezone: str = None
+    ) -> ResourceType:
+        data = {}
+        if summary:
+            data["summary"] = summary
+        if description:
+            data["description"] = description
+        if timezone:
+            data["timeZone"] = timezone or self.timezone
+
+        return self._execute(
+            method=self.client.calendars().update,
+            calendarId=calendar_id,
+            body=data,
+        )
+
+    def watch_calendars(self, hook_url: str, hook_token: str = None, uuid: str = None) -> ResourceType:
+        data = {
+            "id": uuid or uuid4().hex,
+            "type": "webhook",
+            "address": hook_url,
+        }
+        if hook_token:
+            data["token"] = hook_token
+
+        return self._execute(
+            method=self.client.calendarList().watch,
+            body=data,
+        )
+
+    def unwatch(self, uuid: str, resource_id: str) -> ResourceType:
+        data = {
+            "id": uuid,
+            "resource_id": resource_id,
+        }
+        return self._execute(
+            method=self.client.channels().stop,
+            body=data,
         )
 
     def create_or_update_event(
@@ -147,12 +207,92 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
                 body=data,
             )
 
+    def get_events(
+        self,
+        calendar_id: str = "primary",
+        starts_at: datetime.date = None,
+    ) -> Generator[ResourceType, None, None]:
+        min_date = self._date_to_str(starts_at) if starts_at else None
+
+        page_size = 100
+        params = dict(
+            calendarId=calendar_id,
+            timeMin=min_date,
+            singleEvents=True,
+        )
+
+        yield from self._paginate(
+            method=self.client.events().list,
+            result_key="items",
+            params=params,
+            order_by="startTime",
+            limit=page_size,
+        )
+
     def delete_event(self, event_id: str, calendar_id: str = "primary") -> ResourceType:
         return self._execute(
             method=self.client.events().delete,
             calendarId=calendar_id,
             eventId=event_id,
         )
+
+    def get_recurrent_events(self, event_id: str, calendar_id: str = "primary") -> Generator[ResourceType, None, None]:
+        page_size = 100
+        params = dict(
+            calendarId=calendar_id,
+            eventId=event_id,
+        )
+
+        yield from self._paginate(
+            method=self.client.events().instances,
+            result_key="items",
+            params=params,
+            limit=page_size,
+        )
+
+    def watch_events(
+        self,
+        hook_url: str,
+        calendar_id: str = "primary",
+        hook_token: str = None,
+        uuid: str = None,
+    ) -> ResourceType:
+        data = {
+            "id": uuid or uuid4().hex,
+            "type": "webhook",
+            "address": hook_url,
+        }
+        if hook_token:
+            data["token"] = hook_token
+
+        return self._execute(
+            method=self.client.events().watch,
+            calendarId=calendar_id,
+            body=data,
+        )
+
+    def check_availability(
+        self,
+        starts_at: datetime,
+        ends_at: datetime,
+        timezone: str = None,
+        calendar_ids: List[str] = None,
+        calendar_id: str = "primary",
+    ) -> ResourceType:
+        data = {
+            "timeMin": self._date_to_str(starts_at),
+            "timeMax": self._date_to_str(ends_at),
+            "timeZone": timezone or self.timezone,
+            "groupExpansionMax": 100,  # max value
+            "calendarExpansionMax": 50,  # max value
+            "items": [{"id": calendar_id} for calendar_id in (calendar_ids or ["primary"])],
+        }
+
+        return self._execute(
+            method=self.client.freeBusy().watch,
+            calendarId=calendar_id,
+            body=data,
+        )["calendars"]
 
 
 __all__ = (

@@ -305,13 +305,14 @@ class ServiceAgent:
     def _load_from_tsv(cls, filepath: str):
         # Load this <https://cloud.google.com/iam/docs/service-agents> table
         data = {}
-        for r in open(filepath, "r").readlines()[1:]:
-            name, domain, role = r.strip().split("\t")
-            if "roles/" not in role:
-                role_name = None
-            else:
-                role_name = role.replace("(", "").replace(")", "")
-            data[name] = (domain, role_name)
+        with open(filepath, "r") as file:
+            for line in file.readlines()[1:]:
+                name, domain, role = line.strip().split("\t")
+                if "roles/" not in role:
+                    role_name = None
+                else:
+                    role_name = role.replace("(", "").replace(")", "")
+                data[name] = (domain, role_name)
         return data
 
     @classmethod
@@ -345,7 +346,7 @@ class ServiceAgent:
 
     @classmethod
     async def restore(cls, services: List[str], project_id: str) -> None:
-        rm = ResourceManager()
+        rm = ResourceManager()  # pylint: disable=invalid-name
         for service_name in services:
             email = ServiceAgent.get_email(service_name=service_name, project_id=project_id)
             role = ServiceAgent.get_role(service_name=service_name)

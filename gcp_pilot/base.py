@@ -170,7 +170,7 @@ class GoogleCloudPilotAPI(abc.ABC):
     async def set_up_permissions(self, email: str, project_id: str = None) -> None:
         from gcp_pilot.resource import ResourceManager, ServiceAgent  # pylint: disable=import-outside-toplevel
 
-        rm = ResourceManager()
+        rm = ResourceManager()  # pylint: disable=invalid-name
         for role in self._iam_roles:
             await rm.add_member(
                 email=email,

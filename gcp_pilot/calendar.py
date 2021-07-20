@@ -25,6 +25,7 @@ class Attendee:
 class Color(Enum):
     # Predefined colors.
     # For more color, use the endpoint: <https://developers.google.com/calendar/v3/reference/colors>
+    # pylint: disable=invalid-name
     light_blue = ("1", "#a4bdfc")
     light_green = ("2", "#7ae7bf")
     light_purple = ("3", "#dbadff")
@@ -36,6 +37,7 @@ class Color(Enum):
     blue = ("9", "#5484ed")
     green = ("10", "#51b749")
     red = ("11", "#dc2127")
+    # pylint: enable=invalid-name
 
 
 class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
@@ -94,11 +96,15 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
             calendarId=calendar_id,
             params=params,
         )
-    
-    def create_or_update_calendar(self, summary: str, description: str = "", timezone: str = None, calendar_id: str = None) -> ResourceType:
+
+    def create_or_update_calendar(
+        self, summary: str, description: str = "", timezone: str = None, calendar_id: str = None
+    ) -> ResourceType:
         if not calendar_id:
             return self.create_calendar(summary=summary, description=description, timezone=timezone)
-        return self.update_calendar(calendar_id=calendar_id, summary=summary, description=description, timezone=timezone)
+        return self.update_calendar(
+            calendar_id=calendar_id, summary=summary, description=description, timezone=timezone
+        )
 
     def create_calendar(self, summary: str, description: str = "", timezone: str = None) -> ResourceType:
         data = {
@@ -171,10 +177,10 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
                 return {
                     "dateTime": self._date_to_str(dt),
                 }
-            else:
-                return {
-                    "date": self._date_to_str(dt, fmt="%Y-%m-%d"),
-                }
+
+            return {
+                "date": self._date_to_str(dt, fmt="%Y-%m-%d"),
+            }
 
         data = {
             "summary": summary,
@@ -200,12 +206,12 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
                 eventId=event_id,
                 body=data,
             )
-        else:
-            return self._execute(
-                method=self.client.events().insert,
-                calendarId=calendar_id,
-                body=data,
-            )
+
+        return self._execute(
+            method=self.client.events().insert,
+            calendarId=calendar_id,
+            body=data,
+        )
 
     def get_events(
         self,

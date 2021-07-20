@@ -178,7 +178,7 @@ class Manager:
                 lookup_fields.append(part)
 
         if isinstance(value, list):
-            raise exceptions.ValidationError(f"Querying with OR clause is not supported")
+            raise exceptions.ValidationError("Querying with OR clause is not supported")
 
         return [(".".join(lookup_fields), (operator or "="), value)]
 
@@ -328,7 +328,7 @@ class ORM(type):
 
     @classmethod
     def _extract_fields(cls, klass: type) -> Dict[str, type]:
-        def _ignore(t: str, k: type):
+        def _ignore(t: str, k: type):  # pylint: disable=invalid-name
             is_private = t.startswith("_")
             is_class_var = getattr(k, "__origin__", None) == ClassVar  # pylint: disable=comparison-with-callable
             return is_private or is_class_var

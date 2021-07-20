@@ -39,7 +39,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             project=project_id or self.project_id,
         )
 
-    async def create_instance(
+    async def create_instance(  # pylint: disable=invalid-name
         self,
         name: str,
         version: str,
@@ -73,8 +73,8 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             try:
                 sql_instance = await self.get_instance(name=name, project_id=project_id)
                 current_state = sql_instance["state"]
-            except exceptions.NotFound as e:
-                raise exceptions.DeletedRecently(resource=f"Instance {name}") from e
+            except exceptions.NotFound as exc:
+                raise exceptions.DeletedRecently(resource=f"Instance {name}") from exc
 
         if not wait_ready:
             return sql_instance
@@ -116,12 +116,12 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
                 )
                 .execute()
             )
-        except HttpError as e:
+        except HttpError as exc:
             # IDK. Weird bug that the error_details is empty if too fast
-            error_details = json.loads(e.content.decode())["error"]["message"]
+            error_details = json.loads(exc.content.decode())["error"]["message"]
 
-            not_ready = e.resp.status == 400 and "is not running" in error_details
-            already_exists = e.resp.status == 400 and "already exists" in error_details and exists_ok
+            not_ready = exc.resp.status == 400 and "is not running" in error_details
+            already_exists = exc.resp.status == 400 and "already exists" in error_details and exists_ok
             if not_ready or already_exists:
                 return await self.get_database(instance=instance, database=name, project_id=project_id)
             raise

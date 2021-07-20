@@ -71,11 +71,11 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
                 method=self.client.groups().insert,
                 body=body,
             )
-        else:
-            return self._execute(
-                method=self.client.groups().update,
-                body=body,
-            )
+
+        return self._execute(
+            method=self.client.groups().update,
+            body=body,
+        )
 
     def delete_group(self, group_id: str) -> GroupType:
         return self._execute(

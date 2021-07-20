@@ -111,12 +111,12 @@ class CloudDNS(GoogleCloudPilotAPI):
 
         try:
             changes.create()
-        except BadRequest as e:
-            if "is only permitted to have one record" in e.message:
-                raise exceptions.AlreadyExists(e.message) from e
+        except BadRequest as exc:
+            if "is only permitted to have one record" in exc.message:
+                raise exceptions.AlreadyExists(exc.message) from exc
             raise
-        except Conflict as e:
-            raise exceptions.AlreadyExists(e.message) from e
+        except Conflict as exc:
+            raise exceptions.AlreadyExists(exc.message) from exc
 
         if wait:
             while changes.status != "done":

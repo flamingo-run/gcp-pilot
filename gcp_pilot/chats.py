@@ -28,8 +28,8 @@ class Widget(dict):
     def as_data(self):
         if self._key:
             return {self._key: dict(self)}
-        else:
-            return dict(self)
+
+        return dict(self)
 
 
 class ButtonWidget(Widget):

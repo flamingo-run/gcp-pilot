@@ -20,9 +20,9 @@ class Spreadsheet(GoogleCloudPilotAPI):
 
     @classmethod
     def _client_class(cls, credentials, **kwargs):
-        gc = gspread.Client(auth=credentials)
-        gc.session = AuthorizedSession(credentials)
-        return gc
+        client = gspread.Client(auth=credentials)
+        client.session = AuthorizedSession(credentials)
+        return client
 
     @property
     def url(self) -> str:

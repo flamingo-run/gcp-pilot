@@ -89,10 +89,10 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
 
         try:
             response = self.client.create_task(parent=queue_path, task=task)
-        except FailedPrecondition as e:
-            if "a queue with this name existed recently" in e.message:
-                raise exceptions.DeletedRecently(resource=f"Queue {queue_name}") from e
-            if e.message != "Queue does not exist.":
+        except FailedPrecondition as exc:
+            if "a queue with this name existed recently" in exc.message:
+                raise exceptions.DeletedRecently(resource=f"Queue {queue_name}") from exc
+            if exc.message != "Queue does not exist.":
                 raise
 
             self._create_queue(queue_name=queue_name, project_id=project_id)

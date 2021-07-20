@@ -32,7 +32,7 @@ class Speech(GoogleCloudPilotAPI):
         )
 
         if not long_running:
-            operation = self.client.recognize(config, audio)
+            operation = self.client.recognize(config=config, audio=audio)
             results = operation.results
         else:
             operation = self.client.long_running_recognize(config=config, audio=audio)

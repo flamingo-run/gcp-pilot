@@ -99,17 +99,15 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
 
     def get(self, name: str, project_id: str = None) -> scheduler.Job:
         job_name = self._job_path(job=name, project_id=project_id)
-        response = self.client.get_job(
+        return self.client.get_job(
             name=job_name,
         )
-        return response
 
     async def delete(self, name: str, project_id: str = None) -> None:
         job_name = self._job_path(job=name, project_id=project_id)
-        response = self.client.delete_job(
+        return self.client.delete_job(
             name=job_name,
         )
-        return response
 
     async def put(
         self,

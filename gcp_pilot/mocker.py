@@ -5,7 +5,7 @@ from functools import wraps
 from google.oauth2.service_account import Credentials
 
 
-class patch_auth:
+class patch_auth:  # pylint: disable=invalid-name
     def __init__(self, project_id: str = "potato-dev", location: str = "moon-dark1"):
         # Realistic: actual class to be accepted by clients during validation
         # But fake: with as few attributes as possible, any API call using the credential should fail
@@ -36,10 +36,10 @@ class patch_auth:
     def stop(self):
         self.__exit__(None, None, None)
 
-    def __call__(self, f):
-        @wraps(f)
+    def __call__(self, func):
+        @wraps(func)
         def wrapper(*args, **kw):
             with self:
-                return f(*args, **kw)
+                return func(*args, **kw)
 
         return wrapper

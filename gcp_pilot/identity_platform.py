@@ -63,8 +63,8 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
     def find(self, email: str = None, phone_number: str = None, project_id: str = None) -> User:
         try:
             return next(self.lookup(email=email, phone_number=phone_number, project_id=project_id))
-        except StopIteration:
-            raise exceptions.NotFound()
+        except StopIteration as exc:
+            raise exceptions.NotFound() from exc
 
     def lookup(self, email: str = None, phone_number: str = None, project_id: str = None) -> Iterator[User]:
         if not email and not phone_number:
@@ -108,7 +108,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def generate_email_code(
         self,
-        type: OOBCodeType,
+        type: OOBCodeType,  # pylint: disable=redefined-builtin
         email: str,
         ip_address: str = None,
         project_id: str = None,

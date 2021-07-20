@@ -46,8 +46,8 @@ class Substitutions:
     _variables: Dict[str, _SubstitutionVariable] = field(default_factory=dict)
 
     def add(self, **kwargs):
-        for k, v in kwargs.items():
-            variable = _SubstitutionVariable(key=k.upper(), value=v)
+        for key, val in kwargs.items():
+            variable = _SubstitutionVariable(key=key.upper(), value=val)
             self._variables[variable.key] = variable
 
     @property
@@ -166,18 +166,16 @@ class CloudBuild(GoogleCloudPilotAPI):
         )
 
     async def get_trigger(self, trigger_id: str, project_id: str = None) -> TriggerType:
-        response = self.client.get_build_trigger(
+        return self.client.get_build_trigger(
             trigger_id=trigger_id,
             project_id=project_id or self.project_id,
         )
-        return response
 
     async def delete_trigger(self, trigger_id: str, project_id: str = None):
-        response = self.client.delete_build_trigger(
+        return self.client.delete_build_trigger(
             trigger_id=trigger_id,
             project_id=project_id or self.project_id,
         )
-        return response
 
     async def create_trigger(
         self,
@@ -324,8 +322,8 @@ class CloudBuild(GoogleCloudPilotAPI):
         try:
             # try to import here to avoid making pubsub a mandatory dependency of CloudBuild
             from gcp_pilot.pubsub import CloudSubscriber  # pylint: disable=import-outside-toplevel
-        except ImportError as e:
-            raise ImportError("Add `pubsub` extras dependency in order to use CloudBuild notifications") from e
+        except ImportError as exc:
+            raise ImportError("Add `pubsub` extras dependency in order to use CloudBuild notifications") from exc
         subscriber = CloudSubscriber()
         await subscriber.create_subscription(
             topic_id="cloud-builds",  # pre-defined by GCP

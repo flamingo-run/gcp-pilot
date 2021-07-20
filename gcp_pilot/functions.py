@@ -66,7 +66,7 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
         elif tag:
             ref = f"fixed-aliases/{tag}"
         else:
-            ref = f"moveable-aliases/master"
+            ref = "moveable-aliases/master"
 
         path = f"/paths/{directory}" if directory else ""
 
@@ -77,7 +77,7 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
         else:
             repo_name = name
 
-        REPO_SOURCE_URL = "https://source.developers.google.com"
+        REPO_SOURCE_URL = "https://source.developers.google.com"  # pylint: disable=invalid-name
         url = f"{REPO_SOURCE_URL}/projects/{project_id}/repos/{repo_name}/{ref}{path}"
         repo = dict(url=url)
 

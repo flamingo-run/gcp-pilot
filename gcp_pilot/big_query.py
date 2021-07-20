@@ -31,7 +31,7 @@ class BigQuery(GoogleCloudPilotAPI):
         if destination_table_name or destination_dataset_name:
             if not destination_table_name and destination_dataset_name:
                 raise exceptions.ValidationError(
-                    f"Both destination_dataset_name and destination_table_name must be provided."
+                    "Both destination_dataset_name and destination_table_name must be provided."
                 )
             destination_project = destination_project or self.project_id
             destination_dataset = destination_dataset_name
@@ -119,11 +119,12 @@ class BigQuery(GoogleCloudPilotAPI):
                     job_config=job_config,
                 )
             else:
-                load_job = self.client.load_table_from_file(
-                    file_obj=open(filename, "rb"),
-                    destination=target_ref,
-                    job_config=job_config,
-                )
+                with open(filename, "rb") as file:
+                    load_job = self.client.load_table_from_file(
+                        file_obj=file,
+                        destination=target_ref,
+                        job_config=job_config,
+                    )
         else:
             load_job = self.client.load_table_from_uri(
                 source_uris=filename,
@@ -167,8 +168,8 @@ class BigQuery(GoogleCloudPilotAPI):
     def _wait_for_job(self, job):
         try:
             return job.result()
-        except Exception as e:
-            raise exceptions.BigQueryJobError(job) from e
+        except Exception as exc:
+            raise exceptions.BigQueryJobError(job) from exc
 
     def add_external_gcs_source(
         self,
@@ -199,7 +200,7 @@ class BigQuery(GoogleCloudPilotAPI):
 class _BigQueryParam:
     @classmethod
     def _get_type(cls, variable: Any) -> str:
-        TYPES = {
+        TYPES = {  # pylint: disable=invalid-name
             "int": "INT64",
             "str": "STRING",
             "datetime": "DATETIME",
@@ -217,7 +218,7 @@ class _BigQueryParam:
 
     @classmethod
     def _get_value(cls, variable: Any) -> Any:
-        TYPES = {
+        TYPES = {  # pylint: disable=invalid-name
             "Decimal": float,
         }
         python_type = type(variable).__name__

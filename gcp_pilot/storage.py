@@ -48,7 +48,7 @@ class CloudStorage(GoogleCloudPilotAPI):
     ) -> Blob:
         target_bucket = await self.create_bucket(name=bucket_name, project_id=project_id, region=region)
 
-        target_file_name = target_file_name or str(source_file).rsplit("/")[-1]
+        target_file_name = target_file_name or str(source_file).rsplit("/", maxsplit=1)[-1]
         blob = target_bucket.blob(target_file_name, chunk_size=chunk_size)
 
         if isinstance(source_file, str):
@@ -81,7 +81,7 @@ class CloudStorage(GoogleCloudPilotAPI):
         source_blob = source_bucket.blob(source_file_name)
 
         target_bucket = await self.create_bucket(name=target_bucket_name, region=region, project_id=project_id)
-        target_file_name = target_file_name or str(source_file_name).rsplit("/")[-1]
+        target_file_name = target_file_name or str(source_file_name).rsplit("/", maxsplit=1)[-1]
 
         obj = source_bucket.copy_blob(source_blob, target_bucket, target_file_name)
         return obj
@@ -121,10 +121,10 @@ class CloudStorage(GoogleCloudPilotAPI):
 
     def _download(self, url: str) -> io.BytesIO:
         response = requests.get(url, stream=True)
-        f = io.BytesIO()
-        f.write(response.content)
-        f.seek(0)
-        return f
+        file = io.BytesIO()
+        file.write(response.content)
+        file.seek(0)
+        return file
 
     def get_uri(self, blob: Blob) -> str:
         return f"gs://{blob.bucket.name}/{blob.name}"

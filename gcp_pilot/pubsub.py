@@ -179,12 +179,14 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 **(self.get_oidc_token(audience=push_to_url) if use_oidc_auth else {}),
             )
 
+        subscription = Subscription(
+            name=subscription_path,
+            topic=topic_path,
+            push_config=push_config,
+        )
+
         try:
-            return self.client.create_subscription(
-                name=subscription_path,
-                topic=topic_path,
-                push_config=push_config,
-            )
+            return self.client.create_subscription(request=subscription)
         except NotFound:
             if not auto_create_topic:
                 raise
@@ -193,11 +195,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 project_id=project_id,
                 exists_ok=False,
             )
-            return self.client.create_subscription(
-                name=subscription_path,
-                topic=topic_path,
-                push_config=push_config,
-            )
+            return self.client.create_subscription(request=subscription)
         except AlreadyExists:
             if not exists_ok:
                 raise

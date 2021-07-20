@@ -160,6 +160,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         project_id: str = None,
         exists_ok: bool = True,
         auto_create_topic: bool = True,
+        enable_message_ordering: bool = False,
         push_to_url: str = None,
         use_oidc_auth: bool = False,
     ) -> Subscription:
@@ -183,6 +184,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             name=subscription_path,
             topic=topic_path,
             push_config=push_config,
+            enable_message_ordering=enable_message_ordering,
         )
 
         try:
@@ -241,6 +243,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         subscription_id: str,
         project_id: str = None,
         auto_create_topic: bool = True,
+        enable_message_ordering: bool = False,
         push_to_url: str = None,
         use_oidc_auth: bool = False,
     ) -> Subscription:
@@ -251,6 +254,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 project_id=project_id,
                 exists_ok=False,
                 auto_create_topic=auto_create_topic,
+                enable_message_ordering=enable_message_ordering,
                 push_to_url=push_to_url,
                 use_oidc_auth=use_oidc_auth,
             )

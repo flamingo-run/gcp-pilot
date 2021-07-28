@@ -74,11 +74,9 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
     def get_calendar(self, calendar_id: str = "primary") -> ResourceType:
-        params = {}
         return self._execute(
             method=self.client.calendars().get,
             calendarId=calendar_id,
-            params=params,
         )
 
     def clear_calendar(self, calendar_id: str = "primary") -> ResourceType:
@@ -161,9 +159,9 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
     def create_or_update_event(
         self,
         summary: str,
-        location: str,
         start_at: datetime.date,
         end_at: datetime.date,
+        location: str = None,
         event_id: str = None,
         description: str = None,
         attendees: List[Attendee] = None,
@@ -233,6 +231,13 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
             params=params,
             order_by="startTime",
             limit=page_size,
+        )
+
+    def get_event(self, event_id: str, calendar_id: str = "primary") -> ResourceType:
+        return self._execute(
+            method=self.client.events().get,
+            calendarId=calendar_id,
+            eventId=event_id,
         )
 
     def delete_event(self, event_id: str, calendar_id: str = "primary") -> ResourceType:

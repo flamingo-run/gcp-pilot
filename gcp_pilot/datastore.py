@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+import itertools
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -74,6 +76,19 @@ class Manager:
         # If no primary key is provided, we let the server create a new ID
         return self.get_client().allocate_ids(self.get_client().key(self.kind), 1)[0]
 
+    def _iterate(self, query, page_size):
+        cursor = None
+        empty = False
+
+        while not empty:
+            query_iter = query.fetch(start_cursor=cursor, limit=page_size)
+
+            page = next(query_iter.pages, [])
+            for item in page:
+                yield item
+            cursor = query_iter.next_page_token
+            empty = not bool(cursor)
+
     def query(
         self,
         distinct_on: str = None,
@@ -89,21 +104,36 @@ class Manager:
             query.distinct_on = distinct_on
 
         # parse lookup args
+        cross_filters = []
         for key, value in kwargs.items():
             all_filters = self._build_filter(key=key, value=value)
             for field_name, operator, field_value in all_filters:
-                query.add_filter(field_name, operator, field_value)
+                if operator == "in":
+                    cross_filters.append((field_name, operator, field_value))
+                else:
+                    query.add_filter(field_name, operator, field_value)
 
-        # prepare iterator
-        cursor = None
-        empty = False
-        while not empty:
-            query_iter = query.fetch(start_cursor=cursor, limit=page_size)
-            page = next(query_iter.pages, [])
-            for item in page:
-                yield item
-            cursor = query_iter.next_page_token
-            empty = not bool(cursor)
+        if not cross_filters:
+            yield from self._iterate(query=query, page_size=page_size)
+        else:
+            # prepare combinations
+            options = defaultdict(list)
+            for name, operator, values in cross_filters:
+                for value in values:
+                    options[name].append((name, "=", value))
+
+            combinations = itertools.product(*list(options.values()))
+
+            found = set()
+            for combination in combinations:
+                current_query = query
+                for field_name, operator, value in combination:
+                    current_query = current_query.add_filter(field_name, operator, value)
+
+                for item in self._iterate(query=current_query, page_size=page_size):
+                    if item.id not in found:
+                        yield item
+                        found.add(item.id)
 
     def filter(self, **kwargs) -> Generator[Document, None, None]:
         for entity in self.query(**kwargs):
@@ -158,29 +188,25 @@ class Manager:
                 self.get_client().delete_multi(keys=chunk)
 
     def _build_filter(self, key: str, value: Any) -> List[Tuple[str, str, Any]]:
-        lookup_fields = []
         operator = None
 
-        parts = key.split("__") if "__" in key else key.split(".")
-        for idx, part in enumerate(parts):
-            is_last = idx == len(parts) - 1
-            if part in self.lookup_operators:
-                if not is_last:
-                    raise exceptions.UnsupportedFormatException(f"Unsupported lookup key format {key}")
-                operator = self.lookup_operators[part]
-                if callable(operator):
-                    return operator(lookup_fields, value)
-            elif idx == 0 and part not in self.fields:
-                raise exceptions.ValidationError(
-                    f"{part} is not a valid field. Excepted one of {' | '.join(self.fields)}"
-                )
-            else:
-                lookup_fields.append(part)
+        field_name, *extra = key.split("__")
+        if extra:
+            if len(extra) > 1:
+                raise exceptions.UnsupportedFormatException(f"Unsupported lookup key format {extra}")
+            operator = extra[0]
+            if operator not in self.lookup_operators:
+                raise exceptions.UnsupportedFormatException(f"Unsupported lookup {operator}")
+            if callable(operator):
+                return operator(field_name, value)
 
-        if isinstance(value, list):
-            raise exceptions.ValidationError("Querying with OR clause is not supported")
+        parts = field_name.split(".")
+        if len(parts) > 1 and parts[0] not in self.fields:
+            raise exceptions.ValidationError(
+                f"{parts[0]} is not a valid field. Excepted one of {' | '.join(self.fields)}"
+            )
 
-        return [(".".join(lookup_fields), (operator or "="), value)]
+        return [(field_name, (operator or "="), value)]
 
     def to_entity(self, obj: Document) -> datastore.Entity:
         entity = datastore.Entity(key=self.build_key(pk=obj.pk))
@@ -271,23 +297,23 @@ class Metadata:
 
 
 class ORM(type):
-    def __new__(cls, name, bases, attrs):
-        is_abstract_model = cls._is_abstract(name=name)
-        is_concrete_model = cls._is_concrete(bases=bases)
+    def __new__(mcs, name, bases, attrs):
+        is_abstract_model = mcs._is_abstract(name=name)
+        is_concrete_model = mcs._is_concrete(bases=bases)
 
         if not is_abstract_model:
             # Since it was not explicitly provided, add id: str = None
-            if not cls._has_explicit_pk_field(attrs=attrs, bases=bases) and is_concrete_model:
+            if not mcs._has_explicit_pk_field(attrs=attrs, bases=bases) and is_concrete_model:
                 attrs["__annotations__"][DEFAULT_PK_FIELD] = int
                 attrs[DEFAULT_PK_FIELD] = None
 
-        new_cls = super().__new__(cls, name, bases, attrs)
+        new_cls = super().__new__(mcs, name, bases, attrs)
 
         if is_abstract_model:
             return new_cls
 
         # Metadata initialization
-        typed_fields = cls._extract_fields(klass=new_cls)
+        typed_fields = mcs._extract_fields(klass=new_cls)
         new_cls.Meta = Metadata(
             fields=typed_fields,
             doc_klass=new_cls,
@@ -308,15 +334,15 @@ class ORM(type):
         return new_cls
 
     @classmethod
-    def _is_abstract(cls, name: str) -> bool:
+    def _is_abstract(mcs, name: str) -> bool:
         return name in ["Document", "EmbeddedDocument"]
 
     @classmethod
-    def _is_concrete(cls, bases: Tuple[type]) -> bool:
+    def _is_concrete(mcs, bases: Tuple[type]) -> bool:
         return "Document" in [base.__name__ for base in bases]
 
     @classmethod
-    def _has_explicit_pk_field(cls, attrs: Dict, bases: Tuple[type]) -> bool:
+    def _has_explicit_pk_field(mcs, attrs: Dict, bases: Tuple[type]) -> bool:
         if DEFAULT_PK_FIELD in attrs.get("__annotations__", []):
             return True
 
@@ -327,14 +353,14 @@ class ORM(type):
         return False
 
     @classmethod
-    def _extract_fields(cls, klass: type) -> Dict[str, type]:
-        def _ignore(t: str, k: type):  # pylint: disable=invalid-name
-            is_private = t.startswith("_")
+    def _extract_fields(mcs, klass: type) -> Dict[str, type]:
+        def _ignore(var_type: str, k: type):
+            is_private = var_type.startswith("_")
             is_class_var = getattr(k, "__origin__", None) == ClassVar  # pylint: disable=comparison-with-callable
             return is_private or is_class_var
 
         hints = get_type_hints(klass)
-        typed_fields = {t: k for t, k in hints.items() if not _ignore(t, k)}
+        typed_fields = {var_type: k for var_type, k in hints.items() if not _ignore(var_type, k)}
         return typed_fields
 
 

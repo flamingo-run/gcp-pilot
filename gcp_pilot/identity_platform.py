@@ -57,6 +57,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
             serviceName="identitytoolkit",
             version="v1",
             cache_discovery=False,
+            static_discovery=False,
             **kwargs,
         )
 

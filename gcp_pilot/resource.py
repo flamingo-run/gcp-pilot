@@ -305,7 +305,7 @@ class ServiceAgent:
     def _load_from_tsv(cls, filepath: str):
         # Load this <https://cloud.google.com/iam/docs/service-agents> table
         data = {}
-        with open(filepath, "r") as file:
+        with open(filepath, "r", encoding="utf-8") as file:
             for line in file.readlines()[1:]:
                 name, domain, role = line.strip().split("\t")
                 if "roles/" not in role:

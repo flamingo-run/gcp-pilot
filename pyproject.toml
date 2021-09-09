@@ -13,6 +13,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
+pytz = "*"
 google-api-python-client = ">=2,<3"
 google-cloud-tasks = { version = ">=2,<3", optional = true}
 google-cloud-scheduler = { version = ">=2,<3", optional = true}

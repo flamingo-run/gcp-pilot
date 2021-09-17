@@ -10,15 +10,27 @@ import pytz
 from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, ResourceType
 
 
+class ResponseStatus(Enum):
+    # Predefined options to attendee response status
+    # Refs: <https://developers.google.com/calendar/api/v3/reference/events/update#attendees.responseStatus>
+    # pylint: disable=invalid-name
+    needs_action = "needsAction"
+    declined = "declined"
+    tentative = "tentative"
+    accepted = "accepted"
+
+
 @dataclass
 class Attendee:
     email: str
     optional: bool = False
+    response_status: ResponseStatus = None
 
     def as_data(self) -> Dict:
         return {
             "email": self.email,
             "optional": self.optional,
+            "responseStatus": self.response_status,
         }
 
 
@@ -313,4 +325,5 @@ __all__ = (
     "Calendar",
     "Attendee",
     "Color",
+    "ResponseStatus",
 )

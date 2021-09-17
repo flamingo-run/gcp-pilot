@@ -52,6 +52,15 @@ class Color(Enum):
     # pylint: enable=invalid-name
 
 
+class SendUpdates(Enum):
+    # Predefined options to send updates on events.
+    # Refs: <https://developers.google.com/calendar/api/v3/reference/events/update#sendUpdates>
+    # pylint: disable=invalid-name
+    all = "all"
+    external_only = "externalOnly"
+    none = "none"
+
+
 class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
     _scopes = ["https://www.googleapis.com/auth/calendar"]
 
@@ -181,6 +190,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         recurrence_amount: str = None,
         calendar_id: str = "primary",
         color: Color = None,
+        send_updates: SendUpdates = None,
     ) -> ResourceType:
         def _build_time_field(dt):
             if isinstance(start_at, datetime.datetime):
@@ -198,6 +208,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
             "description": description,
             "start": _build_time_field(dt=start_at),
             "end": _build_time_field(dt=end_at),
+            "sendUpdates": send_updates,
         }
 
         if color:
@@ -326,4 +337,5 @@ __all__ = (
     "Attendee",
     "Color",
     "ResponseStatus",
+    "SendUpdates",
 )

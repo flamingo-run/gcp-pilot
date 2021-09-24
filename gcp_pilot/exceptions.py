@@ -51,3 +51,7 @@ class MissingUserIdentification(Exception):
 
 class PushWebhookInvalid(ValidationError):
     pass
+
+
+class ChannelIdNotUnique(Exception):
+    pass

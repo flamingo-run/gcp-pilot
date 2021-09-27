@@ -6,11 +6,11 @@ from google.oauth2.service_account import Credentials
 
 
 class patch_auth:  # pylint: disable=invalid-name
-    def __init__(self, project_id: str = "potato-dev", location: str = "moon-dark1"):
+    def __init__(self, project_id: str = "potato-dev", location: str = "moon-dark1", email: str = "chuck@norris.com"):
         # Realistic: actual class to be accepted by clients during validation
         # But fake: with as few attributes as possible, any API call using the credential should fail
         credentials = Credentials(
-            service_account_email="chuck@norris.com",
+            service_account_email=email,
             signer=None,
             token_uri="",
             project_id=project_id,

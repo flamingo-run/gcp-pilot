@@ -55,3 +55,7 @@ class PushWebhookInvalid(ValidationError):
 
 class ChannelIdNotUnique(Exception):
     pass
+
+
+class NotACalendarUser(Exception):
+    pass

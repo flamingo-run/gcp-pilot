@@ -304,6 +304,7 @@ def friendly_http_error(func):
         "duplicate": exceptions.AlreadyExists,
         "push.webhookUrlUnauthorized": exceptions.PushWebhookInvalid,
         "channelIdNotUnique": exceptions.ChannelIdNotUnique,
+        "notACalendarUser": exceptions.NotACalendarUser,
     }
     _statuses = {
         "INVALID_ARGUMENT": exceptions.ValidationError,

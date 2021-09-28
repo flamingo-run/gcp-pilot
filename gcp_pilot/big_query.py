@@ -88,7 +88,7 @@ class BigQuery(GoogleCloudPilotAPI):
         elif extension == "csv":
             source_format = bigquery.job.SourceFormat.CSV
         else:
-            message = "Unsupported BigQuery Source format {}".format(extension)
+            message = f"Unsupported BigQuery Source format {extension}"
             raise exceptions.UnsupportedFormatException(message)
 
         job_config.source_format = source_format

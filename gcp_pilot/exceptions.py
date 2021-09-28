@@ -59,3 +59,7 @@ class ChannelIdNotUnique(Exception):
 
 class NotACalendarUser(Exception):
     pass
+
+
+class QuotaExceeded(Exception):
+    pass

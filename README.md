@@ -156,6 +156,8 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
   - manage APIs
   - manage API Configs
   - manage Gateways
+- Service Usage
+  - enable/disable APIs and Services
 - BigQuery
    - manage datasets
    - perform queries

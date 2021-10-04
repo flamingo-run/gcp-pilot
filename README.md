@@ -152,6 +152,10 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
 - Cloud Run
    - read services
    - manage domain mappings [[1]](https://cloud.google.com/run/docs/mapping-custom-domains#adding_verified_domain_owners_to_other_users_or_service_accounts)
+- API Gateway
+  - manage APIs
+  - manage API Configs
+  - manage Gateways
 - BigQuery
    - manage datasets
    - perform queries

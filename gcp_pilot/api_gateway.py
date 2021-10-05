@@ -55,7 +55,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def create_api(
         self,
-        app_id: str,
+        api_name: str,
         display_name: str = "",
         labels: Optional[Dict[str, str]] = None,
         project_id: Optional[str] = None,
@@ -69,7 +69,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         return self._execute(
             method=self.client.projects().locations().apis().create,
             parent=parent,
-            apiId=app_id,
+            apiId=api_name,
             body=body,
         )
 

@@ -114,7 +114,7 @@ grpcio-gcp = ["grpcio-gcp (>=0.2.2)"]
 
 [[package]]
 name = "google-api-python-client"
-version = "2.23.0"
+version = "2.24.0"
 description = "Google API Client Library for Python"
 category = "main"
 optional = false
@@ -357,7 +357,7 @@ proto-plus = ">=1.4.0"
 
 [[package]]
 name = "google-cloud-speech"
-version = "2.9.1"
+version = "2.9.3"
 description = "Google Cloud Speech API client library"
 category = "main"
 optional = true
@@ -900,8 +900,8 @@ google-api-core = [
     {file = "google_api_core-2.0.1-py2.py3-none-any.whl", hash = "sha256:b8ad41f72a70dd709dd13a08478936172aecf5f2d34a18ab378efa6d2d6ab575"},
 ]
 google-api-python-client = [
-    {file = "google-api-python-client-2.23.0.tar.gz", hash = "sha256:f117a595717fc384446f6235019e6a83fc9df821bd9d05dba7ff14aa96c70f52"},
-    {file = "google_api_python_client-2.23.0-py2.py3-none-any.whl", hash = "sha256:a7b364eff63ca75d827cfb241a0f8567157976e879046c1ff20ddf735bad618e"},
+    {file = "google-api-python-client-2.24.0.tar.gz", hash = "sha256:1c6267c7f018d86afc62dd8ec844a3e7189022a35ee239ed704cbda010888998"},
+    {file = "google_api_python_client-2.24.0-py2.py3-none-any.whl", hash = "sha256:75edc13a5c6dd9ff6f47721162a845edc343b4987ee059842e9a7905ad62e917"},
 ]
 google-auth = [
     {file = "google-auth-2.2.1.tar.gz", hash = "sha256:6dc8173abd50f25b6e62fc5b42802c96fc7cd9deb9bfeeb10a79f5606225cdf4"},
@@ -964,8 +964,8 @@ google-cloud-secret-manager = [
     {file = "google_cloud_secret_manager-2.7.2-py2.py3-none-any.whl", hash = "sha256:182e58f6f507d7322fa0ec3e526ee1dae48963efd1d957678499502c849b74a5"},
 ]
 google-cloud-speech = [
-    {file = "google-cloud-speech-2.9.1.tar.gz", hash = "sha256:321a11863124d2fba73c519594d5a8803650f1f4323b08b9de3d096e536e98c1"},
-    {file = "google_cloud_speech-2.9.1-py2.py3-none-any.whl", hash = "sha256:c140a803cf9e18a09cabda6ba64a4fd8dba2c41d30224485cc0104a4864bdcd5"},
+    {file = "google-cloud-speech-2.9.3.tar.gz", hash = "sha256:52b8a056f26e9ed082576b7b173c9a86f286a12c2883ec7cf5a0e8be68020bac"},
+    {file = "google_cloud_speech-2.9.3-py2.py3-none-any.whl", hash = "sha256:1a28d32fdd0f9d46eb90a9b7ffdecb314aa1121298d907fa3767e53292f3c7b5"},
 ]
 google-cloud-storage = [
     {file = "google-cloud-storage-1.42.3.tar.gz", hash = "sha256:7754d4dcaa45975514b404ece0da2bb4292acbc67ca559a69e12a19d54fcdb06"},

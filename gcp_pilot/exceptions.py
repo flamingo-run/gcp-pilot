@@ -63,3 +63,7 @@ class NotACalendarUser(Exception):
 
 class QuotaExceeded(Exception):
     pass
+
+
+class FailedPrecondition(Exception):
+    pass

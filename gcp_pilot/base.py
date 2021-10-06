@@ -315,6 +315,7 @@ def friendly_http_error(func):
         "INVALID_PASSWORD": exceptions.InvalidPassword,
         "EMAIL_NOT_FOUND": exceptions.NotFound,
         "MISSING_ID_TOKEN": exceptions.MissingUserIdentification,
+        "FAILED_PRECONDITION": exceptions.FailedPrecondition,
     }
 
     def inner_function(*args, **kwargs):

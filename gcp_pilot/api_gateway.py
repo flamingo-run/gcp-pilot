@@ -1,5 +1,6 @@
 # More Information: https://cloud.google.com/api-gateway/docs/reference/rest
 import base64
+import time
 from pathlib import Path
 from typing import Generator, Optional, Dict
 
@@ -59,6 +60,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         display_name: str = "",
         labels: Optional[Dict[str, str]] = None,
         project_id: Optional[str] = None,
+        wait: bool = True,
     ) -> ResourceType:
 
         parent = self._location_path(location="global", project_id=project_id)
@@ -66,12 +68,17 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
             "displayName": display_name,
             "labels": labels,
         }
-        return self._execute(
+        output = self._execute(
             method=self.client.projects().locations().apis().create,
             parent=parent,
             apiId=api_name,
             body=body,
         )
+        if wait:
+            while output.get("state", "CREATING") == "CREATING":
+                output = self.get_api(api_name=api_name, project_id=project_id)
+                time.sleep(5)
+        return output
 
     def delete_api(
         self,
@@ -119,6 +126,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         display_name: str = "",
         labels: Optional[Dict[str, str]] = None,
         project_id: Optional[str] = None,
+        wait: bool = True,
     ) -> ResourceType:
 
         parent = self._api_path(api_name=api_name, project_id=project_id)
@@ -129,12 +137,18 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
             "openapiDocuments": [{"document": file_content}],
             "labels": labels,
         }
-        return self._execute(
+        output = self._execute(
             method=self.client.projects().locations().apis().configs().create,
             parent=parent,
             apiConfigId=config_name,
             body=body,
         )
+
+        if wait:
+            while output.get("state", "CREATING") == "CREATING":
+                output = self.get_config(config_name=config_name, api_name=api_name, project_id=project_id)
+                time.sleep(5)
+        return output
 
     def delete_config(
         self,
@@ -182,6 +196,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         labels: Optional[Dict[str, str]] = None,
         project_id: Optional[str] = None,
         location: Optional[str] = None,
+        wait: bool = True,
     ) -> ResourceType:
 
         parent = self._location_path(project_id=project_id, location=location)
@@ -194,12 +209,17 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
             "apiConfig": config_path,
             "labels": labels,
         }
-        return self._execute(
+        output = self._execute(
             method=self.client.projects().locations().gateways().create,
             parent=parent,
             gatewayId=gateway_name,
             body=body,
         )
+        if wait:
+            while output.get("state", "CREATING") == "CREATING":
+                output = self.get_gateway(gateway_name=gateway_name, location=location, project_id=project_id)
+                time.sleep(5)
+        return output
 
     def delete_gateway(
         self,

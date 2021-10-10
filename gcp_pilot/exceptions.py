@@ -1,4 +1,5 @@
 from google.api_core.exceptions import FailedPrecondition
+from google.auth import exceptions as google_auth_exceptions
 
 
 class UnsupportedFormatException(Exception):
@@ -66,4 +67,8 @@ class QuotaExceeded(Exception):
 
 
 class FailedPrecondition(Exception):
+    pass
+
+
+class RefreshError(google_auth_exceptions.RefreshError):
     pass

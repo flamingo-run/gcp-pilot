@@ -332,7 +332,7 @@ def friendly_http_error(func):
             if not exception_klass and "message" in errors:
                 exception_klass = _statuses.get(errors["message"], None)
 
-            if not exception_klass:
+            if not exception_klass and "status" in errors:
                 exception_klass = _statuses.get(errors["status"], None)
                 details = f"{errors['code']}: {errors['message']}"
 

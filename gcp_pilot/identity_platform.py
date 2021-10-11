@@ -184,6 +184,9 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         user_id: str = None,
         project_id: str = None,
     ):
+        if phone_number and not phone_number.startswith("+"):
+            phone_number = f"+{phone_number}"
+
         data = {
             "email": email,
             "password": password,

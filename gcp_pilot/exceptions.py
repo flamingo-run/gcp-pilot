@@ -1,6 +1,3 @@
-from google.api_core.exceptions import FailedPrecondition
-
-
 class UnsupportedFormatException(Exception):
     pass
 
@@ -14,6 +11,10 @@ class UnboundException(Exception):
 
 
 class NotFound(Exception):
+    pass
+
+
+class FailedPrecondition(Exception):
     pass
 
 
@@ -62,8 +63,4 @@ class NotACalendarUser(Exception):
 
 
 class QuotaExceeded(Exception):
-    pass
-
-
-class FailedPrecondition(Exception):
     pass

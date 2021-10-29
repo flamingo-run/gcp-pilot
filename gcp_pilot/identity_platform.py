@@ -40,7 +40,7 @@ class User:
         return cls(
             id=data["localId"],
             email=data["email"],
-            verified=data["emailVerified"],
+            verified=data.get("emailVerified"),
             disabled=data["disabled"],
             created_at=parse_timestamp(timestamp=data["createdAt"]),
             last_login_at=parse_timestamp(timestamp=data.get("lastLoginAt")),
@@ -77,6 +77,8 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         if email:
             data["email"] = email
         if phone_number:
+            if not phone_number.startswith("+"):
+                phone_number = f"+{phone_number}"
             data["phone_number"] = phone_number
 
         response = self._execute(method=self.client.accounts().lookup, body=data)
@@ -222,6 +224,8 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         if password:
             data["password"] = password
         if phone_number:
+            if not phone_number.startswith("+"):
+                phone_number = f"+{phone_number}"
             data["phoneNumber"] = phone_number
         if name:
             data["displayName"] = name

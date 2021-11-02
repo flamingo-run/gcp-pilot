@@ -190,22 +190,23 @@ class Manager:
     def _build_filter(self, key: str, value: Any) -> List[Tuple[str, str, Any]]:
         operator = None
 
-        field_name, *extra = key.split("__")
-        if extra:
-            if len(extra) > 1:
-                raise exceptions.UnsupportedFormatException(f"Unsupported lookup key format {extra}")
-            operator = extra[0]
-            if operator not in self.lookup_operators:
-                raise exceptions.UnsupportedFormatException(f"Unsupported lookup {operator}")
-            if callable(operator):
-                return operator(field_name, value)
+        *field_parts, lookup = key.split("__")
+        if lookup:
+            try:
+                operator = self.lookup_operators[lookup]
 
-        parts = field_name.split(".")
-        if len(parts) > 1 and parts[0] not in self.fields:
+                if callable(operator):
+                    field_name = ".".join(field_parts)
+                    return operator(field_name, value)
+            except KeyError:
+                field_parts.append(lookup)
+
+        if len(field_parts) > 1 and field_parts[0] not in self.fields:
             raise exceptions.ValidationError(
-                f"{parts[0]} is not a valid field. Excepted one of {' | '.join(self.fields)}"
+                f"{field_parts[0]} is not a valid field. Excepted one of {' | '.join(self.fields)}"
             )
 
+        field_name = ".".join(field_parts)
         return [(field_name, (operator or "="), value)]
 
     def to_entity(self, obj: Document) -> datastore.Entity:

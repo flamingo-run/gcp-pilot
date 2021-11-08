@@ -6,6 +6,8 @@ from enum import Enum
 from typing import Dict, Optional, Union, Iterator
 from urllib.parse import urlparse, parse_qs
 
+from tenacity import Retrying, stop_after_attempt, wait_fixed
+
 from gcp_pilot import exceptions
 from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, ResourceType
 
@@ -41,7 +43,7 @@ class User:
             id=data["localId"],
             email=data["email"],
             verified=data.get("emailVerified"),
-            disabled=data["disabled"],
+            disabled=data.get("disabled"),
             created_at=parse_timestamp(timestamp=data["createdAt"]),
             last_login_at=parse_timestamp(timestamp=data.get("lastLoginAt")),
             password_changed_at=parse_timestamp(timestamp=data.get("passwordUpdatedAt")),
@@ -199,10 +201,11 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
             "phoneNumber": phone_number,
             "targetProjectId": project_id or self.project_id,
         }
-        response = self._execute(method=self.client.accounts().signUp, body=data)
+        self._execute(method=self.client.accounts().signUp, body=data)
 
-        User.create(data=response)
-        return self.find(email=email, project_id=project_id)
+        for attempt in Retrying(stop=stop_after_attempt(3), wait=wait_fixed(1)):
+            with attempt:
+                return self.find(email=email, project_id=project_id)
 
     def update(
         self,

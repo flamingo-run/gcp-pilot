@@ -23,7 +23,7 @@ lint:
 
 unit:
 	@echo "Running unit tests ..."
-	@poetry run nosetests
+	@poetry run pytest
 
 clean:
 	@rm -rf .coverage coverage.xml dist/ build/ *.egg-info/

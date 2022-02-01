@@ -1,6 +1,6 @@
 # More Information: https://cloud.google.com/cloud-build/docs/api
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Union, Generator
+from typing import List, Dict, Any, Union, Generator
 from urllib.parse import urlparse
 
 from google.api_core.exceptions import AlreadyExists

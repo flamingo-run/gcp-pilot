@@ -45,10 +45,12 @@ monitoring = ["google-cloud-logging", "google-cloud-error-reporting"]
 
 
 [tool.poetry.dev-dependencies]
-pylint = "*"
 black = "*"
-nose = "*"
+pylint = "*"
+safety = "*"
 coverage = "*"
+pytest = "*"
+pytest-cov = "*"
 
 
 [tool.black]
@@ -64,6 +66,13 @@ max-line-length = "120"
 
 [tool.pylint.basic]
 good-names= "i, j, k, m, n, dt, db, id, pk, tz, qs, ex, _"
+
+[tool.coverage.run]
+branch = true
+source = ["gcp_pilot"]
+
+[tool.pytest.ini_options]
+addopts = "--cov"
 
 
 [build-system]

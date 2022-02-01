@@ -139,7 +139,7 @@ class CloudBuild(GoogleCloudPilotAPI):
         images: List[str] = None,
         substitutions: Substitutions = None,
         timeout: int = None,
-        options: Optional[Dict] = None,
+        machine_type: str = cloudbuild_v1.BuildOptions.MachineType.UNSPECIFIED,
     ) -> cloudbuild_v1.BuildTrigger:
         def _get_event_param():
             valid_events = {
@@ -161,7 +161,9 @@ class CloudBuild(GoogleCloudPilotAPI):
                 steps=steps,
                 images=images or [],
                 timeout=self._as_duration(timeout),
-                options=options,
+                options=cloudbuild_v1.BuildOptions(
+                    machine_type=machine_type,
+                ),
             ),
             substitutions=substitutions.as_dict,
             **params,
@@ -190,7 +192,7 @@ class CloudBuild(GoogleCloudPilotAPI):
         images: List[str] = None,
         substitutions: Substitutions = None,
         timeout: int = None,
-        options: Optional[Dict] = None,
+        machine_type: str = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
             name=name,
@@ -201,7 +203,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             images=images,
             substitutions=substitutions,
             timeout=timeout,
-            options=options,
+            machine_type=machine_type,
         )
 
         response = self.client.create_build_trigger(
@@ -221,7 +223,7 @@ class CloudBuild(GoogleCloudPilotAPI):
         substitutions: Substitutions = None,
         project_id: str = None,
         timeout: int = None,
-        options: Optional[Dict] = None,
+        machine_type: str = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
             name=name,
@@ -232,7 +234,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             images=images,
             substitutions=substitutions,
             timeout=timeout,
-            options=options,
+            machine_type=machine_type,
         )
 
         response = self.client.update_build_trigger(
@@ -253,7 +255,7 @@ class CloudBuild(GoogleCloudPilotAPI):
         images: List[str] = None,
         substitutions: Substitutions = None,
         timeout: int = None,
-        options: Optional[Dict] = None,
+        machine_type: str = None,
     ) -> TriggerType:
         create_args = dict(
             name=name,
@@ -265,7 +267,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             images=images,
             substitutions=substitutions,
             timeout=timeout,
-            options=options,
+            machine_type=machine_type,
         )
 
         try:

@@ -1,3 +1,6 @@
+from typing import List
+
+
 class UnsupportedFormatException(Exception):
     pass
 
@@ -64,3 +67,9 @@ class NotACalendarUser(Exception):
 
 class QuotaExceeded(Exception):
     pass
+
+
+class OperationError(Exception):
+    def __init__(self, errors: List):
+        self.errors = errors
+        super().__init__(str(self.errors))

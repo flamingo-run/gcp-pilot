@@ -1,9 +1,13 @@
 # More Information: https://cloud.google.com/healthcare-api/docs/reference/rest
 import abc
+import logging
 from typing import Generator, Dict, Any
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, ResourceType
+
+
+logger = logging.getLogger("gcp-pilot")
 
 
 class HealthcareBase(DiscoveryMixin, GoogleCloudPilotAPI, abc.ABC):
@@ -18,8 +22,29 @@ class HealthcareBase(DiscoveryMixin, GoogleCloudPilotAPI, abc.ABC):
         )
 
     def _set_location(self, location: str = None) -> str:
-        # Only some limited regions are available: https://cloud.google.com/healthcare-api/docs/concepts/region
-        return "us"
+        # Only some limited regions are available: https://cloud.google.com/healthcare-api/docs/concepts/regions
+        valid_locations = [
+            "us-central1",
+            "us-west2",
+            "us-east4",
+            "northamerica-northeast1",
+            "southamerica-east1",
+            "europe-west3",
+            "europe-west2",
+            "europe-west4",
+            "europe-west6",
+            "asia-east2",
+            "asia-south1",
+            "asia-southeast1",
+            "asia-northeast1",
+            "asia-northeast3",
+            "australia-southeast1",
+        ]
+        location = super()._set_location(location=location)
+        if location not in valid_locations:
+            logger.warning(f"The location {location} is not available for Healthcare API yet. Using multi-region US.")
+            location = "us"
+        return location
 
     def _dataset_path(self, name: str, project_id: str = None, location: str = None) -> str:
         location_path = self._location_path(project_id=project_id, location=location)

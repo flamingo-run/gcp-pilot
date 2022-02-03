@@ -322,7 +322,11 @@ def friendly_http_error(func):
         try:
             return func(*args, **kwargs)
         except HttpError as exc:
-            errors = json.loads(exc.content)["error"]
+            error_content = json.loads(exc.content)
+            if "issue" in error_content:
+                raise exceptions.OperationError(errors=error_content["issue"]) from exc
+
+            errors = error_content["error"]
             exception_klass = None
             details = ""
 

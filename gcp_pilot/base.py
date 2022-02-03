@@ -13,6 +13,7 @@ from google.oauth2.service_account import Credentials as ServiceAccountCredentia
 from google.protobuf.duration_pb2 import Duration
 from googleapiclient.discovery import build, Resource
 from googleapiclient.errors import HttpError
+from requests import Response
 
 from gcp_pilot import exceptions
 
@@ -225,6 +226,15 @@ class GoogleCloudPilotAPI(abc.ABC):
         project_path = self._project_path(project_id=project_id)
         return f"{project_path}/locations/{location or self.location}"
 
+    @property
+    def _session(self) -> requests.AuthorizedSession:
+        return requests.AuthorizedSession(credentials=self.credentials)
+
+    @property
+    def _base_url(self) -> str:
+        metadata = self.client._rootDesc
+        return f"{metadata['baseUrl']}{metadata['version']}"
+
 
 class AccountManagerMixin:
     def _as_member(self, email: str) -> str:
@@ -350,6 +360,10 @@ def friendly_http_error(func):
 class DiscoveryMixin:
     @friendly_http_error
     def _execute(self, method: Callable, **kwargs) -> ResourceType:
+        call = method(**kwargs)
+        if isinstance(call, Response):
+            call.raise_for_status()
+            return call.json()
         return method(**kwargs).execute()
 
     def _list(

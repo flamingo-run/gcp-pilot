@@ -181,3 +181,7 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
   - reporting errors
   - logging
   - manage custom services
+- Healthcare
+  - Manage datasets
+  - Manage stores
+  - Manage FHIR resources

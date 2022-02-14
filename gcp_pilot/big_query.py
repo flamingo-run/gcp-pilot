@@ -83,7 +83,6 @@ class BigQuery(GoogleCloudPilotAPI):
             job_config.schema = schema
         else:
             job_config.autodetect = True
-            job_config._properties["load"]["schemaUpdateOptions"] = ["ALLOW_FIELD_ADDITION"]
 
         extension = filename.split(".")[-1]
         if extension == "json":

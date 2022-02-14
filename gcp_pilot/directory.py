@@ -1,5 +1,5 @@
 # More Information: https://developers.google.com/admin-sdk/directory/reference/rest
-from typing import Dict, Any, Generator, Optional, Union
+from typing import Dict, Any, Generator, Union
 
 from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
 

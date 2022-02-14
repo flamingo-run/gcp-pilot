@@ -1,5 +1,5 @@
 # More Information: https://developers.google.com/admin-sdk/directory/reference/rest
-from typing import Dict, Any, Generator
+from typing import Dict, Any, Generator, Optional, Union
 
 from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
 
@@ -21,6 +21,9 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
             subject=email,
             **kwargs,
         )
+
+    def _get_project_default_location(self, project_id: str = None) -> Union[str, None]:
+        return "us"
 
     def _build_context(self, customer: str = None, domain: str = None) -> Dict[str, str]:
         context = {

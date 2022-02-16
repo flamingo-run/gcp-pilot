@@ -316,6 +316,7 @@ def friendly_http_error(func):
         "channelIdNotUnique": exceptions.ChannelIdNotUnique,
         "notACalendarUser": exceptions.NotACalendarUser,
         "quotaExceeded": exceptions.QuotaExceeded,
+        "invalid": exceptions.ValidationError,
     }
     _statuses = {
         "INVALID_ARGUMENT": exceptions.ValidationError,
@@ -341,7 +342,9 @@ def friendly_http_error(func):
             details = ""
 
             if "errors" in errors:
-                exception_klass = _reasons.get(errors["errors"][0]["reason"], None)
+                main_error = errors["errors"][0]["reason"]
+                exception_klass = _reasons.get(main_error, None)
+                details = errors.get("message", "")
 
             if not exception_klass and "message" in errors:
                 exception_klass = _statuses.get(errors["message"], None)

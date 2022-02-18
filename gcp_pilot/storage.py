@@ -60,6 +60,8 @@ class CloudStorage(GoogleCloudPilotAPI):
             else:
                 content = io.StringIO(source_file)
                 blob.upload_from_file(content)
+        elif isinstance(source_file, bytes):
+            blob.upload_from_string(data=source_file)
         else:
             blob.upload_from_file(source_file)
 

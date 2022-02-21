@@ -9,6 +9,7 @@ from google.cloud.exceptions import Conflict
 from google.cloud.storage import Bucket, Blob
 
 from gcp_pilot.base import GoogleCloudPilotAPI
+from gcp_pilot import exceptions
 
 
 class CloudStorage(GoogleCloudPilotAPI):
@@ -120,6 +121,16 @@ class CloudStorage(GoogleCloudPilotAPI):
         )
         for blob in blobs:
             yield blob
+
+    def get_file(self, uri: str) -> Blob:
+        if not uri.startswith("gs://"):
+            raise exceptions.ValidationError("GCS file must start with gs://")
+
+        bucket_name, file_path = uri.removeprefix("gs://").split("/", 1)
+        bucket = self.client.bucket(bucket_name)
+        blob = bucket.blob(file_path)
+
+        return blob
 
     def _download(self, url: str) -> io.BytesIO:
         response = requests.get(url, stream=True)

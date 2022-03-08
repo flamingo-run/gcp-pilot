@@ -46,6 +46,7 @@ class CloudStorage(GoogleCloudPilotAPI):
         project_id: str = None,
         region: str = None,
         is_public: bool = False,
+        content_type: str = None,
     ) -> Blob:
         target_bucket = await self.create_bucket(name=bucket_name, project_id=project_id, region=region)
 
@@ -55,16 +56,16 @@ class CloudStorage(GoogleCloudPilotAPI):
         if isinstance(source_file, str):
             if source_file.startswith("http"):
                 file_obj = self._download(url=source_file)
-                blob.upload_from_file(file_obj)
+                blob.upload_from_file(file_obj, content_type=content_type)
             elif os.path.exists(source_file):
-                blob.upload_from_filename(source_file)
+                blob.upload_from_filename(source_file, content_type=content_type)
             else:
                 content = io.StringIO(source_file)
-                blob.upload_from_file(content)
+                blob.upload_from_file(content, content_type=content_type)
         elif isinstance(source_file, bytes):
-            blob.upload_from_string(data=source_file)
+            blob.upload_from_string(data=source_file, content_type=content_type)
         else:
-            blob.upload_from_file(source_file)
+            blob.upload_from_file(file_obj=source_file, content_type=content_type)
 
         if is_public:
             blob.make_public()

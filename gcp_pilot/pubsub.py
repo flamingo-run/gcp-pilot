@@ -51,7 +51,6 @@ class CloudPublisher(GoogleCloudPilotAPI):
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
             topic=topic_id,
-            labels=labels,
         )
         topic_obj = types.Topic(
             name=topic_path,

@@ -133,7 +133,7 @@ pipenv = ["pipenv"]
 
 [[package]]
 name = "google-api-core"
-version = "2.7.0"
+version = "2.7.1"
 description = "Google API client core library"
 category = "main"
 optional = false
@@ -154,14 +154,14 @@ grpcio-gcp = ["grpcio-gcp (>=0.2.2)"]
 
 [[package]]
 name = "google-api-python-client"
-version = "2.39.0"
+version = "2.41.0"
 description = "Google API Client Library for Python"
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
-google-api-core = ">=1.21.0,<3.0.0dev"
+google-api-core = ">=1.31.5,<2.0.0 || >2.3.0,<3.0.0dev"
 google-auth = ">=1.16.0,<3.0.0dev"
 google-auth-httplib2 = ">=0.1.0"
 httplib2 = ">=0.15.0,<1dev"
@@ -169,7 +169,7 @@ uritemplate = ">=3.0.1,<5"
 
 [[package]]
 name = "google-auth"
-version = "2.6.0"
+version = "2.6.2"
 description = "Google Authentication Library"
 category = "main"
 optional = false
@@ -201,7 +201,7 @@ six = "*"
 
 [[package]]
 name = "google-auth-oauthlib"
-version = "0.5.0"
+version = "0.5.1"
 description = "Google Authentication Library"
 category = "main"
 optional = true
@@ -353,18 +353,18 @@ proto-plus = ">=1.15.0"
 
 [[package]]
 name = "google-cloud-pubsub"
-version = "2.10.0"
+version = "2.11.0"
 description = "Google Cloud Pub/Sub API client library"
 category = "main"
 optional = true
 python-versions = ">=3.6"
 
 [package.dependencies]
-google-api-core = {version = ">=1.28.0,<3.0.0dev", extras = ["grpc"]}
+google-api-core = {version = ">=1.31.5,<2.0.0 || >2.3.0,<3.0.0dev", extras = ["grpc"]}
 grpc-google-iam-v1 = ">=0.12.3,<0.13dev"
 grpcio = ">=1.38.1,<2.0dev"
 grpcio-status = ">=1.16.0"
-proto-plus = ">=1.7.1"
+proto-plus = ">=1.15.0"
 
 [package.extras]
 libcst = ["libcst (>=0.3.10)"]
@@ -386,7 +386,7 @@ libcst = ["libcst (>=0.2.5)"]
 
 [[package]]
 name = "google-cloud-secret-manager"
-version = "2.9.1"
+version = "2.9.2"
 description = "Secret Manager API API client library"
 category = "main"
 optional = true
@@ -417,17 +417,17 @@ libcst = ["libcst (>=0.2.5)"]
 
 [[package]]
 name = "google-cloud-storage"
-version = "2.1.0"
+version = "2.2.1"
 description = "Google Cloud Storage API client library"
 category = "main"
 optional = true
 python-versions = ">=3.7"
 
 [package.dependencies]
-google-api-core = ">=1.29.0,<3.0dev"
+google-api-core = ">=1.31.5,<2.0.0 || >2.3.0,<3.0.0dev"
 google-auth = ">=1.25.0,<3.0dev"
 google-cloud-core = ">=1.6.0,<3.0dev"
-google-resumable-media = ">=1.3.0"
+google-resumable-media = ">=2.3.2"
 protobuf = "*"
 requests = ">=2.18.0,<3.0.0dev"
 
@@ -472,7 +472,7 @@ requests = ["requests (>=2.18.0,<3.0.0dev)"]
 
 [[package]]
 name = "googleapis-common-protos"
-version = "1.55.0"
+version = "1.56.0"
 description = "Common protobufs used in Google APIs"
 category = "main"
 optional = false
@@ -736,11 +736,11 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pytest"
-version = "7.0.1"
+version = "7.1.1"
 description = "pytest: simple powerful testing with Python"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 atomicwrites = {version = ">=1.0", markers = "sys_platform == \"win32\""}
@@ -908,14 +908,14 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "urllib3"
-version = "1.26.8"
+version = "1.26.9"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 
 [package.extras]
-brotli = ["brotlipy (>=0.6.0)"]
+brotli = ["brotlicffi (>=0.8.0)", "brotli (>=1.0.9)", "brotlipy (>=0.6.0)"]
 secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "certifi", "ipaddress"]
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
@@ -1051,24 +1051,24 @@ dparse = [
     {file = "dparse-0.5.1.tar.gz", hash = "sha256:a1b5f169102e1c894f9a7d5ccf6f9402a836a5d24be80a986c7ce9eaed78f367"},
 ]
 google-api-core = [
-    {file = "google-api-core-2.7.0.tar.gz", hash = "sha256:53fde60b5589420df2c1b4c98674ecbc217226931b713247586f71f5c0458c38"},
-    {file = "google_api_core-2.7.0-py3-none-any.whl", hash = "sha256:4ef13280a8b00772f9effa92c8f798bd2b7d2637ffe7d5bc8d50356448f1840b"},
+    {file = "google-api-core-2.7.1.tar.gz", hash = "sha256:b0fa577e512f0c8e063386b974718b8614586a798c5894ed34bedf256d9dae24"},
+    {file = "google_api_core-2.7.1-py3-none-any.whl", hash = "sha256:6be1fc59e2a7ba9f66808bbc22f976f81e4c3e7ab20fa0620ce42686288787d0"},
 ]
 google-api-python-client = [
-    {file = "google-api-python-client-2.39.0.tar.gz", hash = "sha256:401169215ecafb5afb683d3fe0e43c059eb625c71fea1929f16403dda72a2dc1"},
-    {file = "google_api_python_client-2.39.0-py2.py3-none-any.whl", hash = "sha256:69c73c2e206995839b2145255e8348bfb28ad825fae4c01e9db36d5856f0c770"},
+    {file = "google-api-python-client-2.41.0.tar.gz", hash = "sha256:facbe8e25ea9d07241299bf7704f53dec154ad3dc52fec2ea23ca6d6e5f6b392"},
+    {file = "google_api_python_client-2.41.0-py2.py3-none-any.whl", hash = "sha256:ce25fc21cf0649a1cbf42583e78d5fd7648ff2700e7b89b945209149ba913adc"},
 ]
 google-auth = [
-    {file = "google-auth-2.6.0.tar.gz", hash = "sha256:ad160fc1ea8f19e331a16a14a79f3d643d813a69534ba9611d2c80dc10439dad"},
-    {file = "google_auth-2.6.0-py2.py3-none-any.whl", hash = "sha256:218ca03d7744ca0c8b6697b6083334be7df49b7bf76a69d555962fd1a7657b5f"},
+    {file = "google-auth-2.6.2.tar.gz", hash = "sha256:60d449f8142c742db760f4c0be39121bc8d9be855555d784c252deaca1ced3f5"},
+    {file = "google_auth-2.6.2-py2.py3-none-any.whl", hash = "sha256:3ba4d63cb29c1e6d5ffcc1c0623c03cf02ede6240a072f213084749574e691ab"},
 ]
 google-auth-httplib2 = [
     {file = "google-auth-httplib2-0.1.0.tar.gz", hash = "sha256:a07c39fd632becacd3f07718dfd6021bf396978f03ad3ce4321d060015cc30ac"},
     {file = "google_auth_httplib2-0.1.0-py2.py3-none-any.whl", hash = "sha256:31e49c36c6b5643b57e82617cb3e021e3e1d2df9da63af67252c02fa9c1f4a10"},
 ]
 google-auth-oauthlib = [
-    {file = "google-auth-oauthlib-0.5.0.tar.gz", hash = "sha256:06c4ceb3ab2a93b85b8976bbe86cbb82ae1d1c02d2ded3cfd0847a8b6955263b"},
-    {file = "google_auth_oauthlib-0.5.0-py2.py3-none-any.whl", hash = "sha256:8b7ff4d2fe81e3bd034306aa665444360b3c67195b9dea582dddc7dfb8d89d34"},
+    {file = "google-auth-oauthlib-0.5.1.tar.gz", hash = "sha256:30596b824fc6808fdaca2f048e4998cc40fb4b3599eaea66d28dc7085b36c5b8"},
+    {file = "google_auth_oauthlib-0.5.1-py2.py3-none-any.whl", hash = "sha256:24f67735513c4c7134dbde2f1dee5a1deb6acc8dfcb577d7bff30d213a28e7b0"},
 ]
 google-cloud-appengine-logging = [
     {file = "google-cloud-appengine-logging-1.1.1.tar.gz", hash = "sha256:361450ed7d7bfd8efd0ef253e21680aeb6f6df3cf057e5e8253f5851f8cbbca7"},
@@ -1107,24 +1107,24 @@ google-cloud-logging = [
     {file = "google_cloud_logging-3.0.0-py2.py3-none-any.whl", hash = "sha256:8c8154c590ca750fe18ec8194f9450932c2188ad3a51340063e116d37b46bf5d"},
 ]
 google-cloud-pubsub = [
-    {file = "google-cloud-pubsub-2.10.0.tar.gz", hash = "sha256:95d9f311e8a7af6909f2ae7696ae6e30aa675f04ef1d0208d6851e828811f0e0"},
-    {file = "google_cloud_pubsub-2.10.0-py2.py3-none-any.whl", hash = "sha256:9ff6f72d62a5390ae5ae418d101c1a9ca3dfd3798239df916a12820f1b25cc12"},
+    {file = "google-cloud-pubsub-2.11.0.tar.gz", hash = "sha256:6ed3c9d97f88d1ff02dd80c1f5b6703efec75a7aacabd9285ac4fe0b22b50203"},
+    {file = "google_cloud_pubsub-2.11.0-py2.py3-none-any.whl", hash = "sha256:4cef16ef78b533f5177aaafc85c9ceac29a61afdbd2efad017999859c7ea5ed4"},
 ]
 google-cloud-scheduler = [
     {file = "google-cloud-scheduler-2.6.2.tar.gz", hash = "sha256:c1314bba221fc923c90f48002b583743e3dce5759c1f8aaaf0fac0b427d7eb0e"},
     {file = "google_cloud_scheduler-2.6.2-py2.py3-none-any.whl", hash = "sha256:278701762d8fb0229521448828d264648be6df9e25ade83bda602fa9b6d47797"},
 ]
 google-cloud-secret-manager = [
-    {file = "google-cloud-secret-manager-2.9.1.tar.gz", hash = "sha256:6a99f57b1ff6557d7c18780de7e258babcd328cab33d336a4cd38023e0c404bc"},
-    {file = "google_cloud_secret_manager-2.9.1-py2.py3-none-any.whl", hash = "sha256:79724e2f4aa5148a75cd585115712d3bcf8507021750a80861cfcee8236eae35"},
+    {file = "google-cloud-secret-manager-2.9.2.tar.gz", hash = "sha256:5bddd20c947c6d43d05fd2b3a19e98bd5f6453e4f077d86e1f4f5299aa78f358"},
+    {file = "google_cloud_secret_manager-2.9.2-py2.py3-none-any.whl", hash = "sha256:befa099b43f559c44f198fcb900ef1a9dde13bc802b58c451b0c64f6e3fa1366"},
 ]
 google-cloud-speech = [
     {file = "google-cloud-speech-2.13.1.tar.gz", hash = "sha256:2718480b838cb178dd258343a261219873d40b3bde152d287835ac5ffc1de730"},
     {file = "google_cloud_speech-2.13.1-py2.py3-none-any.whl", hash = "sha256:77af160d53933bf35d637e18f193c8ab57505120b3aabc089a7d6c80801056e0"},
 ]
 google-cloud-storage = [
-    {file = "google-cloud-storage-2.1.0.tar.gz", hash = "sha256:0a5e7ab1a38d2c24be8e566e50b8b0daa8af8fd49d4ab312b1fda5c147429893"},
-    {file = "google_cloud_storage-2.1.0-py2.py3-none-any.whl", hash = "sha256:53e4f6030d771526e4dbe9c6000cca44eab812f39ae8c7a810be999473e4f02c"},
+    {file = "google-cloud-storage-2.2.1.tar.gz", hash = "sha256:0244f4612710cb5ec445fc6774387564e23f9823363fb408b28724e2102401b7"},
+    {file = "google_cloud_storage-2.2.1-py2.py3-none-any.whl", hash = "sha256:abdf0fadf26516172e804e00b9c24819a3b3f7351cd32f35ca249bbfac965494"},
 ]
 google-cloud-tasks = [
     {file = "google-cloud-tasks-2.8.1.tar.gz", hash = "sha256:55f443651830ab5a4ec23ce6aba99d6d5a9c4fac10743eaa38c8af427e146b5d"},
@@ -1180,8 +1180,8 @@ google-resumable-media = [
     {file = "google_resumable_media-2.3.2-py2.py3-none-any.whl", hash = "sha256:3c13f84813861ac8f5b6371254bdd437076bf1f3bac527a9f3fd123a70166f52"},
 ]
 googleapis-common-protos = [
-    {file = "googleapis-common-protos-1.55.0.tar.gz", hash = "sha256:53eb313064738f45d5ac634155ae208e121c963659627b90dfcb61ef514c03e1"},
-    {file = "googleapis_common_protos-1.55.0-py2.py3-none-any.whl", hash = "sha256:183bb0356bd614c4330ad5158bc1c1bcf9bcf7f5e7f911317559fe209496eeee"},
+    {file = "googleapis-common-protos-1.56.0.tar.gz", hash = "sha256:4007500795bcfc269d279f0f7d253ae18d6dc1ff5d5a73613ffe452038b1ec5f"},
+    {file = "googleapis_common_protos-1.56.0-py2.py3-none-any.whl", hash = "sha256:60220c89b8bd5272159bed4929ecdc1243ae1f73437883a499a44a1cbc084086"},
 ]
 grpc-google-iam-v1 = [
     {file = "grpc-google-iam-v1-0.12.3.tar.gz", hash = "sha256:0bfb5b56f648f457021a91c0df0db4934b6e0c300bd0f2de2333383fe958aa72"},
@@ -1398,8 +1398,8 @@ pyparsing = [
     {file = "pyparsing-3.0.7.tar.gz", hash = "sha256:18ee9022775d270c55187733956460083db60b37d0d0fb357445f3094eed3eea"},
 ]
 pytest = [
-    {file = "pytest-7.0.1-py3-none-any.whl", hash = "sha256:9ce3ff477af913ecf6321fe337b93a2c0dcf2a0a1439c43f5452112c1e4280db"},
-    {file = "pytest-7.0.1.tar.gz", hash = "sha256:e30905a0c131d3d94b89624a1cc5afec3e0ba2fbdb151867d8e0ebd49850f171"},
+    {file = "pytest-7.1.1-py3-none-any.whl", hash = "sha256:92f723789a8fdd7180b6b06483874feca4c48a5c76968e03bb3e7f806a1869ea"},
+    {file = "pytest-7.1.1.tar.gz", hash = "sha256:841132caef6b1ad17a9afde46dc4f6cfa59a05f9555aae5151f73bdf2820ca63"},
 ]
 pytest-cov = [
     {file = "pytest-cov-3.0.0.tar.gz", hash = "sha256:e7f0f5b1617d2210a2cabc266dfe2f4c75a8d32fb89eafb7ad9d06f6d076d470"},
@@ -1489,8 +1489,8 @@ uritemplate = [
     {file = "uritemplate-4.1.1.tar.gz", hash = "sha256:4346edfc5c3b79f694bccd6d6099a322bbeb628dbf2cd86eea55a456ce5124f0"},
 ]
 urllib3 = [
-    {file = "urllib3-1.26.8-py2.py3-none-any.whl", hash = "sha256:000ca7f471a233c2251c6c7023ee85305721bfdf18621ebff4fd17a8653427ed"},
-    {file = "urllib3-1.26.8.tar.gz", hash = "sha256:0e7c33d9a63e7ddfcb86780aac87befc2fbddf46c58dbb487e0855f7ceec283c"},
+    {file = "urllib3-1.26.9-py2.py3-none-any.whl", hash = "sha256:44ece4d53fb1706f667c9bd1c648f5469a2ec925fcf3a776667042d645472c14"},
+    {file = "urllib3-1.26.9.tar.gz", hash = "sha256:aabaf16477806a5e1dd19aa41f8c2b7950dd3c746362d7e3223dbe6de6ac448e"},
 ]
 wrapt = [
     {file = "wrapt-1.13.3-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:e05e60ff3b2b0342153be4d1b597bbcfd8330890056b9619f4ad6b8d5c96a81a"},

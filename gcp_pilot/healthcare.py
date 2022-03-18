@@ -1,11 +1,13 @@
 # More Information: https://cloud.google.com/healthcare-api/docs/reference/rest
 import abc
 import logging
-from typing import Generator, Dict, Any
+import math
+from dataclasses import dataclass
+from typing import Generator, Dict, Any, Callable, Optional
+from urllib.parse import urlsplit, parse_qsl
 
 from gcp_pilot import exceptions
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, ResourceType
-
+from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, ResourceType, friendly_http_error
 
 logger = logging.getLogger("gcp-pilot")
 
@@ -95,6 +97,83 @@ class HealthcareBase(DiscoveryMixin, GoogleCloudPilotAPI, abc.ABC):
         )
 
 
+@dataclass
+class FHIRResultSet:
+    method: Callable
+    url: str
+    query: Dict[str, Any] = None
+    order_by: str = None
+    limit: int = None
+    cursor: str = None
+    _response: Dict = None
+
+    @property
+    def response(self):
+        if not self._response:
+            self._request()
+        return self._response
+
+    @response.setter
+    def response(self, value):
+        self._response = value
+
+    @friendly_http_error
+    def _request(self):
+        kwargs = {
+            "url": self.url,
+            "headers": {"Content-Type": "application/fhir+json;charset=utf-8"},
+            "params": self.query or {},
+        }
+        if self.order_by:
+            kwargs["params"]["_sort"] = self.order_by
+        if self.limit:
+            kwargs["params"]["_count"] = self.limit
+        if self.cursor:
+            kwargs["params"]["_page_token"] = self.cursor
+
+        request = self.method(**kwargs)
+        request.raise_for_status()
+        self.response = request.json()
+
+    def __iter__(self) -> Generator[Dict, None, None]:
+        while True:
+            yield from self.get_page_resources()
+            self.cursor = self.next_cursor
+            if not self.cursor:
+                break
+            self._request()
+
+    def get_page_resources(self) -> Generator[Dict, None, None]:
+        for entry in self.response["entry"]:
+            yield entry["resource"]
+
+    @property
+    def next_cursor(self) -> Optional[str]:
+        for link in self.response["link"]:
+            if link["relation"] == "next":
+                query_params = dict(parse_qsl(urlsplit(link["url"]).query))
+                return query_params.get("_page_token")
+        return None
+
+    @property
+    def previous_cursor(self) -> Optional[str]:
+        for link in self.response["link"]:
+            if link["relation"] == "previous":
+                return link["url"]
+        return None
+
+    @property
+    def total(self) -> int:
+        return self.response["total"]
+
+    def __len__(self) -> int:
+        return self.total
+
+    @property
+    def num_pages(self) -> int:
+        return int(math.ceil(self.total / self.limit))
+
+
 class HealthcareFHIR(HealthcareBase):
     def _store_path(self, name: str, dataset_name: str, project_id: str = None, location: str = None) -> str:
         dataset_path = self._dataset_path(name=dataset_name, project_id=project_id, location=location)
@@ -150,11 +229,13 @@ class HealthcareFHIR(HealthcareBase):
         self,
         store_name: str,
         dataset_name: str,
+        resource_type: str,
         project_id: str = None,
         location: str = None,
-        resource_type: str = None,
         query: Dict[str, Any] = None,
-    ) -> Generator[ResourceType, None, None]:
+        limit: int = 100,
+        cursor: str = None,
+    ) -> FHIRResultSet:
         parent = self._store_path(
             name=store_name,
             dataset_name=dataset_name,
@@ -163,19 +244,13 @@ class HealthcareFHIR(HealthcareBase):
         )
         url = f"{self._base_url}/{parent}/fhir/{resource_type}/_search"
 
-        params = dict(
-            url=url,
-            params=query,
-            headers={"Content-Type": "application/fhir+json;charset=utf-8"},
-        )
-
-        entries = self._list(
+        return FHIRResultSet(
             method=self._session.post,
-            result_key="entry",
-            params=params,
+            url=url,
+            query=query,
+            limit=limit,
+            cursor=cursor,
         )
-        for entry in entries:
-            yield entry["resource"]
 
     def create_store(
         self,

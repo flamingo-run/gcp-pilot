@@ -143,7 +143,16 @@ class FHIRResultSet:
                 break
             self._request()
 
+    def first(self) -> Dict:
+        try:
+            return next(iter(self))
+        except StopIteration:
+            raise exceptions.NotFound()
+
     def get_page_resources(self) -> Generator[Dict, None, None]:
+        if self.total == 0:
+            return
+
         for entry in self.response["entry"]:
             yield entry["resource"]
 

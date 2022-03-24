@@ -108,9 +108,9 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             body={"policy": policy, "updateMask": "bindings"},
         )
 
-    def get_key(self, id: str, service_account_name: str, project_id: str = None) -> KeyType:
+    def get_key(self, key_id: str, service_account_name: str, project_id: str = None) -> KeyType:
         key_path = self._key_path(
-            key_id=id,
+            key_id=key_id,
             email=self._build_service_account_email(name=service_account_name, project_id=project_id),
             project_id=project_id,
         )
@@ -120,9 +120,9 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             name=key_path,
         )
 
-    def delete_key(self, id: str, service_account_name: str, project_id: str = None) -> KeyType:
+    def delete_key(self, key_id: str, service_account_name: str, project_id: str = None) -> KeyType:
         key_path = self._key_path(
-            key_id=id,
+            key_id=key_id,
             email=self._build_service_account_email(name=service_account_name, project_id=project_id),
             project_id=project_id,
         )

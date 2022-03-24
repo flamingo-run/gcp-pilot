@@ -146,8 +146,8 @@ class FHIRResultSet:
     def first(self) -> Dict:
         try:
             return next(iter(self))
-        except StopIteration:
-            raise exceptions.NotFound()
+        except StopIteration as exc:
+            raise exceptions.NotFound() from exc
 
     def get_page_resources(self) -> Generator[Dict, None, None]:
         if self.total == 0:

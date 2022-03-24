@@ -1,10 +1,12 @@
 # More Information: <https://cloud.google.com/iam/docs/reference/rest>
+import base64
 from typing import Dict, Any, Generator
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import GoogleCloudPilotAPI, AccountManagerMixin, PolicyType, DiscoveryMixin
 
 AccountType = Dict[str, Any]
+KeyType = Dict[str, Any]
 
 
 class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
@@ -19,6 +21,10 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
     def _service_account_path(self, email: str, project_id: str = None) -> str:
         parent_path = self._project_path(project_id=project_id)
         return f"{parent_path}/serviceAccounts/{email}"
+
+    def _key_path(self, key_id: str, email: str, project_id: str = None) -> str:
+        parent_path = self._service_account_path(email=email, project_id=project_id)
+        return f"{parent_path}/keys/{key_id}"
 
     def _build_service_account_email(self, name: str, project_id: str = None) -> str:
         return f"{name}@{project_id or self.project_id}.iam.gserviceaccount.com"
@@ -101,6 +107,73 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             resource=resource,
             body={"policy": policy, "updateMask": "bindings"},
         )
+
+    def get_key(self, id: str, service_account_name: str, project_id: str = None) -> KeyType:
+        key_path = self._key_path(
+            key_id=id,
+            email=self._build_service_account_email(name=service_account_name, project_id=project_id),
+            project_id=project_id,
+        )
+
+        return self._execute(
+            method=self.client.projects().serviceAccounts().key().get,
+            name=key_path,
+        )
+
+    def delete_key(self, id: str, service_account_name: str, project_id: str = None) -> KeyType:
+        key_path = self._key_path(
+            key_id=id,
+            email=self._build_service_account_email(name=service_account_name, project_id=project_id),
+            project_id=project_id,
+        )
+
+        return self._execute(
+            method=self.client.projects().serviceAccounts().keys().delete,
+            name=key_path,
+        )
+
+    def create_key(
+        self,
+        service_account_name: str,
+        project_id: str = None,
+    ) -> KeyType:
+        body = {}
+        parent = self._service_account_path(
+            email=self._build_service_account_email(name=service_account_name, project_id=project_id),
+            project_id=project_id,
+        )
+        account_key = self._execute(
+            method=self.client.projects().serviceAccounts().keys().create,
+            name=parent,
+            body=body,
+        )
+        return self._format_key(data=account_key)
+
+    def list_keys(self, service_account_name: str, project_id: str = None) -> Generator[KeyType, None, None]:
+        parent = self._service_account_path(
+            email=self._build_service_account_email(name=service_account_name, project_id=project_id),
+            project_id=project_id,
+        )
+        params = dict(
+            name=parent,
+        )
+        pagination = self._list(
+            method=self.client.projects().serviceAccounts().keys().list,
+            result_key="keys",
+            params=params,
+        )
+        for item in pagination:
+            yield self._format_key(data=item)
+
+    def _format_key(self, data: Dict) -> Dict:
+        prefix, suffix = data["name"].split("/keys/", 1)
+        data["id"] = suffix
+        data["service_account_email"] = prefix.rsplit("/", 1)[-1]
+        data["service_account_name"] = data["service_account_email"].rsplit("@", 1)[0]
+
+        if "privateKeyData" in data:
+            data["json"] = base64.b64decode(data["privateKeyData"]).decode()
+        return data
 
 
 __all__ = ("IdentityAccessManager",)

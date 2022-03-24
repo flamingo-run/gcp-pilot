@@ -6,7 +6,20 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Type, Generator, get_args, Dict, ClassVar, Any, Tuple, get_type_hints, Union, Callable, List
+from typing import (
+    Type,
+    Generator,
+    get_args,
+    Dict,
+    ClassVar,
+    Any,
+    Tuple,
+    get_type_hints,
+    Union,
+    List,
+    Optional,
+    Callable,
+)
 
 from google.cloud import datastore
 
@@ -69,7 +82,10 @@ class Manager:
     def get_namespace(self):
         return self.doc_klass.Meta.namespace
 
-    def build_key(self, pk: Any = None) -> datastore.Key:
+    def build_key(self, pk: Any = None, embedded: bool = False) -> datastore.Key:
+        if embedded:
+            return self.get_client().key("EmbeddedKind")
+
         if pk:
             typed_pk = self.doc_klass.Meta.fields[self.pk_field](pk)
             return self.get_client().key(self.kind, typed_pk)
@@ -210,10 +226,17 @@ class Manager:
         return [(field_name, (operator or "="), value)]
 
     def to_entity(self, obj: Document) -> datastore.Entity:
-        entity = datastore.Entity(key=self.build_key(pk=obj.pk))
-        if not obj.pk:
-            setattr(obj, obj.Meta.pk_field, entity.id)
-        entity.update(obj.Meta.to_dict(obj=obj))
+        exclude_from_indexes = obj.Meta.exclude_from_indexes
+
+        if isinstance(obj, Document):
+            entity = datastore.Entity(key=self.build_key(pk=obj.pk), exclude_from_indexes=exclude_from_indexes)
+            if not obj.pk:
+                setattr(obj, obj.Meta.pk_field, entity.id)
+        else:
+            entity = datastore.Entity(key=self.build_key(embedded=True), exclude_from_indexes=exclude_from_indexes)
+
+        entity_data = obj.Meta.to_dict(obj=obj, parse_embedded=self.to_entity)
+        entity.update(entity_data)
         return entity
 
     def from_entity(self, entity: datastore.Entity) -> Document:
@@ -229,6 +252,7 @@ class Metadata:
     doc_klass: Type[EmbeddedDocument]
     pk_field: str = None
     namespace: str = DEFAULT_NAMESPACE
+    exclude_from_indexes: List[str] = field(default_factory=list)
 
     def from_dict(self, data: Dict) -> EmbeddedDocument:
         data = data.copy()
@@ -267,13 +291,18 @@ class Metadata:
 
         return self.doc_klass(**parsed_data)
 
-    def to_dict(self, obj: EmbeddedDocument, select_fields: List[str] = None) -> dict:
+    def to_dict(
+        self,
+        obj: EmbeddedDocument,
+        select_fields: List[str] = None,
+        parse_embedded: Optional[Callable] = None,
+    ) -> Dict:
         # TODO handle custom dynamic fields
         def _unbuild(value):
             if value is None:
                 return value
             if isinstance(value, EmbeddedDocument):
-                return value.Meta.to_dict(obj=value)
+                return parse_embedded(value) if parse_embedded else value.Meta.to_dict(obj=value)
             if isinstance(value, Enum):
                 return value.value
             return value
@@ -315,10 +344,12 @@ class ORM(type):
 
         # Metadata initialization
         typed_fields = mcs._extract_fields(klass=new_cls)
+        metadata_fields = mcs._extract_fields(klass=new_cls, metadata=True)
         new_cls.Meta = Metadata(
             fields=typed_fields,
             doc_klass=new_cls,
             namespace=getattr(new_cls, "__namespace__", None),
+            **{field.removeprefix("_"): getattr(new_cls, field) for field in metadata_fields},
         )
 
         # Manager initialization
@@ -354,14 +385,16 @@ class ORM(type):
         return False
 
     @classmethod
-    def _extract_fields(mcs, klass: type) -> Dict[str, type]:
-        def _ignore(var_type: str, k: type):
+    def _extract_fields(mcs, klass: type, metadata: bool = False) -> Dict[str, type]:
+        def _include(var_type: str, k: type):
             is_private = var_type.startswith("_")
-            is_class_var = getattr(k, "__origin__", None) == ClassVar  # pylint: disable=comparison-with-callable
-            return is_private or is_class_var
+            is_class_var = (
+                getattr(k, "__origin__", None) == ClassVar or getattr(k, "_name", None) == "ClassVar"
+            )  # pylint: disable=comparison-with-callable
+            return (is_private and is_class_var) if metadata else not (is_private or is_class_var)
 
         hints = get_type_hints(klass)
-        typed_fields = {var_type: k for var_type, k in hints.items() if not _ignore(var_type, k)}
+        typed_fields = {var_type: k for var_type, k in hints.items() if _include(var_type, k)}
         return typed_fields
 
 

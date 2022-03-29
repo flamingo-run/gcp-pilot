@@ -2,9 +2,13 @@
 import abc
 import logging
 import math
+import json
 from dataclasses import dataclass
-from typing import Generator, Dict, Any, Callable, Optional
+from typing import Generator, Dict, Any, Callable, Optional, Type, List
 from urllib.parse import urlsplit, parse_qsl
+
+from fhir.resources.domainresource import DomainResource
+from fhir.resources.identifier import Identifier
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, ResourceType, friendly_http_error
@@ -97,10 +101,15 @@ class HealthcareBase(DiscoveryMixin, GoogleCloudPilotAPI, abc.ABC):
         )
 
 
+def as_json(resource: DomainResource) -> Dict[str, Any]:
+    return json.loads(resource.json())
+
+
 @dataclass
 class FHIRResultSet:
     method: Callable
     url: str
+    resource_class: Type[DomainResource]
     query: Dict[str, Any] = None
     order_by: str = None
     limit: int = None
@@ -149,12 +158,12 @@ class FHIRResultSet:
         except StopIteration as exc:
             raise exceptions.NotFound() from exc
 
-    def get_page_resources(self) -> Generator[Dict, None, None]:
+    def get_page_resources(self) -> Generator[DomainResource, None, None]:
         if self.total == 0:
             return
 
         for entry in self.response["entry"]:
-            yield entry["resource"]
+            yield self.resource_class(**entry["resource"])
 
     @property
     def next_cursor(self) -> Optional[str]:
@@ -206,7 +215,10 @@ class HealthcareFHIR(HealthcareBase):
         return f"{store_path}/fhir/{resource_type}/{resource_id}"
 
     def list_stores(
-        self, dataset_name: str, project_id: str = None, location: str = None
+        self,
+        dataset_name: str,
+        project_id: str = None,
+        location: str = None,
     ) -> Generator[ResourceType, None, None]:
         params = dict(
             parent=self._dataset_path(name=dataset_name, project_id=project_id, location=location),
@@ -238,7 +250,7 @@ class HealthcareFHIR(HealthcareBase):
         self,
         store_name: str,
         dataset_name: str,
-        resource_type: str,
+        resource_class: Type[DomainResource],
         project_id: str = None,
         location: str = None,
         query: Dict[str, Any] = None,
@@ -251,11 +263,13 @@ class HealthcareFHIR(HealthcareBase):
             project_id=project_id,
             location=location,
         )
+        resource_type = resource_class().resource_type
         url = f"{self._base_url}/{parent}/fhir/{resource_type}/_search"
 
         return FHIRResultSet(
             method=self._session.post,
             url=url,
+            resource_class=resource_class,
             query=query,
             limit=limit,
             cursor=cursor,
@@ -309,13 +323,14 @@ class HealthcareFHIR(HealthcareBase):
 
     def get_resource(
         self,
-        resource_type: str,
+        resource_class: Type[DomainResource],
         resource_id: str,
         store_name: str,
         dataset_name: str,
         project_id: str = None,
         location: str = None,
-    ) -> ResourceType:
+    ) -> DomainResource:
+        resource_type = resource_class().resource_type
         name = self._resource_path(
             resource_type=resource_type,
             resource_id=resource_id,
@@ -325,20 +340,22 @@ class HealthcareFHIR(HealthcareBase):
             location=location,
         )
 
-        return self._execute(
+        data = self._execute(
             method=self.client.projects().locations().datasets().fhirStores().fhir().read,
             name=name,
         )
+        return resource_class(**data)
 
     def delete_resource(
         self,
-        resource_type: str,
+        resource_class: Type[DomainResource],
         resource_id: str,
         store_name: str,
         dataset_name: str,
         project_id: str = None,
         location: str = None,
     ) -> ResourceType:
+        resource_type = resource_class().resource_type
         name = self._resource_path(
             resource_type=resource_type,
             resource_id=resource_id,
@@ -348,15 +365,15 @@ class HealthcareFHIR(HealthcareBase):
             location=location,
         )
 
-        return self._execute(
+        data = self._execute(
             method=self.client.projects().locations().datasets().fhirStores().fhir().delete,
             name=name,
         )
+        return data
 
     def create_resource(
         self,
-        data: Dict[str, Any],
-        resource_type: str,
+        resource: DomainResource,
         store_name: str,
         dataset_name: str,
         project_id: str = None,
@@ -366,54 +383,52 @@ class HealthcareFHIR(HealthcareBase):
         return self._execute(
             method=self.client.projects().locations().datasets().fhirStores().fhir().create,
             parent=parent,
-            type=resource_type,
-            body=data,
+            type=resource.resource_type,
+            body=as_json(resource),
         )
 
     def update_resource(
         self,
-        data: Dict[str, Any],
-        resource_type: str,
-        resource_id: str,
+        resource: DomainResource,
         store_name: str,
         dataset_name: str,
         project_id: str = None,
         location: str = None,
-    ) -> ResourceType:
+    ) -> DomainResource:
         name = self._resource_path(
-            resource_type=resource_type,
-            resource_id=resource_id,
+            resource_type=resource.resource_type,
+            resource_id=resource.id,
             store_name=store_name,
             dataset_name=dataset_name,
             project_id=project_id,
             location=location,
         )
 
-        return self._execute(
+        data = self._execute(
             method=self.client.projects().locations().datasets().fhirStores().fhir().update,
             name=name,
-            body=data,
+            body=as_json(resource),
         )
+        return resource.__class__(**data)
 
     def create_or_update_resource(
         self,
-        data: Dict[str, Any],
-        resource_type: str,
+        resource: DomainResource,
         store_name: str,
         dataset_name: str,
         query: Dict[str, Any] = None,
         project_id: str = None,
         location: str = None,
-    ) -> ResourceType:
+    ) -> DomainResource:
         if not query:
-            identifiers = data.get("identifier")
+            identifiers: List[Identifier] = getattr(resource, "identifier")
             if not identifiers:
                 raise exceptions.ValidationError("Either `query` or identifiers must be provided to create-or-update")
 
             query_values = []
             for identifier in identifiers:
-                query_values.append(identifier["system"])
-                query_values.append(identifier["value"])
+                query_values.append(identifier.system)
+                query_values.append(identifier.value)
             query = {"identifier": "|".join(query_values)}
 
         parent = self._store_path(
@@ -422,16 +437,17 @@ class HealthcareFHIR(HealthcareBase):
             project_id=project_id,
             location=location,
         )
-        url = f"{self._base_url}/{parent}/fhir/{resource_type}"
+        url = f"{self._base_url}/{parent}/fhir/{resource.resource_type}"
 
         params = dict(
             url=url,
             params=query,
             headers={"Content-Type": "application/fhir+json;charset=utf-8"},
-            json=data,
+            json=as_json(resource),
         )
 
-        return self._execute(method=self._session.put, **params)
+        data = self._execute(method=self._session.put, **params)
+        return resource.__class__(**data)
 
     def export_resources(
         self,
@@ -470,16 +486,15 @@ class HealthcareFHIR(HealthcareBase):
 
     def get_resource_history(
         self,
-        resource_type: str,
-        resource_id: str,
+        resource: DomainResource,
         store_name: str,
         dataset_name: str,
         project_id: str = None,
         location: str = None,
     ) -> ResourceType:
         name = self._resource_path(
-            resource_type=resource_type,
-            resource_id=resource_id,
+            resource_type=resource.resource_type,
+            resource_id=resource.id,
             store_name=store_name,
             dataset_name=dataset_name,
             project_id=project_id,
@@ -495,4 +510,4 @@ class HealthcareFHIR(HealthcareBase):
         )
 
         for entry in entries:
-            yield entry["resource"]
+            yield resource.__class__(**entry["resource"])

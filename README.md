@@ -20,6 +20,7 @@ Some APIs need extra packages, thus you must use `extras` to add them:
 - Datastore: `pip install gcp-pilot[datastore]`
 - Cloud DNS: `pip install gcp-pilot[dns]`
 - Secret Manager: `pip install gcp-pilot[secret]`
+- Healthcare Engine: `pip install gcp-pilot[healthcare]`
 
 
 ## Usage
@@ -65,7 +66,7 @@ when creating clients.
 _"Since Google already has a [generic API client](https://github.com/googleapis/google-api-python-client) and so many [specific clients](https://github.com/googleapis?q=python&type=&language=), why should I use this library?"_
 
 Google's has 2 types of clients:
-- **dedicated**: custom made for the APIs. They are excellent: they implement high level interaction with the API with friendly methods. The `gcp-pilot` can adds its value by handling authentication, friendly errors and parameter fallback.
+- **dedicated**: custom-made for the APIs. They are excellent: they implement high level interaction with the API with friendly methods. The `gcp-pilot` can adds its value by handling authentication, friendly errors and parameter fallback.
 - **generic**: a single client that is capable of dynamically calling any REST API. They are a pain to use: very specific calls that must be translated from the documentation. The `gcp-pilot` comes in handy to add high-level interaction with friendly method such as `Calendar.create_event`, on top of all other vantages cited above.
 
 ### Parameter Fallback
@@ -184,4 +185,4 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
 - Healthcare
   - Manage datasets
   - Manage stores
-  - Manage FHIR resources
+  - Manage FHIR resources: _powered by [fhir-resources](https://github.com/nazrulworld/fhir.resources)_

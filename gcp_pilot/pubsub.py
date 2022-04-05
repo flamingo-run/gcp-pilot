@@ -6,7 +6,7 @@ from typing import Callable, Dict, Any, AsyncIterator, Union
 
 from google.api_core.exceptions import AlreadyExists, NotFound
 from google.cloud import pubsub_v1
-from google.protobuf.field_mask_pb2 import FieldMask
+from google.protobuf.field_mask_pb2 import FieldMask  # pylint: disable=no-name-in-module
 from google.pubsub_v1 import PushConfig, Subscription, Topic, types
 
 from gcp_pilot.base import GoogleCloudPilotAPI

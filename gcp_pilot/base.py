@@ -10,7 +10,7 @@ from google.auth.credentials import Credentials
 from google.auth.impersonated_credentials import Credentials as ImpersonatedCredentials
 from google.auth.transport import requests
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
-from google.protobuf.duration_pb2 import Duration
+from google.protobuf.duration_pb2 import Duration  # pylint: disable=no-name-in-module
 from googleapiclient.discovery import build, Resource
 from googleapiclient.errors import HttpError
 from requests import Response

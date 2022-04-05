@@ -6,6 +6,8 @@ from enum import Enum
 from typing import Dict, Optional, Union, Iterator
 from urllib.parse import urlparse, parse_qs
 
+from google.auth.transport import requests
+from google.oauth2 import id_token
 from tenacity import Retrying, stop_after_attempt, wait_fixed
 
 from gcp_pilot import exceptions
@@ -33,6 +35,8 @@ class User:
     verified: bool
     disabled: bool
     created_at: Optional[datetime]
+    name: str = None
+    photo_url: bool = None
     last_login_at: Optional[datetime] = None
     password_changed_at: Optional[datetime] = None
     extra_attributes: Dict[str, str] = None
@@ -44,10 +48,75 @@ class User:
             email=data["email"],
             verified=data.get("emailVerified"),
             disabled=data.get("disabled"),
+            photo_url=data.get("photoUrl"),
             created_at=parse_timestamp(timestamp=data["createdAt"]),
             last_login_at=parse_timestamp(timestamp=data.get("lastLoginAt")),
             password_changed_at=parse_timestamp(timestamp=data.get("passwordUpdatedAt")),
             extra_attributes=json.loads(data.get("customAttributes", "{}")),
+        )
+
+
+@dataclass
+class FirebaseOAuth:
+    id_token: str
+    access_token: str
+    refresh_token: str = None
+    token_secret: str = None
+
+
+@dataclass
+class FirebaseAuthToken:
+    jwt_token: str
+
+    def __post_init__(self):
+        self._data = id_token.verify_firebase_token(id_token=self.jwt_token, request=requests.Request())
+
+    @property
+    def provider_id(self) -> str:
+        return self._data["sign_in_method"]
+
+    @property
+    def tenant_id(self) -> str:
+        return self._data["tenant_id"]  # FIXME
+
+    @property
+    def oauth(self) -> FirebaseOAuth:
+        return FirebaseOAuth(
+            id_token=self._data["oauth_id_token"],
+            access_token=self._data["oauth_access_token"],
+            refresh_token=self._data.get("oauth_refresh_token", None),
+            token_secret=self._data.get("oauth_token_secret", None),
+        )
+
+    @property
+    def event_type(self) -> str:
+        return self._data["event_type"]
+
+    @property
+    def ip_address(self) -> str:
+        return self._data["ip_address"]
+
+    @property
+    def user_agent(self) -> str:
+        return self._data["user_agent"]
+
+    @property
+    def expiration_date(self) -> datetime:
+        epoch = self._data["exp"]
+        return parse_timestamp(epoch)
+
+    @property
+    def user(self) -> User:
+        user_data = self._data["user_record"]
+        return User(
+            id=user_data["uid"],
+            email=user_data["email"],
+            name=user_data["display_name"],
+            photo_url=user_data["photo_url"],
+            verified=user_data["email_verified"],
+            disabled=user_data["disabled"],
+            created_at=parse_timestamp(user_data["metadata"]["creation_time"]),
+            last_login_at=parse_timestamp(user_data["metadata"]["last_sign_in_time"]),
         )
 
 

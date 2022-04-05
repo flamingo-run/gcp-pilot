@@ -43,3 +43,7 @@ class patch_auth:  # pylint: disable=invalid-name
                 return func(*args, **kw)
 
         return wrapper
+
+
+def patch_firebase_token(**kwargs):
+    return patch("google.oauth2.id_token.verify_firebase_token", **kwargs)

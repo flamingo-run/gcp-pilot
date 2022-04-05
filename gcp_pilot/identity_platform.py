@@ -54,7 +54,7 @@ class User:
 class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
     _scopes = ["https://www.googleapis.com/auth/identitytoolkit"]
 
-    def __init__(self, **kwargs):
+    def __init__(self, tenant_id: str = None, **kwargs):
         super().__init__(
             serviceName="identitytoolkit",
             version="v1",
@@ -62,19 +62,33 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
             static_discovery=False,
             **kwargs,
         )
+        self.tenant_id = tenant_id
 
-    def find(self, email: str = None, phone_number: str = None, project_id: str = None) -> User:
+    def find(
+        self,
+        email: str = None,
+        phone_number: str = None,
+        tenant_id: str = None,
+        project_id: str = None,
+    ) -> User:
         try:
-            return next(self.lookup(email=email, phone_number=phone_number, project_id=project_id))
+            return next(self.lookup(email=email, phone_number=phone_number, tenant_id=tenant_id, project_id=project_id))
         except StopIteration as exc:
             raise exceptions.NotFound() from exc
 
-    def lookup(self, email: str = None, phone_number: str = None, project_id: str = None) -> Iterator[User]:
+    def lookup(
+        self,
+        email: str = None,
+        phone_number: str = None,
+        tenant_id: str = None,
+        project_id: str = None,
+    ) -> Iterator[User]:
         if not email and not phone_number:
             raise exceptions.ValidationError("Either `email` or `phone_number` must be provided")
 
         data = {
             "target_project_id": project_id or self.project_id,
+            "tenantId": tenant_id or self.tenant_id,
         }
         if email:
             data["email"] = email
@@ -87,26 +101,29 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         for item in response.get("users", []):
             yield User.create(data=item)
 
-    def sign_in_with_password(self, email: str, password: str):
+    def sign_in_with_password(self, email: str, password: str, tenant_id: str = None):
         data = {
             "email": email,
             "password": password,
+            "tenantId": tenant_id or self.tenant_id,
         }
         response = self._execute(method=self.client.accounts().signInWithPassword, body=data)
         return response
 
-    def sign_in_with_phone_number(self, phone_number: str, code: str):
+    def sign_in_with_phone_number(self, phone_number: str, code: str, tenant_id: str = None):
         data = {
             "phone_number": phone_number,
             "code": code,
+            "tenantId": tenant_id or self.tenant_id,
         }
         response = self._execute(method=self.client.accounts().signInWithPhoneNumber, body=data)
         return response
 
-    def sign_in_with_email_link(self, email: str, code: str):
+    def sign_in_with_email_link(self, email: str, code: str, tenant_id: str = None):
         data = {
             "email": email,
             "oobCode": code,
+            "tenantId": tenant_id or self.tenant_id,
         }
         response = self._execute(method=self.client.accounts().signInWithEmailLink, body=data)
         return response
@@ -119,6 +136,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         project_id: str = None,
         send_email: bool = False,
         redirect_url: str = None,
+        tenant_id: str = None,
     ) -> ResourceType:
         data = {
             "requestType": type.value,
@@ -127,6 +145,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
             "continue_url": redirect_url,
             "target_project_id": project_id or self.project_id,
             "returnOobLink": not send_email,
+            "tenantId": tenant_id or self.tenant_id,
         }
         response = self._execute(method=self.client.accounts().sendOobCode, body=data)
 
@@ -137,10 +156,18 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         query = parse_qs(urlparse(url).query)
         return {"url": url, "code": query["oobCode"][0]}
 
-    def reset_password(self, email: str, new_password: str, old_password: str = None, oob_code: str = None):
+    def reset_password(
+        self,
+        email: str,
+        new_password: str,
+        old_password: str = None,
+        oob_code: str = None,
+        tenant_id: str = None,
+    ):
         data = {
             "newPassword": new_password,
             "email": email,
+            "tenantId": tenant_id or self.tenant_id,
         }
 
         if oob_code:
@@ -153,27 +180,30 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         response = self._execute(method=self.client.accounts().resetPassword, body=data)
         return response
 
-    def delete_user(self, user_id: str):
+    def delete_user(self, user_id: str, tenant_id: str = None):
         data = {
             "localId": user_id,
+            "tenantId": tenant_id or self.tenant_id,
         }
         response = self._execute(method=self.client.accounts().delete, body=data)
         return response
 
-    def disable_user(self, user_id: str, project_id: str = None):
+    def disable_user(self, user_id: str, project_id: str = None, tenant_id: str = None):
         data = {
             "localId": user_id,
             "disableUser": True,
             "targetProjectId": project_id or self.project_id,
+            "tenantId": tenant_id or self.tenant_id,
         }
         response = self._execute(method=self.client.accounts().update, body=data)
         return response
 
-    def enable_user(self, user_id: str, project_id: str = None):
+    def enable_user(self, user_id: str, project_id: str = None, tenant_id: str = None):
         data = {
             "localId": user_id,
             "disableUser": False,
             "targetProjectId": project_id or self.project_id,
+            "tenantId": tenant_id or self.tenant_id,
         }
         response = self._execute(method=self.client.accounts().update, body=data)
         return response
@@ -187,6 +217,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         photo_url: str = None,
         user_id: str = None,
         project_id: str = None,
+        tenant_id: str = None,
     ):
         if phone_number and not phone_number.startswith("+"):
             phone_number = f"+{phone_number}"
@@ -200,6 +231,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
             "localId": user_id,
             "phoneNumber": phone_number,
             "targetProjectId": project_id or self.project_id,
+            "tenantId": tenant_id or self.tenant_id,
         }
         self._execute(method=self.client.accounts().signUp, body=data)
 
@@ -217,10 +249,12 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         photo_url: str = None,
         project_id: str = None,
         attributes: Dict[str, str] = None,
+        tenant_id: str = None,
     ):
         data = {
             "localId": user_id,
             "targetProjectId": project_id or self.project_id,
+            "tenantId": tenant_id or self.tenant_id,
         }
         if email:
             data["email"] = email
@@ -236,6 +270,5 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
             data["photoUrl"] = photo_url
         if attributes:
             data["customAttributes"] = json.dumps(attributes)
-
         response = self._execute(method=self.client.accounts().update, body=data)
         return response

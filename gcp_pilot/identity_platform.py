@@ -114,9 +114,10 @@ class FirebaseAuthToken:
             id=user_data["uid"],
             email=user_data["email"],
             name=user_data["display_name"],
-            photo_url=user_data["photo_url"],
-            verified=user_data["email_verified"],
-            disabled=user_data["disabled"],
+            photo_url=user_data.get("photo_url"),
+            verified=user_data.get("email_verified"),
+            disabled=user_data.get("disabled"),
+            tenant_id=user_data.get("tenant_id"),
             created_at=parse_timestamp(user_data["metadata"]["creation_time"]),
             last_login_at=parse_timestamp(user_data["metadata"]["last_sign_in_time"]),
         )

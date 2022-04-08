@@ -1,0 +1,41 @@
+{
+  "iss": "https://securetoken.google.com/gcp-project-name",
+  "aud": "https://us-east1-gcp-project-name.cloudfunctions.net/function-name",
+  "iat": 1649369851,
+  "exp": 1649370151,
+  "event_id": "Do8Kgj-he6liMeluuf3G1A",
+  "event_type": "beforeSignIn",
+  "sign_in_method": "google.com",
+  "raw_user_info": "'{\"name\":\"Harry Potter\",\"granted_scopes\":\"https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid https://www.googleapis.com/auth/calendar.readonly\",\"id\":\"114073921988005792263\",\"verified_email\":true,\"given_name\":\"Harry\",\"locale\":\"en\",\"hd\":\"nilo.co\",\"family_name\":\"Potter\",\"email\":\"harry@potter.wiz\",\"picture\":\"https://lh3.googleusercontent.com/a-/AOh14GiDgBcpNbwMp2hvbmid87zPVU2i7gKnQlsS4yI-=s96-c\"}'",
+  "oauth_id_token": "eyJhbGciOiJSUzINiIsImtpZCI6ImNlYzEzZGViZjRiOTY0Nzk2ODM3MzYyMDUwODI0NjZjMTQ3OTdiZDAiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiYXpwIjoiNzAyNjcyOTcxMjk0LTk2Y2czZjV1cTJ2NmgxcG0yY2NvYm9rMTgxamwzYmJ2LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiNzAyNjcyOTcxMjk0LTk2Y2czZjV1cTJ2NmgxcG0yY2NvYm9rMTgxamwzYmJ2LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTE0MDczOTIxOTg4MDA1NzkyMjYzIiwiaGQiOiJuaWxvLmNvIiwiZW1haWwiOiJsZ29taWRlQG5pbG8uY28iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6Ikp3aGQ5YVBNeUZ2VENBcU14UkNRY0EiLCJpYXQiOjE2NDkzNjk4NTEsImV4cCI6MTY0OTM3MzQ1MX0.ialqLiHEh1ypYmYgzN42eIFnAdMYF4FuHzb6YBmK3MV4qCo-5JJilJIu1o4BQELpzMAl4HIoGJqjSGt8F2HssrRJDYwI8-p2ralwrkBVFy1FnZNv32v6Zw0fmbwRfa0X2RXS4A2bmU4OyeUWvD3pOKDMePS3DE5wTZ7Yn63elCQRYQzquqFjBMTiGMTufGbj3Fsb_Tf9lVvvPa8Ug8NWOBdX93NrXW7pet8Ug8fV4t9rERFDMwd8wMCJe7RcS0NeZG-WqxbOkpY5KPn4TfocNkCQpxWzwc-DEFlr9U8KQoqr-fTNcNUh69axCrn4Rx8q20kc5Dxfb1banWIHFIjc-Q",
+  "oauth_access_token": "ya29.A0ARrdaMBF9gcqfk7zyalZHO3ODgQh05o0ruGNQkBJaG0tRVAS-tjaDOUs1rKN1of7hyCVFcp_IhViO4ocRqdbvDJYYzKR7cQ_zHNDAAoJQGUTxwZKfElRx58kpKayQ3mIvlu6G0dWOQs1ZGr-hOL1bBP_cey",
+  "oauth_token_secret": "",
+  "oauth_refresh_token": "1//0f1xCKcpvRGrCgYIARAAGA8SNwF-L9Ir1OgBtHsqeKINfn1V78GeEHP9pEFE3BHIqgbFsSGE9vhAGHKGZ1xjgxwEa55Kdfp49Mc",
+  "oauth_expires_in": 3599,
+  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36,gzip(gfe),gzip(gfe)",
+  "ip_address": "2804:14d:78a5:899e:a8f8:553d:5776:e6d9",
+  "locale": "en",
+  "sub": "qZE07p9aLEdWgAQRvFqtKXhrtum2",
+  "tenant_id": "name-of-tenant",
+  "user_record": {
+    "uid": "qZE07p9aLEdWgAQRvFqtKXhrtum2",
+    "email": "harry@potter.wiz",
+    "email_verified": true,
+    "display_name": "Harry Potter",
+    "photo_url": "https://lh3.googleusercontent.com/a-/AOh14GiDgBcpNbwMp2hvbmid87zPVU2i7gKnQlsS4yI-=s96-c",
+    "provider_data": [
+      {
+        "provider_id": "google.com",
+        "display_name": "Harry Potter",
+        "photo_url": "https://lh3.googleusercontent.com/a-/AOh14GiDgBcpNbwMp2hvbmid87zPVU2i7gKnQlsS4yI-=s96-c",
+        "email": "harry@potter.wiz",
+        "uid": "114073921988005792263"
+      }
+    ],
+    "metadata": {
+      "last_sign_in_time": 1649369851815,
+      "creation_time": 1649367694482
+    },
+    "tenant_id": "name-of-tenant"
+  }
+}

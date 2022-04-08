@@ -1,5 +1,7 @@
+import json
 import unittest
-from typing import Dict
+from pathlib import Path
+from typing import Tuple, Dict
 
 from gcp_pilot.factories.identity_platform import FirebaseAuthTokenFactory
 from gcp_pilot.identity_platform import IdentityPlatform, FirebaseAuthToken, parse_timestamp
@@ -9,6 +11,13 @@ from tests import ClientTestMixin
 
 class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
     _CLIENT_KLASS = IdentityPlatform
+
+    @classmethod
+    def _load_sample_token(cls, sample_name: str) -> Tuple[Dict, FirebaseAuthToken]:
+        sample_path = Path(__file__).parent / "samples" / "identity_platform" / f"{sample_name}.json"
+        token_data = json.load(sample_path.open())
+        with patch_firebase_token(return_value=token_data):
+            return token_data, FirebaseAuthToken(jwt_token="potato")
 
     def assert_expected_sample_token(self, expected_data: Dict, token: FirebaseAuthToken, is_tenant: bool):
         self.assertEqual(parse_timestamp(expected_data["exp"]), token.expiration_date)
@@ -44,6 +53,14 @@ class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
             self.assertIsNone(token.tenant_id)
             self.assertFalse("tenant_id" in expected_data["user_record"])
             self.assertIsNone(token.user.tenant_id)
+
+    def test_parse_tenant_signin_token(self):
+        token_data, token = self._load_sample_token("firebase_tenant_signin_decoded_token")
+        self.assert_expected_sample_token(expected_data=token_data, token=token, is_tenant=True)
+
+    def test_parse_signin_token(self):
+        token_data, token = self._load_sample_token("firebase_signin_decoded_token")
+        self.assert_expected_sample_token(expected_data=token_data, token=token, is_tenant=False)
 
     def test_parse_firebase_factory_token(self):
         token_data = FirebaseAuthTokenFactory.create()

@@ -33,6 +33,7 @@ class FirebaseUserFactory(factory.Factory):
             "creation_time": Faker().unix_time(),
         }
     )
+    tenant_id = factory.Faker("word")
 
 
 class FirebaseAuthTokenFactory(factory.Factory):
@@ -71,4 +72,5 @@ class FirebaseAuthTokenFactory(factory.Factory):
     ip_address = factory.Faker("ipv4")
     locale = "en"
     sub = factory.Faker("ean")
+    tenant_id = factory.Faker("word")
     user_record = factory.SubFactory(FirebaseUserFactory)

@@ -40,6 +40,7 @@ class User:
     last_login_at: Optional[datetime] = None
     password_changed_at: Optional[datetime] = None
     extra_attributes: Dict[str, str] = None
+    tenant_id: Optional[str] = None
 
     @classmethod
     def create(cls, data: ResourceType) -> "User":
@@ -49,6 +50,7 @@ class User:
             verified=data.get("emailVerified"),
             disabled=data.get("disabled"),
             photo_url=data.get("photoUrl"),
+            tenant_id=data.get("tenant_id"),
             created_at=parse_timestamp(timestamp=data["createdAt"]),
             last_login_at=parse_timestamp(timestamp=data.get("lastLoginAt")),
             password_changed_at=parse_timestamp(timestamp=data.get("passwordUpdatedAt")),
@@ -76,8 +78,8 @@ class FirebaseAuthToken:
         return self._data["sign_in_method"]
 
     @property
-    def tenant_id(self) -> str:
-        return self._data["tenant_id"]  # FIXME
+    def tenant_id(self) -> Optional[str]:
+        return self._data.get("tenant_id", None)
 
     @property
     def oauth(self) -> FirebaseOAuth:

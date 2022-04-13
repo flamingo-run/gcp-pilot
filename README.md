@@ -71,7 +71,7 @@ Google's has 2 types of clients:
 
 ### Parameter Fallback
 
-Most of the API endpoints require `project_id` (sometimes even `project_number`) and `location`.
+Most API endpoints require `project_id` (sometimes even `project_number`) and `location`.
 
 So `gcp-pilot` automatically detects these values for you, based on your credentials (although it'll require extra permissions and API calls).
 
@@ -80,7 +80,7 @@ If you use multiple projects, and your credentials is accessing other projects, 
 
 ### Friendly Errors
 
-Most of APIs return a generic ``HttpException`` with am embedded payload with error output, and also there's a couple of different structures for these payloads.
+Most APIs return a generic ``HttpException`` with am embedded payload with error output, and also there's a couple of different structures for these payloads.
 
 So `gcp-pilot` tries its best to convert these exceptions into more friendly ones, such as `NotFound`, `AlreadyExists` and `NotAllowed`.
 
@@ -133,6 +133,11 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
    - generate OIDC token
 - Source Repositories
    - manage repositories
+- Directory:
+  - manage users
+  - manage groups
+- People:
+  - get people
 - Cloud SQL
    - manage instances
    - manage databases

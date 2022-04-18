@@ -263,7 +263,7 @@ class HealthcareFHIR(HealthcareBase):
             project_id=project_id,
             location=location,
         )
-        resource_type = resource_class().resource_type
+        resource_type = resource_class.get_resource_type()
         url = f"{self._base_url}/{parent}/fhir/{resource_type}/_search"
 
         return FHIRResultSet(
@@ -330,7 +330,7 @@ class HealthcareFHIR(HealthcareBase):
         project_id: str = None,
         location: str = None,
     ) -> DomainResource:
-        resource_type = resource_class().resource_type
+        resource_type = resource_class.get_resource_type()
         name = self._resource_path(
             resource_type=resource_type,
             resource_id=resource_id,
@@ -355,7 +355,7 @@ class HealthcareFHIR(HealthcareBase):
         project_id: str = None,
         location: str = None,
     ) -> ResourceType:
-        resource_type = resource_class().resource_type
+        resource_type = resource_class.get_resource_type()
         name = self._resource_path(
             resource_type=resource_type,
             resource_id=resource_id,
@@ -383,7 +383,7 @@ class HealthcareFHIR(HealthcareBase):
         return self._execute(
             method=self.client.projects().locations().datasets().fhirStores().fhir().create,
             parent=parent,
-            type=resource.resource_type,
+            type=resource.get_resource_type(),
             body=as_json(resource),
         )
 
@@ -396,7 +396,7 @@ class HealthcareFHIR(HealthcareBase):
         location: str = None,
     ) -> DomainResource:
         name = self._resource_path(
-            resource_type=resource.resource_type,
+            resource_type=resource.get_resource_type(),
             resource_id=resource.id,
             store_name=store_name,
             dataset_name=dataset_name,
@@ -437,7 +437,7 @@ class HealthcareFHIR(HealthcareBase):
             project_id=project_id,
             location=location,
         )
-        url = f"{self._base_url}/{parent}/fhir/{resource.resource_type}"
+        url = f"{self._base_url}/{parent}/fhir/{resource.get_resource_type()}"
 
         params = dict(
             url=url,
@@ -493,7 +493,7 @@ class HealthcareFHIR(HealthcareBase):
         location: str = None,
     ) -> ResourceType:
         name = self._resource_path(
-            resource_type=resource.resource_type,
+            resource_type=resource.get_resource_type(),
             resource_id=resource.id,
             store_name=store_name,
             dataset_name=dataset_name,

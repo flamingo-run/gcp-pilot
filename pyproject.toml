@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gcp-pilot"
-version = "0.47.1"
+version = "0.48.0"
 description = "Google Cloud Platform Friendly Pilot"
 authors = ["Joao Daher <joao@daher.dev>"]
 repository = "https://github.com/flamingo-run/gcp-pilot"
@@ -26,6 +26,7 @@ google-cloud-speech = { version = "^2", optional = true}
 gspread = { version = "^5", optional = true}
 google-cloud-pubsub = { version = "^2", optional = true}
 google-cloud-datastore = { version = "^2", optional = true}
+pydantic = { version = "*", optional = true}
 google-cloud-dns = { version = "^0", optional = true}
 google-cloud-logging = { version = "^3", optional = true}
 google-cloud-error-reporting = { version = "*", optional = true}
@@ -40,7 +41,7 @@ bigquery = ["google-cloud-bigquery"]
 speech = ["google-cloud-speech"]
 sheets = ["gspread"]
 pubsub = ["google-cloud-pubsub"]
-datastore = ["google-cloud-datastore"]
+datastore = ["google-cloud-datastore", "pydantic"]
 dns = ["google-cloud-dns"]
 secret = ["google-cloud-secret-manager"]
 monitoring = ["google-cloud-logging", "google-cloud-error-reporting"]
@@ -69,6 +70,9 @@ max-line-length = "120"
 
 [tool.pylint.basic]
 good-names= "i, j, k, m, n, dt, db, id, pk, tz, qs, ex, _"
+
+[tool.pylint."MESSAGES CONTROL"]
+extension-pkg-whitelist = "pydantic"
 
 [tool.coverage.run]
 branch = true

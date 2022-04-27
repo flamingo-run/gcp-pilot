@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 import itertools
+import inspect
 import os
 from collections import defaultdict
 from dataclasses import dataclass
@@ -75,7 +76,11 @@ class Manager:
 
     @property
     def namespace(self) -> str:
-        return self.doc_klass.__config__.namespace
+        return getattr(self.doc_klass.__config__, "namespace", ())
+
+    @property
+    def exclude_from_indexes(self):
+        return getattr(self.doc_klass.__config__, "exclude_from_indexes", ())
 
     @property
     def kind(self) -> str:
@@ -235,6 +240,7 @@ class Manager:
 class EmbeddedDocument(BaseModel, abc.ABC):
     class Config:
         arbitrary_types_allowed = True
+        use_enum_values = True
         keep_untouched = (cached_property,)
 
     def __init_subclass__(cls, *args, **kwargs):
@@ -255,8 +261,7 @@ class EmbeddedDocument(BaseModel, abc.ABC):
         return cls.from_dict(**data)
 
     def to_entity(self) -> datastore.Entity:
-        exclude_from_indexes = self.__config__.exclude_from_indexes
-
+        exclude_from_indexes = self.documents.exclude_from_indexes
         if isinstance(self, Document):
             entity = datastore.Entity(
                 key=self.documents.build_key(pk=self.pk),
@@ -270,7 +275,22 @@ class EmbeddedDocument(BaseModel, abc.ABC):
                 exclude_from_indexes=exclude_from_indexes,
             )
 
-        entity.update(self.to_dict())
+        dict_obj = self.dict()
+
+        data = {}
+        for field_name, field_info in self.__fields__.items():
+            if inspect.isclass(field_info.type_) and issubclass(field_info.type_, EmbeddedDocument):
+                # recursively generate entities
+                field_value = getattr(self, field_name)
+                if isinstance(field_value, (list, tuple)):
+                    value = [item.to_entity() for item in field_value]
+                else:
+                    value = field_value.to_entity() if field_value else None
+            else:
+                value = dict_obj[field_name]  # fetch json-friendly value
+            data[field_name] = value
+
+        entity.update(data)
         return entity
 
 

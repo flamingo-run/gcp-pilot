@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import abc
+from datetime import datetime, date
 import itertools
+import json
 import inspect
 import os
 from collections import defaultdict
@@ -18,6 +20,7 @@ from typing import (
     List,
     Callable,
     Iterable,
+    Optional,
 )
 
 from google.cloud import datastore
@@ -186,7 +189,8 @@ class Manager:
             raise DoesNotExist(self.doc_klass, filters=kwargs)
         return one_obj
 
-    def create(self, obj: Document) -> Document:
+    def create(self, **kwargs) -> Document:
+        obj = self.doc_klass(**kwargs)
         entity = obj.to_entity()
         self.client.put(entity=entity)
 
@@ -275,7 +279,7 @@ class EmbeddedDocument(BaseModel, abc.ABC):
                 exclude_from_indexes=exclude_from_indexes,
             )
 
-        dict_obj = self.dict()
+        dict_obj = json.loads(self.json())
 
         data = {}
         for field_name, field_info in self.__fields__.items():
@@ -295,11 +299,19 @@ class EmbeddedDocument(BaseModel, abc.ABC):
 
 
 class Document(EmbeddedDocument, abc.ABC):
-    id: DEFAULT_PK_FIELD_TYPE
+    id: Optional[DEFAULT_PK_FIELD_TYPE] = None
 
     class Config(EmbeddedDocument.Config):
         exclude_from_indexes = ()
         namespace = DEFAULT_NAMESPACE
+        json_encoders = {
+            datetime: lambda v: v.isoformat(),
+            date: lambda v: v.isoformat(),
+        }
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.update_forward_refs()  # needed when base model has optional field o.O
 
     @property
     def pk(self):

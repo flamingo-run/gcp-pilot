@@ -306,6 +306,17 @@ class Message:
             data=parser(base64.b64decode(body["message"]["data"]).decode("utf-8")),
         )
 
+    def dump(self, parser: Callable = json.dumps) -> str:
+        body = {
+            "message": {
+                "messageId": self.id,
+                "attributes": self.attributes,
+                "data": base64.b64encode(parser(self.data).encode("utf-8")).decode(),
+            },
+            "subscription": self.subscription,
+        }
+        return json.dumps(body)
+
 
 __all__ = (
     "CloudPublisher",

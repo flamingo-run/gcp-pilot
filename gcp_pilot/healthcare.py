@@ -446,7 +446,15 @@ class HealthcareFHIR(HealthcareBase):
             json=as_json(resource),
         )
 
-        data = self._execute(method=self._session.put, **params)
+        try:
+            data = self._execute(method=self._session.put, **params)
+        except exceptions.OperationError as exc:
+            if exc.errors[0]["code"] == "conflict":
+                raise exceptions.FailedPrecondition(
+                    f"{resource.get_resource_type()} with query {query} matches multiple resources at {parent}"
+                )
+            raise
+
         return resource.__class__(**data)
 
     def export_resources(

@@ -13,7 +13,7 @@ from google.oauth2.service_account import Credentials as ServiceAccountCredentia
 from google.protobuf.duration_pb2 import Duration  # pylint: disable=no-name-in-module
 from googleapiclient.discovery import build, Resource
 from googleapiclient.errors import HttpError
-from requests import Response
+from requests import Response, HTTPError
 
 from gcp_pilot import exceptions
 
@@ -332,8 +332,8 @@ def friendly_http_error(func):
     def inner_function(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except HttpError as exc:
-            error_content = json.loads(exc.content)
+        except (HttpError, HTTPError) as exc:
+            error_content = json.loads(exc.content) if isinstance(exc, HttpError) else exc.response.json()
             if "issue" in error_content:
                 raise exceptions.OperationError(errors=error_content["issue"]) from exc
 

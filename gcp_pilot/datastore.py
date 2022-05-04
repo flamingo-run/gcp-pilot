@@ -318,7 +318,7 @@ class Document(EmbeddedDocument, abc.ABC):
         return getattr(self, "id", None)
 
     def save(self) -> Document:
-        return self.documents.create(obj=self)
+        return self.documents.create(**self.dict())
 
     def delete(self) -> None:
         self.documents.delete(pk=self.pk)

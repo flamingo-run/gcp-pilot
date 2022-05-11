@@ -112,8 +112,8 @@ class FirebaseAuthToken:
         user_data = self._data["user_record"]
         return User(
             id=user_data["uid"],
-            email=user_data["email"],
-            name=user_data["display_name"],
+            email=user_data.get("email"),
+            name=user_data.get("display_name"),
             photo_url=user_data.get("photo_url"),
             verified=user_data.get("email_verified"),
             disabled=user_data.get("disabled"),

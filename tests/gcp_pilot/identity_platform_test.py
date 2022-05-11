@@ -27,8 +27,8 @@ class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
         self.assertEqual(expected_data["user_agent"], token.user_agent)
 
         self.assertEqual(expected_data["user_record"]["uid"], token.user.id)
-        self.assertEqual(expected_data["user_record"]["email"], token.user.email)
-        self.assertEqual(expected_data["user_record"]["display_name"], token.user.name)
+        self.assertEqual(expected_data["user_record"].get("email"), token.user.email)
+        self.assertEqual(expected_data["user_record"].get("display_name"), token.user.name)
         self.assertEqual(expected_data["user_record"].get("photo_url"), token.user.photo_url)
         self.assertEqual(expected_data["user_record"].get("email_verified"), token.user.verified)
         self.assertEqual(expected_data["user_record"].get("disabled"), token.user.disabled)
@@ -53,6 +53,10 @@ class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
             self.assertIsNone(token.tenant_id)
             self.assertFalse("tenant_id" in expected_data["user_record"])
             self.assertIsNone(token.user.tenant_id)
+
+    def test_parse_tenant_oidc_signin_token(self):
+        token_data, token = self._load_sample_token("firebase_tenant_oidc_signin_decoded_token")
+        self.assert_expected_sample_token(expected_data=token_data, token=token, is_tenant=True)
 
     def test_parse_tenant_signin_token(self):
         token_data, token = self._load_sample_token("firebase_tenant_signin_decoded_token")

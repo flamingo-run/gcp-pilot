@@ -22,9 +22,12 @@ class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
     def assert_expected_sample_token(self, expected_data: Dict, token: FirebaseAuthToken, is_tenant: bool):
         self.assertEqual(parse_timestamp(expected_data["exp"]), token.expiration_date)
         self.assertEqual(expected_data["event_type"], token.event_type)
+        self.assertEqual(expected_data["event_id"], token.event_id)
         self.assertEqual(expected_data["ip_address"], token.ip_address)
         self.assertEqual(expected_data["sign_in_method"], token.provider_id)
         self.assertEqual(expected_data["user_agent"], token.user_agent)
+
+        self.assertEqual(json.loads(expected_data["raw_user_info"]), token.raw_user)
 
         self.assertEqual(expected_data["user_record"]["uid"], token.user.id)
         self.assertEqual(expected_data["user_record"].get("email"), token.user.email)
@@ -44,6 +47,13 @@ class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
         self.assertEqual(expected_data["oauth_id_token"], token.oauth.id_token)
         self.assertEqual(expected_data["oauth_refresh_token"], token.oauth.refresh_token)
         self.assertEqual(expected_data["oauth_token_secret"], token.oauth.token_secret)
+
+        self.assertEqual(expected_data["aud"], token.jwt_info.aud)
+        self.assertEqual(expected_data["iss"], token.jwt_info.iss)
+        self.assertEqual(parse_timestamp(expected_data["iat"]), token.jwt_info.iat)
+        self.assertEqual(parse_timestamp(expected_data["exp"]), token.jwt_info.exp)
+        self.assertEqual(expected_data["sub"], token.jwt_info.sub)
+        self.assertTrue(token.jwt_info.is_expired)
 
         if is_tenant:
             self.assertEqual(expected_data["tenant_id"], token.tenant_id)

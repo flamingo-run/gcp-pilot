@@ -29,6 +29,19 @@ def parse_timestamp(timestamp: Union[str, int, float]) -> Optional[datetime]:
 
 
 @dataclass
+class JWTInfo:
+    aud: str
+    exp: datetime
+    iat: datetime
+    iss: str
+    sub: str
+
+    @property
+    def is_expired(self) -> bool:
+        return datetime.now().timestamp() >= self.exp.timestamp()
+
+
+@dataclass
 class User:
     id: str
     email: str
@@ -120,6 +133,24 @@ class FirebaseAuthToken:
             tenant_id=user_data.get("tenant_id"),
             created_at=parse_timestamp(user_data["metadata"]["creation_time"]),
             last_login_at=parse_timestamp(user_data["metadata"]["last_sign_in_time"]),
+        )
+
+    @property
+    def raw_user(self) -> Dict:
+        return json.loads(self._data["raw_user_info"])
+
+    @property
+    def event_id(self) -> Dict:
+        return self._data["event_id"]
+
+    @property
+    def jwt_info(self) -> JWTInfo:
+        return JWTInfo(
+            aud=self._data["aud"],
+            exp=parse_timestamp(timestamp=self._data["exp"]),
+            iat=parse_timestamp(timestamp=self._data["iat"]),
+            iss=self._data["iss"],
+            sub=self._data["sub"],
         )
 
 

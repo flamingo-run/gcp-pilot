@@ -1,5 +1,6 @@
 # Reference <https://cloud.google.com/identity-platform/docs/apis>
 import json
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
@@ -82,9 +83,17 @@ class FirebaseOAuth:
 @dataclass
 class FirebaseAuthToken:
     jwt_token: str
+    request: Optional[requests.Request] = None
+    validate_expiration: bool = True
 
     def __post_init__(self):
-        self._data = id_token.verify_firebase_token(id_token=self.jwt_token, request=requests.Request())
+        verification_kwargs = dict(
+            id_token=self.jwt_token,
+            request=self.request or requests.Request(),
+        )
+        if not self.validate_expiration:
+            verification_kwargs["clock_skew_in_seconds"] = sys.maxsize
+        self._data = id_token.verify_firebase_token(**verification_kwargs)
 
     @property
     def provider_id(self) -> str:

@@ -1,6 +1,6 @@
 import json
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import factory
 from faker import Faker
@@ -42,7 +42,11 @@ class FirebaseAuthTokenFactory(factory.Factory):
 
     iss = factory.LazyFunction(lambda: f"https://securetoken.google.com/{Faker().word()}")
     aud = factory.Faker("url")
-    iat = factory.LazyFunction(lambda: Faker().unix_time(start_datetime=datetime.now()))
+    iat = factory.LazyFunction(
+        lambda: Faker().unix_time(
+            start_datetime=datetime.utcnow(), end_datetime=datetime.utcnow() + timedelta(seconds=3600 * 24)
+        )
+    )
     exp = factory.LazyAttribute(lambda obj: obj.iat + 3600)
     event_id = factory.Faker("ean")
     event_type = factory.Iterator(["beforeSignUp", "beforeSignIn"])

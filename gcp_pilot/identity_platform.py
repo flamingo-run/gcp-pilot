@@ -39,7 +39,7 @@ class JWTInfo:
 
     @property
     def is_expired(self) -> bool:
-        return datetime.now().timestamp() >= self.exp.timestamp()
+        return datetime.utcnow().timestamp() >= self.exp.timestamp()
 
 
 @dataclass

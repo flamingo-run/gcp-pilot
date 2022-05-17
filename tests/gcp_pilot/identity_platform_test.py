@@ -1,5 +1,6 @@
 import json
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Tuple, Dict
 
@@ -7,6 +8,14 @@ from gcp_pilot.factories.identity_platform import FirebaseAuthTokenFactory
 from gcp_pilot.identity_platform import IdentityPlatform, FirebaseAuthToken, parse_timestamp
 from gcp_pilot.mocker import patch_firebase_token
 from tests import ClientTestMixin
+
+
+class TestParseTimestamp(unittest.TestCase):
+    def test_parse_timestamp(self):
+        sometime = datetime(2022, 5, 17, 1, 2, 57, tzinfo=timezone.utc)
+        sometimestamp = int(sometime.timestamp())
+        generated_time = parse_timestamp(sometimestamp)
+        self.assertEqual(sometime, generated_time)
 
 
 class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
@@ -19,7 +28,9 @@ class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
         with patch_firebase_token(return_value=token_data):
             return token_data, FirebaseAuthToken(jwt_token="potato")
 
-    def assert_expected_sample_token(self, expected_data: Dict, token: FirebaseAuthToken, is_tenant: bool):
+    def assert_expected_sample_token(
+        self, expected_data: Dict, token: FirebaseAuthToken, is_tenant: bool, is_expired: bool = True
+    ):
         self.assertEqual(parse_timestamp(expected_data["exp"]), token.expiration_date)
         self.assertEqual(expected_data["event_type"], token.event_type)
         self.assertEqual(expected_data["event_id"], token.event_id)
@@ -53,7 +64,7 @@ class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
         self.assertEqual(parse_timestamp(expected_data["iat"]), token.jwt_info.iat)
         self.assertEqual(parse_timestamp(expected_data["exp"]), token.jwt_info.exp)
         self.assertEqual(expected_data["sub"], token.jwt_info.sub)
-        self.assertTrue(token.jwt_info.is_expired)
+        self.assertEqual(is_expired, token.jwt_info.is_expired)
 
         if is_tenant:
             self.assertEqual(expected_data["tenant_id"], token.tenant_id)
@@ -81,4 +92,4 @@ class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
         with patch_firebase_token(return_value=token_data):
             token = FirebaseAuthToken(jwt_token="potato")
 
-        self.assert_expected_sample_token(expected_data=token_data, token=token, is_tenant=True)
+        self.assert_expected_sample_token(expected_data=token_data, token=token, is_tenant=True, is_expired=False)

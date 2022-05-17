@@ -24,7 +24,7 @@ class OOBCodeType(Enum):
 def parse_timestamp(timestamp: Union[str, int, float]) -> Optional[datetime]:
     if not timestamp:
         return None
-    if len(str(timestamp)) >= 10:
+    if len(str(timestamp)) > 10:
         timestamp = float(timestamp) / 1000
     return datetime.fromtimestamp(float(timestamp), tz=timezone.utc)
 

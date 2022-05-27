@@ -519,3 +519,29 @@ class HealthcareFHIR(HealthcareBase):
 
         for entry in entries:
             yield resource.__class__(**entry["resource"])
+
+    def validate_resource(
+        self,
+        resource: DomainResource,
+        store_name: str,
+        dataset_name: str,
+        project_id: str = None,
+        location: str = None,
+    ):
+        parent = self._store_path(
+            name=store_name,
+            dataset_name=dataset_name,
+            project_id=project_id,
+            location=location,
+        )
+
+        try:
+            self._execute(
+                method=self.client.projects().locations().datasets().fhirStores().fhir().Resource_validate,
+                parent=parent,
+                type=resource.get_resource_type(),
+                body=as_json(resource),
+            )
+        except exceptions.OperationError as exc:
+            errors = [{"fields": error["expression"], "detail": error["diagnostics"]} for error in exc.errors]
+            raise exceptions.ValidationError(errors)

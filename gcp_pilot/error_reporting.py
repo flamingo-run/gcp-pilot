@@ -6,7 +6,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
 
 
 class CloudErrorReporting(GoogleCloudPilotAPI):
-    _client_class = error_reporting.Client
+    _client_class: error_reporting.Client = error_reporting.Client
 
     def __init__(self, service_name):
         super().__init__(service=service_name)

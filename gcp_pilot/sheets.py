@@ -19,7 +19,7 @@ class Spreadsheet(GoogleCloudPilotAPI):
         return self.spreadsheet.worksheet(name)
 
     @classmethod
-    def _client_class(cls, credentials, **kwargs):
+    def _client_class(cls, credentials, **kwargs) -> gspread.Client:
         client = gspread.Client(auth=credentials)
         client.session = AuthorizedSession(credentials)
         return client

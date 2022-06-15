@@ -10,7 +10,7 @@ from gcp_pilot.storage import CloudStorage
 
 
 class BigQuery(GoogleCloudPilotAPI):
-    _client_class = bigquery.Client
+    _client_class: bigquery.Client = bigquery.Client
 
     def _get_project_default_location(self, project_id: str = None) -> Union[str, None]:
         return "us"

@@ -12,7 +12,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI, AppEngineBasedService
 
 
 class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
-    _client_class = tasks_v2.CloudTasksClient
+    _client_class: tasks_v2.CloudTasksClient = tasks_v2.CloudTasksClient
     DEFAULT_METHOD = tasks_v2.HttpMethod.POST
 
     def _parent_path(self, project_id: str = None) -> str:

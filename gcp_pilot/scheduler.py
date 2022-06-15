@@ -12,7 +12,7 @@ MAX_TIMEOUT = 30 * 60  # max allowed to HTTP endpoints is 30 minutes
 
 
 class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
-    _client_class = scheduler.CloudSchedulerClient
+    _client_class: scheduler.CloudSchedulerClient = scheduler.CloudSchedulerClient
     DEFAULT_METHOD = scheduler.HttpMethod.POST
 
     def __init__(self, **kwargs):

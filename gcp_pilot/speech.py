@@ -4,7 +4,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 
 
 class Speech(GoogleCloudPilotAPI):
-    _client_class = SpeechClient
+    _client_class: SpeechClient = SpeechClient
 
     def speech_file_to_text(self, flac_content, language="en", rate=44100, long_running=False):
         audio = RecognitionAudio(content=flac_content)

@@ -33,7 +33,7 @@ class RecordType(Enum):
 
 
 class CloudDNS(GoogleCloudPilotAPI):
-    _client_class = dns.Client
+    _client_class: dns.Client = dns.Client
 
     def _get_client_extra_kwargs(self):
         return {

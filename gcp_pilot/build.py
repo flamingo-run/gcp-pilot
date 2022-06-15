@@ -63,7 +63,7 @@ class Substitutions:
 
 
 class CloudBuild(GoogleCloudPilotAPI):
-    _client_class = cloudbuild_v1.CloudBuildClient
+    _client_class: cloudbuild_v1.CloudBuildClient = cloudbuild_v1.CloudBuildClient
 
     def make_build_step(
         self,

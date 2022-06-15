@@ -7,7 +7,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 
 
 class CloudLogging(GoogleCloudPilotAPI):
-    _client_class = logging.Client
+    _client_class: logging.Client = logging.Client
 
     def _get_client_extra_kwargs(self):
         return {"project": self.project_id}

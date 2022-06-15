@@ -13,7 +13,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 
 
 class CloudPublisher(GoogleCloudPilotAPI):
-    _client_class = pubsub_v1.PublisherClient
+    _client_class: pubsub_v1.PublisherClient = pubsub_v1.PublisherClient
     _service_name = "Cloud Pub/Sub"
     _google_managed_service = True
 
@@ -114,7 +114,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
 
 
 class CloudSubscriber(GoogleCloudPilotAPI):
-    _client_class = pubsub_v1.SubscriberClient
+    _client_class: pubsub_v1.SubscriberClient = pubsub_v1.SubscriberClient
     _service_name = "Cloud Pub/Sub"
     _google_managed_service = True
 

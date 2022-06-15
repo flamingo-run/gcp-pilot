@@ -13,7 +13,7 @@ from gcp_pilot import exceptions
 
 
 class CloudStorage(GoogleCloudPilotAPI):
-    _client_class = storage.Client
+    _client_class: storage.Client = storage.Client
 
     async def create_bucket(
         self,

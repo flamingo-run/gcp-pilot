@@ -8,7 +8,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 
 
 class SecretManager(GoogleCloudPilotAPI):
-    _client_class = secretmanager.SecretManagerServiceClient
+    _client_class: secretmanager.SecretManagerServiceClient = secretmanager.SecretManagerServiceClient
 
     def _secret_path(self, key: str, project_id: str = None) -> str:
         parent = self._project_path(project_id=project_id)

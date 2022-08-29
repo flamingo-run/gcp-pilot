@@ -41,7 +41,7 @@ class Key:
 
     @property
     def value(self) -> str:
-        data = APIKey().get_key_string(key=self.key_id)
+        data = APIKey().get_key_string(key_id=self.key_id)
         return data["keyString"]
 
 

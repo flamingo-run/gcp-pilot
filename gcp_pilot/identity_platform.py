@@ -349,7 +349,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
 
         for attempt in Retrying(stop=stop_after_attempt(3), wait=wait_fixed(1)):
             with attempt:
-                return self.find(email=email, project_id=project_id)
+                return self.find(email=email, project_id=project_id, tenant_id=tenant_id or self.tenant_id)
 
     def update(
         self,

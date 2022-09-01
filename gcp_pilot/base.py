@@ -386,6 +386,8 @@ class DiscoveryMixin:
         self,
         method: Callable,
         result_key: str = "items",
+        pagination_key: str = "pageToken",  # Because GCP can be weird sometimes
+        next_pagination_key: str = "nextPageToken",
         params: Dict[str, Any] = None,
         order_by: str = None,
         limit: int = None,
@@ -403,14 +405,16 @@ class DiscoveryMixin:
             params["maxResults"] = limit
 
         while True:
+            call_kwargs = params.copy()
+            if page_token:
+                call_kwargs[pagination_key] = page_token
             results = self._execute(
                 method=method,
-                **params,
-                pageToken=page_token,
+                **call_kwargs,
             )
             for item in results.get(result_key, []):
                 yield item
 
-            page_token = results.get("nextPageToken")
+            page_token = results.get(next_pagination_key)
             if not page_token:
                 break

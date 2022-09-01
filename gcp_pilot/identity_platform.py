@@ -240,6 +240,15 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         response = self._execute(method=self.client.accounts().signInWithEmailLink, body=data)
         return response
 
+    def list_users(self, tenant_id: str = None, project_id: str | None = None):
+        params = {
+            "targetProjectId": project_id or self.project_id,
+            "tenantId": tenant_id or self.tenant_id,
+        }
+        method = self.client.projects().accounts().batchGet
+        for item in self._paginate(method=method, result_key="users", pagination_key="nextPageToken", params=params):
+            yield User.create(data=item)
+
     def generate_email_code(
         self,
         type: OOBCodeType,  # pylint: disable=redefined-builtin

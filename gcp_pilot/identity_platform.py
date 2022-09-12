@@ -371,12 +371,15 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         project_id: str = None,
         attributes: Dict[str, str] = None,
         tenant_id: str = None,
+        enabled: bool = None,
     ):
         data = {
             "localId": user_id,
             "targetProjectId": project_id or self.project_id,
             "tenantId": tenant_id or self.tenant_id,
         }
+        if enabled:
+            data["disableUser"] = not enabled
         if email:
             data["email"] = email
         if password:

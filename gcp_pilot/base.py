@@ -60,7 +60,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         else:
             self.credentials, credential_project_id = self._set_credentials(
                 subject=subject,
-                impersonate_account=impersonate_account or DEFAULT_SERVICE_ACCOUNT,
+                impersonate_account=impersonate_account,
             )
         self.project_id = self._set_project_id(project_id=project_id, credential_project_id=credential_project_id)
 
@@ -148,7 +148,11 @@ class GoogleCloudPilotAPI(abc.ABC):
         else:
             credentials, project_id = cls._cached_credentials
 
-        if impersonate_account and getattr(credentials, "service_account_email") != impersonate_account:
+        current_account = getattr(credentials, "service_account_email")
+        if current_account == "default":  # common when inside GCP
+            current_account = DEFAULT_SERVICE_ACCOUNT
+
+        if impersonate_account and impersonate_account != current_account:
             credentials, impersonated_project_id = cls._impersonate_account(
                 credentials=credentials,
                 service_account=impersonate_account,

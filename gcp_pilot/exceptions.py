@@ -1,6 +1,3 @@
-from typing import List
-
-
 class UnsupportedFormatException(Exception):
     pass
 
@@ -70,6 +67,6 @@ class QuotaExceeded(Exception):
 
 
 class OperationError(Exception):
-    def __init__(self, errors: List):
+    def __init__(self, errors: list):
         self.errors = errors
         super().__init__(str(self.errors))

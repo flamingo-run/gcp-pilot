@@ -2,7 +2,7 @@
 import base64
 import time
 from pathlib import Path
-from typing import Generator, Optional, dict
+from typing import Generator
 
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType
 from gcp_pilot.service_usage import ServiceUsage
@@ -31,8 +31,8 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def list_apis(
         self,
-        project_id: Optional[str] = None,
-        location: Optional[str] = "global",
+        project_id: str | None = None,
+        location: str | None = "global",
     ) -> Generator[ResourceType, None, None]:
         params = dict(
             parent=self._location_path(project_id=project_id, location=location),
@@ -46,7 +46,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
     def get_api(
         self,
         api_name: str,
-        project_id: Optional[str] = None,
+        project_id: str | None = None,
     ) -> ResourceType:
         name = self._api_path(api_name=api_name, project_id=project_id)
         return self._execute(
@@ -58,8 +58,8 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         api_name: str,
         display_name: str = "",
-        labels: Optional[dict[str, str]] = None,
-        project_id: Optional[str] = None,
+        labels: dict[str, str] | None = None,
+        project_id: str | None = None,
         wait: bool = True,
     ) -> ResourceType:
 
@@ -83,7 +83,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
     def delete_api(
         self,
         api_name: str,
-        project_id: Optional[str] = None,
+        project_id: str | None = None,
     ) -> ResourceType:
         name = self._api_path(api_name=api_name, project_id=project_id)
         return self._execute(
@@ -94,7 +94,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
     def list_configs(
         self,
         api_name: str,
-        project_id: Optional[str] = None,
+        project_id: str | None = None,
     ) -> Generator[ResourceType, None, None]:
         params = dict(
             parent=self._api_path(api_name=api_name, project_id=project_id),
@@ -109,7 +109,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         config_name: str,
         api_name: str,
-        project_id: Optional[str] = None,
+        project_id: str | None = None,
     ) -> ResourceType:
         name = self._config_path(config_name=config_name, api_name=api_name, project_id=project_id)
         return self._execute(
@@ -124,8 +124,8 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         service_account: str,
         open_api_file: Path,
         display_name: str = "",
-        labels: Optional[dict[str, str]] = None,
-        project_id: Optional[str] = None,
+        labels: dict[str, str] | None = None,
+        project_id: str | None = None,
         wait: bool = True,
     ) -> ResourceType:
 
@@ -154,7 +154,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         config_name: str,
         api_name: str,
-        project_id: Optional[str] = None,
+        project_id: str | None = None,
     ) -> ResourceType:
         name = self._config_path(config_name=config_name, api_name=api_name, project_id=project_id)
         return self._execute(
@@ -164,8 +164,8 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def list_gateways(
         self,
-        project_id: Optional[str] = None,
-        location: Optional[str] = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> Generator[ResourceType, None, None]:
         params = dict(
             parent=self._location_path(project_id=project_id, location=location),
@@ -179,8 +179,8 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
     def get_gateway(
         self,
         gateway_name: str,
-        project_id: Optional[str] = None,
-        location: Optional[str] = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> ResourceType:
         name = self._gateway_path(gateway_name=gateway_name, location=location, project_id=project_id)
         return self._execute(
@@ -193,9 +193,9 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         gateway_name: str,
         api_name: str,
         config_name: str,
-        labels: Optional[dict[str, str]] = None,
-        project_id: Optional[str] = None,
-        location: Optional[str] = None,
+        labels: dict[str, str] | None = None,
+        project_id: str | None = None,
+        location: str | None = None,
         wait: bool = True,
     ) -> ResourceType:
 
@@ -224,8 +224,8 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
     def delete_gateway(
         self,
         gateway_name: str,
-        project_id: Optional[str] = None,
-        location: Optional[str] = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> ResourceType:
         name = self._gateway_path(gateway_name=gateway_name, location=location, project_id=project_id)
         return self._execute(
@@ -236,7 +236,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
     def enable_gateway(
         self,
         api_name: str,
-        project_id: Optional[str] = None,
+        project_id: str | None = None,
     ):
         api_data = self.get_api(api_name=api_name, project_id=project_id)
         service_name = api_data["managedService"]
@@ -250,7 +250,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
     def disable_gateway(
         self,
         api_name: str,
-        project_id: Optional[str] = None,
+        project_id: str | None = None,
     ):
         api_data = self.get_api(api_name=api_name, project_id=project_id)
         service_name = api_data["managedService"]

@@ -1,7 +1,7 @@
 # More Information: https://googleapis.dev/python/storage/latest/index.html
 import io
 import os
-from typing import AsyncIterator
+from typing import Generator
 
 import requests
 from google.cloud import storage
@@ -115,7 +115,7 @@ class CloudStorage(GoogleCloudPilotAPI):
         blob = bucket.blob(file_name)
         return blob.delete()
 
-    def list_files(self, bucket_name: str, prefix: str = None) -> AsyncIterator[Blob]:
+    def list_files(self, bucket_name: str, prefix: str = None) -> Generator[Blob, None, None]:
         blobs = self.client.list_blobs(
             bucket_name,
             prefix=prefix,

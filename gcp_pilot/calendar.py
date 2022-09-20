@@ -2,7 +2,7 @@
 import datetime
 from dataclasses import dataclass
 from enum import Enum
-from typing import Generator, List, Optional, dict
+from typing import Generator
 from uuid import uuid4
 
 import pytz
@@ -185,7 +185,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         location: str = None,
         event_id: str = None,
         description: str = None,
-        attendees: List[Attendee] = None,
+        attendees: list[Attendee] = None,
         recurrence_type: str = None,
         recurrence_amount: str = None,
         calendar_id: str = "primary",
@@ -237,8 +237,8 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
     def get_events(
         self,
         calendar_id: str = "primary",
-        starts_at: Optional[datetime.date] = None,
-        ends_at: Optional[datetime.date] = None,
+        starts_at: datetime.date | None = None,
+        ends_at: datetime.date | None = None,
     ) -> Generator[ResourceType, None, None]:
         min_date = self._date_to_str(starts_at) if starts_at else None
         max_date = self._date_to_str(ends_at) if ends_at else None
@@ -313,7 +313,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         starts_at: datetime,
         ends_at: datetime,
         timezone: str = None,
-        calendar_ids: List[str] = None,
+        calendar_ids: list[str] = None,
         calendar_id: str = "primary",
     ) -> ResourceType:
         data = {

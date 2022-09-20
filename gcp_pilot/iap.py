@@ -1,5 +1,3 @@
-from typing import dict
-
 import requests
 from google.auth.transport.requests import Request
 from google.oauth2 import service_account

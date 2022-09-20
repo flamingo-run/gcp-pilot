@@ -1,6 +1,6 @@
 # More Information: <https://cloud.google.com/resource-manager/reference/rest>
 
-from typing import Generator, List, Tuple
+from typing import Generator
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI, PolicyType, ResourceType
@@ -316,7 +316,7 @@ class ServiceAgent:
         return data
 
     @classmethod
-    def _find(cls, service_name: str) -> Tuple[str, str]:
+    def _find(cls, service_name: str) -> tuple[str, str]:
         candidates = [f"{service_name} {suffix}" for suffix in cls._suffixes]
 
         for candidate in candidates:
@@ -345,7 +345,7 @@ class ServiceAgent:
         return project["projectNumber"]
 
     @classmethod
-    def restore(cls, services: List[str], project_id: str) -> None:
+    def restore(cls, services: list[str], project_id: str) -> None:
         rm = ResourceManager()  # pylint: disable=invalid-name
         for service_name in services:
             email = ServiceAgent.get_email(service_name=service_name, project_id=project_id)

@@ -9,7 +9,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime
 from functools import cached_property
-from typing import Any, Callable, ClassVar, Generator, Iterable, List, Optional, Tuple, Type, Union, dict
+from typing import Any, Callable, ClassVar, Generator, Iterable, Type
 
 from google.cloud import datastore
 from pydantic import BaseModel
@@ -40,7 +40,7 @@ class MultipleObjectsFound(Exception):
     filters: dict
 
 
-def _starts_with_operator(lookup_fields, value) -> List[Tuple[str, str, Any]]:
+def _starts_with_operator(lookup_fields, value) -> list[tuple[str, str, Any]]:
     field_name = ".".join(lookup_fields)
     return [
         (field_name, ">=", value),
@@ -50,7 +50,7 @@ def _starts_with_operator(lookup_fields, value) -> List[Tuple[str, str, Any]]:
 
 @dataclass
 class Manager:
-    LOOKUP_OPERATORS: ClassVar[dict[str, Union[str, Callable]]] = {
+    LOOKUP_OPERATORS: ClassVar[dict[str, (str | Callable)]] = {
         "eq": "=",
         "gt": ">",
         "gte": ">=",
@@ -111,7 +111,7 @@ class Manager:
     def query(
         self,
         distinct_on: str | None = None,
-        order_by: Union[str, List[str]] | None = None,
+        order_by: str | list[str] | None = None,
         page_size: int | None = None,
         **kwargs,
     ) -> datastore.query.Iterator:
@@ -206,7 +206,7 @@ class Manager:
             for chunk in _chunks(keys, MAX_ITEMS_PER_OPERATIONS):
                 self.client.delete_multi(keys=chunk)
 
-    def _build_filter(self, key: str, value: Any) -> List[Tuple[str, str, Any]]:
+    def _build_filter(self, key: str, value: Any) -> list[tuple[str, str, Any]]:
         operator = None
 
         *field_parts, lookup = key.split("__")
@@ -287,7 +287,7 @@ class EmbeddedDocument(BaseModel, abc.ABC):
 
 
 class Document(EmbeddedDocument, abc.ABC):
-    id: Optional[DEFAULT_PK_FIELD_TYPE] = None
+    id: DEFAULT_PK_FIELD_TYPE | None = None
 
     class Config(EmbeddedDocument.Config):
         exclude_from_indexes = ()

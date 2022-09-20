@@ -1,6 +1,4 @@
 # More Information: <https://googleapis.dev/python/secretmanager/latest/index.html>
-from typing import List, Tuple
-
 from google.api_core.exceptions import NotFound
 from google.cloud import secretmanager
 
@@ -35,7 +33,7 @@ class SecretManager(GoogleCloudPilotAPI):
 
         return self.client.add_secret_version(request={"parent": parent, "payload": {"data": value.encode()}})
 
-    def list_secrets(self, prefix: str = None, suffix: str = None, project_id: str = None) -> List[Tuple[str, str]]:
+    def list_secrets(self, prefix: str = None, suffix: str = None, project_id: str = None) -> list[tuple[str, str]]:
         parent = self._project_path(project_id=project_id)
         secrets = self.client.list_secrets(
             request={

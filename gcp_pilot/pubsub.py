@@ -2,7 +2,7 @@
 import base64
 import json
 from dataclasses import dataclass
-from typing import Any, AsyncIterator, Callable, Union, dict
+from typing import Any, Callable, Generator
 
 from google.api_core.exceptions import AlreadyExists, NotFound
 from google.cloud import pubsub_v1
@@ -72,7 +72,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
             topic=topic_path,
         )
 
-    def list_topics(self, prefix: str = "", suffix: str = "", project_id: str = None) -> AsyncIterator[Topic]:
+    def list_topics(self, prefix: str = "", suffix: str = "", project_id: str = None) -> Generator[Topic, None, None]:
         project_path = self._project_path(project_id=project_id)
         topics = self.client.list_topics(
             project=project_path,
@@ -123,7 +123,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         prefix: str = "",
         suffix: str = "",
         project_id: str = None,
-    ) -> AsyncIterator[Subscription]:
+    ) -> Generator[Subscription, None, None]:
         all_subscriptions = self.client.list_subscriptions(
             project=f"projects/{project_id or self.project_id}",
         )
@@ -292,7 +292,7 @@ class Message:
     subscription: str
 
     @classmethod
-    def load(cls, body: Union[str, bytes, dict], parser: Callable = json.loads) -> "Message":
+    def load(cls, body: str | bytes | dict, parser: Callable = json.loads) -> "Message":
         # https://cloud.google.com/pubsub/docs/push#receiving_messages
         if isinstance(body, bytes):
             body = body.decode()

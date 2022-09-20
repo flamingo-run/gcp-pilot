@@ -169,19 +169,19 @@ class CloudBuild(GoogleCloudPilotAPI):
             **params,
         )
 
-    async def get_trigger(self, trigger_id: str, project_id: str = None) -> TriggerType:
+    def get_trigger(self, trigger_id: str, project_id: str | None = None) -> TriggerType:
         return self.client.get_build_trigger(
             trigger_id=trigger_id,
             project_id=project_id or self.project_id,
         )
 
-    async def delete_trigger(self, trigger_id: str, project_id: str = None):
+    def delete_trigger(self, trigger_id: str, project_id: str | None = None):
         return self.client.delete_build_trigger(
             trigger_id=trigger_id,
             project_id=project_id or self.project_id,
         )
 
-    async def create_trigger(
+    def create_trigger(
         self,
         name: str,
         description: str,
@@ -212,7 +212,7 @@ class CloudBuild(GoogleCloudPilotAPI):
         )
         return response
 
-    async def update_trigger(
+    def update_trigger(
         self,
         name: str,
         description: str,
@@ -244,7 +244,7 @@ class CloudBuild(GoogleCloudPilotAPI):
         )
         return response
 
-    async def create_or_update_trigger(
+    def create_or_update_trigger(
         self,
         name: str,
         description: str,
@@ -271,11 +271,11 @@ class CloudBuild(GoogleCloudPilotAPI):
         )
 
         try:
-            return await self.create_trigger(**create_args)
+            return self.create_trigger(**create_args)
         except AlreadyExists:
-            return await self.update_trigger(**create_args)
+            return self.update_trigger(**create_args)
 
-    async def run_trigger(
+    def run_trigger(
         self,
         name: str,
         tag_name: str = None,
@@ -321,7 +321,7 @@ class CloudBuild(GoogleCloudPilotAPI):
         for build in all_builds:
             yield build
 
-    async def subscribe(
+    def subscribe(
         self,
         subscription_id: str,
         project_id: str = None,
@@ -335,7 +335,7 @@ class CloudBuild(GoogleCloudPilotAPI):
         except ImportError as exc:
             raise ImportError("Add `pubsub` extras dependency in order to use CloudBuild notifications") from exc
         subscriber = CloudSubscriber()
-        await subscriber.create_subscription(
+        subscriber.create_subscription(
             topic_id="cloud-builds",  # pre-defined by GCP
             subscription_id=subscription_id,
             project_id=project_id,

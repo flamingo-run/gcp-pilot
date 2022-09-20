@@ -32,12 +32,12 @@ class ResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
             body={"policy": policy, "updateMask": "bindings"},
         )
 
-    async def add_member(self, email: str, role: str, project_id: str = None) -> PolicyType:
+    def add_member(self, email: str, role: str, project_id: str = None) -> PolicyType:
         policy = self.get_policy(project_id=project_id)
         changed_policy = self._bind_email_to_policy(email=email, role=role, policy=policy)
         return self.set_policy(policy=changed_policy, project_id=project_id)
 
-    async def remove_member(self, email: str, role: str, project_id: str = None) -> PolicyType:
+    def remove_member(self, email: str, role: str, project_id: str = None) -> PolicyType:
         policy = self.get_policy(project_id=project_id)
         changed_policy = self._unbind_email_from_policy(email=email, role=role, policy=policy)
         return self.set_policy(policy=changed_policy, project_id=project_id)
@@ -48,8 +48,8 @@ class ResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
             projectId=project_id or self.project_id,
         )
 
-    async def allow_impersonation(self, email: str, project_id: str = None) -> PolicyType:
-        return await self.add_member(
+    def allow_impersonation(self, email: str, project_id: str = None) -> PolicyType:
+        return self.add_member(
             email=email,
             role="roles/iam.serviceAccountTokenCreator",
             project_id=project_id,
@@ -345,14 +345,14 @@ class ServiceAgent:
         return project["projectNumber"]
 
     @classmethod
-    async def restore(cls, services: List[str], project_id: str) -> None:
+    def restore(cls, services: List[str], project_id: str) -> None:
         rm = ResourceManager()  # pylint: disable=invalid-name
         for service_name in services:
             email = ServiceAgent.get_email(service_name=service_name, project_id=project_id)
             role = ServiceAgent.get_role(service_name=service_name)
             if role:
                 try:
-                    await rm.add_member(email=email, role=role)
+                    rm.add_member(email=email, role=role)
                     print(f"[O] {service_name}")
                 except exceptions.ValidationError:
                     print(f"[X] {service_name}")

@@ -33,7 +33,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             task=task,
         )
 
-    async def push(
+    def push(
         self,
         queue_name: str,
         url: str,

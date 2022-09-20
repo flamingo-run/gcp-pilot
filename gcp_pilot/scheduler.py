@@ -26,7 +26,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         parent_name = self._parent_path(project_id=project_id)
         return f"{parent_name}/jobs/{job}"
 
-    async def create(
+    def create(
         self,
         name: str,
         url: str,
@@ -58,7 +58,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         response = self.client.create_job(request={"parent": parent, "job": job})
         return response
 
-    async def update(
+    def update(
         self,
         name: str,
         url: str,
@@ -103,13 +103,13 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
             name=job_name,
         )
 
-    async def delete(self, name: str, project_id: str = None) -> None:
+    def delete(self, name: str, project_id: str = None) -> None:
         job_name = self._job_path(job=name, project_id=project_id)
         return self.client.delete_job(
             name=job_name,
         )
 
-    async def put(
+    def put(
         self,
         name: str,
         url: str,
@@ -123,7 +123,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         timeout_in_seconds: int = MAX_TIMEOUT,
     ) -> scheduler.Job:
         try:
-            response = await self.update(
+            response = self.update(
                 name=name,
                 url=url,
                 payload=payload,
@@ -136,7 +136,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
                 timeout_in_seconds=timeout_in_seconds,
             )
         except NotFound:
-            response = await self.create(
+            response = self.create(
                 name=name,
                 url=url,
                 payload=payload,

@@ -21,7 +21,7 @@ class BigQuery(GoogleCloudPilotAPI):
             project=project_id or self.project_id,
         )
 
-    async def execute(
+    def execute(
         self,
         sql: str,
         params: dict[str, Any] | None = None,
@@ -52,7 +52,7 @@ class BigQuery(GoogleCloudPilotAPI):
         query_job = self.client.query(sql, job_config=job_config)
         return self._wait_for_job(job=query_job)
 
-    async def insert_rows(self, dataset_name: str, table_name: str, rows, project_id: str = None):
+    def insert_rows(self, dataset_name: str, table_name: str, rows, project_id: str | None = None):
         table = self.get_table(
             table_name=table_name,
             project_id=project_id,
@@ -62,12 +62,12 @@ class BigQuery(GoogleCloudPilotAPI):
         if errors:
             raise Exception(f"Bigquery insert error: {errors}")
 
-    async def get_table(self, table_name: str, project_id: str = None, dataset_name: str = None) -> Table:
+    def get_table(self, table_name: str, project_id: str | None = None, dataset_name: str | None = None) -> Table:
         dataset_ref = self._dataset_ref(project_id=project_id, dataset_name=dataset_name)
         table_ref = dataset_ref.table(table_id=table_name)
         return self.client.get_table(table_ref)
 
-    async def load(
+    def load(
         self,
         table_name: str,
         filename: str,
@@ -109,7 +109,7 @@ class BigQuery(GoogleCloudPilotAPI):
         if not is_gcs:
             if gcs_bucket:
                 gcs = CloudStorage(project_id=self.project_id)
-                blob = await gcs.upload(
+                blob = gcs.upload(
                     source_file=filename,
                     bucket_name=gcs_bucket,
                 )
@@ -137,7 +137,7 @@ class BigQuery(GoogleCloudPilotAPI):
         if wait:
             self._wait_for_job(job=load_job)
 
-    async def copy(
+    def copy(
         self,
         source_dataset_name: str,
         source_table_name: str,
@@ -146,7 +146,7 @@ class BigQuery(GoogleCloudPilotAPI):
         destination_project: str | None = None,
         wait: bool = False,
     ) -> None:
-        source_ref = await self.get_table(dataset_name=source_dataset_name, table_name=source_table_name)
+        source_ref = self.get_table(dataset_name=source_dataset_name, table_name=source_table_name)
         dataset_ref = self._dataset_ref(
             project_id=destination_project or self.project_id,
             dataset_name=destination_dataset_name,

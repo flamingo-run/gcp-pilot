@@ -17,7 +17,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
     _service_name = "Cloud Pub/Sub"
     _google_managed_service = True
 
-    async def create_topic(
+    def create_topic(
         self,
         topic_id: str,
         project_id: str = None,
@@ -39,10 +39,10 @@ class CloudPublisher(GoogleCloudPilotAPI):
         except AlreadyExists:
             if not exists_ok:
                 raise
-            topic = await self.get_topic(topic_id=topic_id, project_id=project_id)
+            topic = self.get_topic(topic_id=topic_id, project_id=project_id)
         return topic
 
-    async def update_topic(
+    def update_topic(
         self,
         topic_id: str,
         project_id: str = None,
@@ -63,7 +63,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
             ),
         )
 
-    async def get_topic(self, topic_id: str, project_id: str = None):
+    def get_topic(self, topic_id: str, project_id: str = None):
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
             topic=topic_id,
@@ -72,7 +72,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
             topic=topic_path,
         )
 
-    async def list_topics(self, prefix: str = "", suffix: str = "", project_id: str = None) -> AsyncIterator[Topic]:
+    def list_topics(self, prefix: str = "", suffix: str = "", project_id: str = None) -> AsyncIterator[Topic]:
         project_path = self._project_path(project_id=project_id)
         topics = self.client.list_topics(
             project=project_path,
@@ -82,7 +82,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
             if name.startswith(prefix) and name.endswith(suffix):
                 yield topic
 
-    async def publish(
+    def publish(
         self,
         message: str,
         topic_id: str,
@@ -101,7 +101,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
             )
             return future.result()
         except NotFound:
-            await self.create_topic(
+            self.create_topic(
                 topic_id=topic_id,
                 project_id=project_id,
             )
@@ -118,7 +118,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
     _service_name = "Cloud Pub/Sub"
     _google_managed_service = True
 
-    async def list_subscriptions(
+    def list_subscriptions(
         self,
         prefix: str = "",
         suffix: str = "",
@@ -132,7 +132,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             if name.startswith(prefix) and name.endswith(suffix):
                 yield subscription
 
-    async def get_subscription(self, subscription_id: str, project_id: str = None) -> Subscription:
+    def get_subscription(self, subscription_id: str, project_id: str = None) -> Subscription:
         subscription_path = self.client.subscription_path(
             project=project_id or self.project_id,
             subscription=subscription_id,
@@ -142,7 +142,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             subscription=subscription_path,
         )
 
-    async def delete_subscription(self, subscription_id: str, project_id: str = None) -> None:
+    def delete_subscription(self, subscription_id: str, project_id: str = None) -> None:
         subscription_path = self.client.subscription_path(
             project=project_id or self.project_id,
             subscription=subscription_id,
@@ -152,7 +152,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             subscription=subscription_path,
         )
 
-    async def create_subscription(
+    def create_subscription(
         self,
         topic_id: str,
         subscription_id: str,
@@ -191,7 +191,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         except NotFound:
             if not auto_create_topic:
                 raise
-            await CloudPublisher().create_topic(
+            CloudPublisher().create_topic(
                 topic_id=topic_id,
                 project_id=project_id,
                 exists_ok=False,
@@ -200,9 +200,9 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         except AlreadyExists:
             if not exists_ok:
                 raise
-            return await self.get_subscription(subscription_id=subscription_id, project_id=project_id)
+            return self.get_subscription(subscription_id=subscription_id, project_id=project_id)
 
-    async def update_subscription(
+    def update_subscription(
         self,
         topic_id: str,
         subscription_id: str,
@@ -236,7 +236,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
 
         return self.client.update_subscription(request={"subscription": subscription, "update_mask": update_mask})
 
-    async def create_or_update_subscription(
+    def create_or_update_subscription(
         self,
         topic_id: str,
         subscription_id: str,
@@ -247,7 +247,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         use_oidc_auth: bool = False,
     ) -> Subscription:
         try:
-            return await self.create_subscription(
+            return self.create_subscription(
                 topic_id=topic_id,
                 subscription_id=subscription_id,
                 project_id=project_id,
@@ -258,7 +258,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 use_oidc_auth=use_oidc_auth,
             )
         except AlreadyExists:
-            return await self.update_subscription(
+            return self.update_subscription(
                 topic_id=topic_id,
                 subscription_id=subscription_id,
                 project_id=project_id,
@@ -266,8 +266,8 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 use_oidc_auth=use_oidc_auth,
             )
 
-    async def subscribe(self, topic_id: str, subscription_id: str, callback: Callable, project_id: str = None):
-        await self.create_subscription(
+    def subscribe(self, topic_id: str, subscription_id: str, callback: Callable, project_id: str = None):
+        self.create_subscription(
             topic_id=topic_id,
             subscription_id=subscription_id,
             project_id=project_id,

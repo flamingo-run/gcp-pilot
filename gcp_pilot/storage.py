@@ -15,7 +15,7 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 class CloudStorage(GoogleCloudPilotAPI):
     _client_class = storage.Client
 
-    async def create_bucket(
+    def create_bucket(
         self,
         name: str,
         region: str | None = None,
@@ -32,12 +32,12 @@ class CloudStorage(GoogleCloudPilotAPI):
         except Conflict:
             if not exists_ok:
                 raise
-            return await self.check_bucket(name=name)
+            return self.check_bucket(name=name)
 
-    async def check_bucket(self, name: str) -> Bucket:
+    def check_bucket(self, name: str) -> Bucket:
         return self.client.get_bucket(bucket_or_name=name)
 
-    async def upload(
+    def upload(
         self,
         source_file,
         bucket_name: str,
@@ -48,7 +48,7 @@ class CloudStorage(GoogleCloudPilotAPI):
         is_public: bool = False,
         content_type: str | None = None,
     ) -> Blob:
-        target_bucket = await self.create_bucket(name=bucket_name, project_id=project_id, region=region)
+        target_bucket = self.create_bucket(name=bucket_name, project_id=project_id, region=region)
 
         target_file_name = target_file_name or str(source_file).rsplit("/", maxsplit=1)[-1]
         blob = target_bucket.blob(target_file_name, chunk_size=chunk_size)
@@ -72,7 +72,7 @@ class CloudStorage(GoogleCloudPilotAPI):
 
         return blob
 
-    async def copy(
+    def copy(
         self,
         source_file_name,
         source_bucket_name: str,
@@ -81,16 +81,16 @@ class CloudStorage(GoogleCloudPilotAPI):
         project_id: str = None,
         region: str = None,
     ) -> Blob:
-        source_bucket = await self.create_bucket(name=source_bucket_name, region=region, project_id=project_id)
+        source_bucket = self.create_bucket(name=source_bucket_name, region=region, project_id=project_id)
         source_blob = source_bucket.blob(source_file_name)
 
-        target_bucket = await self.create_bucket(name=target_bucket_name, region=region, project_id=project_id)
+        target_bucket = self.create_bucket(name=target_bucket_name, region=region, project_id=project_id)
         target_file_name = target_file_name or str(source_file_name).rsplit("/", maxsplit=1)[-1]
 
         obj = source_bucket.copy_blob(source_blob, target_bucket, target_file_name)
         return obj
 
-    async def move(
+    def move(
         self,
         source_file_name: str,
         source_bucket_name: str,
@@ -99,7 +99,7 @@ class CloudStorage(GoogleCloudPilotAPI):
         project_id: str = None,
         region: str = None,
     ) -> Blob:
-        data = await self.copy(
+        data = self.copy(
             source_file_name=source_file_name,
             source_bucket_name=source_bucket_name,
             target_file_name=target_file_name,
@@ -107,15 +107,15 @@ class CloudStorage(GoogleCloudPilotAPI):
             project_id=project_id,
             region=region,
         )
-        await self.delete(file_name=source_file_name, bucket_name=source_bucket_name)
+        self.delete(file_name=source_file_name, bucket_name=source_bucket_name)
         return data
 
-    async def delete(self, file_name: str, bucket_name: str = None) -> None:
-        bucket = await self.check_bucket(name=bucket_name)
+    def delete(self, file_name: str, bucket_name: str = None) -> None:
+        bucket = self.check_bucket(name=bucket_name)
         blob = bucket.blob(file_name)
         return blob.delete()
 
-    async def list_files(self, bucket_name: str, prefix: str = None) -> AsyncIterator[Blob]:
+    def list_files(self, bucket_name: str, prefix: str = None) -> AsyncIterator[Blob]:
         blobs = self.client.list_blobs(
             bucket_name,
             prefix=prefix,

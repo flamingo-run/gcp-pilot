@@ -22,7 +22,7 @@ class SourceRepository(DiscoveryMixin, GoogleCloudPilotAPI):
         parent_path = self._project_path(project_id=project_id)
         return f"{parent_path}/repos/{repo}"
 
-    async def list_repos(self, project_id: str = None) -> RepoType:
+    def list_repos(self, project_id: str | None = None) -> RepoType:
         params = dict(
             name=self._project_path(project_id=project_id),
         )
@@ -34,13 +34,13 @@ class SourceRepository(DiscoveryMixin, GoogleCloudPilotAPI):
         for item in items:
             yield item
 
-    async def get_repo(self, repo_name: str, project_id: str = None) -> RepoType:
+    def get_repo(self, repo_name: str, project_id: str | None = None) -> RepoType:
         return self._execute(
             method=self.client.projects().repos().get,
             name=self._repo_path(repo=repo_name, project_id=project_id),
         )
 
-    async def create_repo(self, repo_name: str, project_id: str = None, exists_ok: bool = True) -> RepoType:
+    def create_repo(self, repo_name: str, project_id: str | None = None, exists_ok: bool = True) -> RepoType:
         parent = self._project_path(project_id=project_id)
         repo_path = self._repo_path(repo=repo_name, project_id=project_id)
         try:
@@ -54,7 +54,7 @@ class SourceRepository(DiscoveryMixin, GoogleCloudPilotAPI):
         except exceptions.AlreadyExists:
             if not exists_ok:
                 raise
-            return await self.get_repo(repo_name=repo_name, project_id=project_id)
+            return self.get_repo(repo_name=repo_name, project_id=project_id)
 
 
 __all__ = ("SourceRepository",)

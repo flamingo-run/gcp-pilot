@@ -28,7 +28,7 @@ class patch_auth:  # pylint: disable=invalid-name
         return self.stack.__enter__()
 
     def start(self):
-        return self.__enter__()
+        return self.__enter__()  # pylint: disable=unnecessary-dunder-call
 
     def __exit__(self, typ, val, traceback):
         return self.stack.__exit__(typ, val, traceback)

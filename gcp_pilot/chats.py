@@ -218,6 +218,7 @@ class ChatsHook:
             url=url,
             headers={"Content-Type": "application/json; charset=UTF-8"},
             data=json.dumps(body),
+            timeout=15,
         )
         response.raise_for_status()
         return response.json()

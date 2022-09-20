@@ -134,7 +134,7 @@ class CloudStorage(GoogleCloudPilotAPI):
         return blob
 
     def _download(self, url: str) -> io.BytesIO:
-        response = requests.get(url, stream=True)
+        response = requests.get(url, stream=True, timeout=15)
         file = io.BytesIO()
         file.write(response.content)
         file.seek(0)

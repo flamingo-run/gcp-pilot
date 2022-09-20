@@ -2,10 +2,10 @@ import json
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Tuple, Dict
+from typing import Tuple, dict
 
 from gcp_pilot.factories.identity_platform import FirebaseAuthTokenFactory
-from gcp_pilot.identity_platform import IdentityPlatform, FirebaseAuthToken, parse_timestamp
+from gcp_pilot.identity_platform import FirebaseAuthToken, IdentityPlatform, parse_timestamp
 from gcp_pilot.mocker import patch_firebase_token
 from tests import ClientTestMixin
 
@@ -22,14 +22,14 @@ class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
     _CLIENT_KLASS = IdentityPlatform
 
     @classmethod
-    def _load_sample_token(cls, sample_name: str) -> Tuple[Dict, FirebaseAuthToken]:
+    def _load_sample_token(cls, sample_name: str) -> Tuple[dict, FirebaseAuthToken]:
         sample_path = Path(__file__).parent / "samples" / "identity_platform" / f"{sample_name}.json"
         token_data = json.load(sample_path.open())
         with patch_firebase_token(return_value=token_data):
             return token_data, FirebaseAuthToken(jwt_token="potato")
 
     def assert_expected_sample_token(
-        self, expected_data: Dict, token: FirebaseAuthToken, is_tenant: bool, is_expired: bool = True
+        self, expected_data: dict, token: FirebaseAuthToken, is_tenant: bool, is_expired: bool = True
     ):
         self.assertEqual(parse_timestamp(expected_data["exp"]), token.expiration_date)
         self.assertEqual(expected_data["event_type"], token.event_type)

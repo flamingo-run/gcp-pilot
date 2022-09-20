@@ -1,14 +1,14 @@
 # More Information: https://cloud.google.com/sql/docs/mysql/apis#rest-api
 import json
 import time
-from typing import Dict, Any, Generator
+from typing import Any, Generator, dict
 
 from googleapiclient.errors import HttpError
 
 from gcp_pilot import exceptions
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
+from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI
 
-InstanceType = DatabaseType = UserType = Dict[str, Any]
+InstanceType = DatabaseType = UserType = dict[str, Any]
 
 
 class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):

@@ -1,4 +1,4 @@
-from google.cloud.speech_v1 import RecognitionAudio, SpeechClient, RecognitionConfig
+from google.cloud.speech_v1 import RecognitionAudio, RecognitionConfig, SpeechClient
 
 from gcp_pilot.base import GoogleCloudPilotAPI
 

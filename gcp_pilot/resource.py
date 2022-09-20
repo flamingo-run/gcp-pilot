@@ -1,9 +1,9 @@
 # More Information: <https://cloud.google.com/resource-manager/reference/rest>
 
-from typing import List, Tuple, Generator
+from typing import Generator, List, Tuple
 
 from gcp_pilot import exceptions
-from gcp_pilot.base import AccountManagerMixin, GoogleCloudPilotAPI, PolicyType, DiscoveryMixin, ResourceType
+from gcp_pilot.base import AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI, PolicyType, ResourceType
 
 
 class ResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
@@ -15,7 +15,7 @@ class ResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    def get_policy(self, project_id: str = None, version: int = 1) -> PolicyType:
+    def get_policy(self, project_id: str | None = None, version: int = 1) -> PolicyType:
         return self._execute(
             method=self.client.projects().getIamPolicy,
             resource=project_id or self.project_id,

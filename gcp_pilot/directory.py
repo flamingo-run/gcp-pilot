@@ -1,9 +1,9 @@
 # More Information: https://developers.google.com/admin-sdk/directory/reference/rest
-from typing import Dict, Any, Generator, Union
+from typing import Any, Generator, Union, dict
 
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
+from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI
 
-UserType = GroupType = MemberType = Dict[str, Any]
+UserType = GroupType = MemberType = dict[str, Any]
 
 
 class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
@@ -25,7 +25,7 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
     def _get_project_default_location(self, project_id: str = None) -> Union[str, None]:
         return "us"
 
-    def _build_context(self, customer: str = None, domain: str = None) -> Dict[str, str]:
+    def _build_context(self, customer: str = None, domain: str = None) -> dict[str, str]:
         context = {
             "customer": customer or "my_customer",
         }

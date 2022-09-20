@@ -1,11 +1,11 @@
 # More Information <https://cloud.google.com/scheduler/docs/reference/rest>
 import os
-from typing import Dict, Generator
+from typing import Generator, dict
 
 from google.api_core.exceptions import NotFound
 from google.cloud import scheduler
 
-from gcp_pilot.base import GoogleCloudPilotAPI, AppEngineBasedService
+from gcp_pilot.base import AppEngineBasedService, GoogleCloudPilotAPI
 
 DEFAULT_TIMEZONE = os.environ.get("TIMEZONE", "Europe/London")  # UTC
 MAX_TIMEOUT = 30 * 60  # max allowed to HTTP endpoints is 30 minutes
@@ -34,7 +34,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         cron: str,
         timezone: str = None,
         method: int = DEFAULT_METHOD,
-        headers: Dict[str, str] = None,
+        headers: dict[str, str] = None,
         project_id: str = None,
         use_oidc_auth: bool = True,
         timeout_in_seconds: int = MAX_TIMEOUT,
@@ -66,7 +66,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         cron: str,
         timezone: str = None,
         method: int = DEFAULT_METHOD,
-        headers: Dict[str, str] = None,
+        headers: dict[str, str] = None,
         project_id: str = None,
         use_oidc_auth: bool = True,
         timeout_in_seconds: int = MAX_TIMEOUT,
@@ -117,7 +117,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         cron: str,
         timezone: str = None,
         method: int = DEFAULT_METHOD,
-        headers: Dict[str, str] = None,
+        headers: dict[str, str] = None,
         project_id: str = None,
         use_oidc_auth: bool = True,
         timeout_in_seconds: int = MAX_TIMEOUT,

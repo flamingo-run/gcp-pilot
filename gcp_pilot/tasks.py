@@ -1,24 +1,24 @@
 # Reference: https://googleapis.dev/python/cloudtasks/latest/tasks_v2/cloud_tasks.html
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict
+from typing import dict
 
 from google.api_core.exceptions import FailedPrecondition
 from google.cloud import tasks_v2
 from google.protobuf import timestamp_pb2
 
 from gcp_pilot import exceptions
-from gcp_pilot.base import GoogleCloudPilotAPI, AppEngineBasedService
+from gcp_pilot.base import AppEngineBasedService, GoogleCloudPilotAPI
 
 
 class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
     _client_class = tasks_v2.CloudTasksClient
     DEFAULT_METHOD = tasks_v2.HttpMethod.POST
 
-    def _parent_path(self, project_id: str = None) -> str:
+    def _parent_path(self, project_id: str | None = None) -> str:
         return f"projects/{project_id or self.project_id}/locations/{self.location}"
 
-    def _queue_path(self, queue: str, project_id: str = None) -> str:
+    def _queue_path(self, queue: str, project_id: str | None = None) -> str:
         return self.client.queue_path(
             project=project_id or self.project_id,
             location=self.location,
@@ -45,7 +45,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
         unique: bool = True,
         use_oidc_auth: bool = True,
         content_type: str = None,
-        headers: Dict[str, str] = None,
+        headers: dict[str, str] = None,
     ) -> tasks_v2.Task:
         queue_path = self.client.queue_path(
             project=project_id or self.project_id,

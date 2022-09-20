@@ -2,7 +2,7 @@
 import base64
 import json
 from dataclasses import dataclass
-from typing import Callable, Dict, Any, AsyncIterator, Union
+from typing import Any, AsyncIterator, Callable, Union, dict
 
 from google.api_core.exceptions import AlreadyExists, NotFound
 from google.cloud import pubsub_v1
@@ -22,7 +22,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
         topic_id: str,
         project_id: str = None,
         exists_ok: bool = True,
-        labels: Dict[str, str] = None,
+        labels: dict[str, str] = None,
     ) -> types.Topic:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -46,7 +46,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
         self,
         topic_id: str,
         project_id: str = None,
-        labels: Dict[str, str] = None,
+        labels: dict[str, str] = None,
     ) -> types.Topic:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -87,7 +87,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
         message: str,
         topic_id: str,
         project_id: str = None,
-        attributes: Dict[str, Any] = None,
+        attributes: dict[str, Any] = None,
     ) -> types.PublishResponse:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -288,11 +288,11 @@ class CloudSubscriber(GoogleCloudPilotAPI):
 class Message:
     id: str
     data: Any
-    attributes: Dict[str, Any]
+    attributes: dict[str, Any]
     subscription: str
 
     @classmethod
-    def load(cls, body: Union[str, bytes, Dict], parser: Callable = json.loads) -> "Message":
+    def load(cls, body: Union[str, bytes, dict], parser: Callable = json.loads) -> "Message":
         # https://cloud.google.com/pubsub/docs/push#receiving_messages
         if isinstance(body, bytes):
             body = body.decode()

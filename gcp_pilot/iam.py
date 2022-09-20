@@ -1,12 +1,12 @@
 # More Information: <https://cloud.google.com/iam/docs/reference/rest>
 import base64
-from typing import Dict, Any, Generator
+from typing import Any, Generator, dict
 
 from gcp_pilot import exceptions
-from gcp_pilot.base import GoogleCloudPilotAPI, AccountManagerMixin, PolicyType, DiscoveryMixin
+from gcp_pilot.base import AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI, PolicyType
 
-AccountType = Dict[str, Any]
-KeyType = Dict[str, Any]
+AccountType = dict[str, Any]
+KeyType = dict[str, Any]
 
 
 class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
@@ -165,7 +165,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
         for item in pagination:
             yield self._format_key(data=item)
 
-    def _format_key(self, data: Dict) -> Dict:
+    def _format_key(self, data: dict) -> dict:
         prefix, suffix = data["name"].split("/keys/", 1)
         data["id"] = suffix
         data["service_account_email"] = prefix.rsplit("/", 1)[-1]

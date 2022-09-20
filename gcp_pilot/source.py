@@ -1,10 +1,10 @@
 # More Information: <https://cloud.google.com/source-repositories/docs/reference/rest>
-from typing import Dict, Any
+from typing import Any, dict
 
 from gcp_pilot import exceptions
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
+from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI
 
-RepoType = Dict[str, Any]
+RepoType = dict[str, Any]
 
 
 class SourceRepository(DiscoveryMixin, GoogleCloudPilotAPI):
@@ -18,7 +18,7 @@ class SourceRepository(DiscoveryMixin, GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    def _repo_path(self, repo: str, project_id: str = None) -> str:
+    def _repo_path(self, repo: str, project_id: str | None = None) -> str:
         parent_path = self._project_path(project_id=project_id)
         return f"{parent_path}/repos/{repo}"
 

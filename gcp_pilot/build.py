@@ -1,6 +1,6 @@
 # More Information: https://cloud.google.com/cloud-build/docs/api
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Union, Generator
+from typing import Any, Generator, List, Union, dict
 from urllib.parse import urlparse
 
 from google.api_core.exceptions import AlreadyExists
@@ -17,7 +17,7 @@ AnyEventType = Union[cloudbuild_v1.GitHubEventsConfig, cloudbuild_v1.RepoSource]
 class _SubstitutionVariable:
     key: str
     value: Any
-    escape_delimiter: str = None
+    escape_delimiter: str | None = None
 
     def __post_init__(self):
         self.escape_delimiter = "|" if "," in str(self.value) else None
@@ -37,13 +37,13 @@ class _SubstitutionVariable:
         # <https://cloud.google.com/run/docs/configuring/environment-variables#setting>
         return f"^{self.escape_delimiter}^" if self.escape_delimiter else ""
 
-    def as_env_var(self, key: str = None):
+    def as_env_var(self, key: str | None = None):
         return f"{self._escape}{key or self.key}={str(self)}"
 
 
 @dataclass
 class Substitutions:
-    _variables: Dict[str, _SubstitutionVariable] = field(default_factory=dict)
+    _variables: dict[str, _SubstitutionVariable] = field(default_factory=dict)
 
     def add(self, **kwargs):
         for key, val in kwargs.items():
@@ -51,7 +51,7 @@ class Substitutions:
             self._variables[variable.key] = variable
 
     @property
-    def as_dict(self) -> Dict[str, str]:
+    def as_dict(self) -> dict[str, str]:
         return {
             variable.full_key: str(variable.value)  # all values must be string or bytes
             for variable in self._variables.values()
@@ -68,11 +68,11 @@ class CloudBuild(GoogleCloudPilotAPI):
     def make_build_step(
         self,
         name: str,
-        identifier: str = None,
-        args: list = None,
+        identifier: str | None = None,
+        args: list | None = None,
         env=None,
-        entrypoint: str = None,
-        timeout: int = None,
+        entrypoint: str | None = None,
+        timeout: int | None = None,
     ) -> cloudbuild_v1.BuildStep:
         return cloudbuild_v1.BuildStep(
             id=identifier,
@@ -86,9 +86,9 @@ class CloudBuild(GoogleCloudPilotAPI):
     def make_source_repo_event(
         self,
         repo_name: str,
-        branch_name: str = None,
-        tag_name: str = None,
-        project_id: str = None,
+        branch_name: str | None = None,
+        tag_name: str | None = None,
+        project_id: str | None = None,
     ) -> cloudbuild_v1.RepoSource:
         if not branch_name and not tag_name:
             branch_name = "master"
@@ -107,8 +107,8 @@ class CloudBuild(GoogleCloudPilotAPI):
     def make_github_event(
         self,
         url,
-        branch_name: str = None,
-        tag_name: str = None,
+        branch_name: str | None = None,
+        tag_name: str | None = None,
     ) -> cloudbuild_v1.GitHubEventsConfig:
         if not branch_name and not tag_name:
             branch_name = "master"
@@ -136,9 +136,9 @@ class CloudBuild(GoogleCloudPilotAPI):
         steps: List[cloudbuild_v1.BuildStep],
         event: AnyEventType,
         tags: List[str],
-        images: List[str] = None,
-        substitutions: Substitutions = None,
-        timeout: int = None,
+        images: List[str] | None = None,
+        substitutions: Substitutions | None = None,
+        timeout: int | None = None,
         machine_type: str = cloudbuild_v1.BuildOptions.MachineType.UNSPECIFIED,
     ) -> cloudbuild_v1.BuildTrigger:
         def _get_event_param():
@@ -187,7 +187,7 @@ class CloudBuild(GoogleCloudPilotAPI):
         description: str,
         event: AnyEventType,
         steps: List[cloudbuild_v1.BuildStep],
-        tags: List[str] = None,
+        tags: List[str] | None = None,
         project_id: str = None,
         images: List[str] = None,
         substitutions: Substitutions = None,

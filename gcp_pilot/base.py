@@ -2,7 +2,7 @@ import abc
 import json
 import logging
 import os
-from typing import Dict, Any, Callable, Tuple, List, Generator, Union
+from typing import Any, Callable, Generator, List, Tuple, Union
 
 from google import auth
 from google.auth import iam
@@ -11,9 +11,9 @@ from google.auth.impersonated_credentials import Credentials as ImpersonatedCred
 from google.auth.transport import requests
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 from google.protobuf.duration_pb2 import Duration  # pylint: disable=no-name-in-module
-from googleapiclient.discovery import build, Resource
+from googleapiclient.discovery import Resource, build
 from googleapiclient.errors import HttpError
-from requests import Response, HTTPError
+from requests import HTTPError, Response
 
 from gcp_pilot import exceptions
 
@@ -23,10 +23,10 @@ DEFAULT_SERVICE_ACCOUNT = os.environ.get("GCP_SERVICE_ACCOUNT", None)
 
 TOKEN_URI = "https://accounts.google.com/o/oauth2/token"
 
-PolicyType = Dict[str, Any]
+PolicyType = dict[str, Any]
 AuthType = Tuple[Credentials, str]
 ImpersonatedAuthType = Tuple[ImpersonatedCredentials, str]
-ResourceType = Dict[str, Any]
+ResourceType = dict[str, Any]
 
 logger = logging.getLogger()
 
@@ -42,17 +42,17 @@ class GoogleCloudPilotAPI(abc.ABC):
     _client_class = None
     _scopes: List[str] = []
     _iam_roles: List[str] = []
-    _cached_credentials: AuthType = None
+    _cached_credentials: AuthType | None = None
     _service_name = None
     _google_managed_service = False  # Service agent requires impersonation
 
     def __init__(
         self,
-        subject: str = None,
-        location: str = None,
-        project_id: str = None,
-        impersonate_account: str = None,
-        credentials: Credentials = None,
+        subject: str | None = None,
+        location: str | None = None,
+        project_id: str | None = None,
+        impersonate_account: str | None = None,
+        credentials: Credentials | None = None,
         **kwargs,
     ):
         if credentials:
@@ -66,7 +66,7 @@ class GoogleCloudPilotAPI(abc.ABC):
 
         self.client = self._build_client(**kwargs)
 
-        self.location = self._set_location(location=location)
+        self._location = location or DEFAULT_LOCATION
 
     def _get_client_extra_kwargs(self):
         return {}
@@ -79,8 +79,14 @@ class GoogleCloudPilotAPI(abc.ABC):
     def _set_project_id(self, project_id: str, credential_project_id: str) -> str:
         return project_id or DEFAULT_PROJECT or credential_project_id
 
-    def _set_location(self, location: str = None) -> str:
+    def _set_location(self, location: str | None = None) -> str:
         return location or DEFAULT_LOCATION or self._get_project_default_location()
+
+    @property
+    def location(self):
+        if not self._location:
+            self._location = self._get_project_default_location()
+        return self._location
 
     @classmethod
     def _impersonate_account(
@@ -138,7 +144,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         return admin_credentials
 
     @classmethod
-    def _set_credentials(cls, subject: str = None, impersonate_account: str = None) -> AuthType:
+    def _set_credentials(cls, subject: str | None = None, impersonate_account: str | None = None) -> AuthType:
         # Speed up consecutive authentications
         # TODO: check if this does not break multiple client usage
         all_scopes = MINIMAL_SCOPES + cls._scopes
@@ -165,19 +171,19 @@ class GoogleCloudPilotAPI(abc.ABC):
 
         return credentials, (project_id or getattr(credentials, "project_id", None))
 
-    def get_oidc_token(self, audience: str = None) -> Dict[str, Dict[str, str]]:
+    def get_oidc_token(self, audience: str | None = None) -> dict[str, dict[str, str]]:
         oidc_token = {"service_account_email": self.credentials.service_account_email}
         if audience:
             # TODO: make sure that, if URL, the query params are removed
             oidc_token["audience"] = audience
         return {"oidc_token": oidc_token}
 
-    async def set_up_permissions(self, email: str, project_id: str = None) -> None:
+    def set_up_permissions(self, email: str, project_id: str | None = None) -> None:
         from gcp_pilot.resource import ResourceManager, ServiceAgent  # pylint: disable=import-outside-toplevel
 
         rm = ResourceManager()  # pylint: disable=invalid-name
         for role in self._iam_roles:
-            await rm.add_member(
+            rm.add_member(
                 email=email,
                 role=role,
                 project_id=project_id or self.project_id,
@@ -189,7 +195,7 @@ class GoogleCloudPilotAPI(abc.ABC):
                 project_id=self.project_id,
             )
 
-            await ResourceManager().allow_impersonation(
+            ResourceManager().allow_impersonation(
                 email=email,
                 project_id=project_id,
             )
@@ -204,13 +210,13 @@ class GoogleCloudPilotAPI(abc.ABC):
         return Duration(seconds=seconds) if seconds else None
 
     @classmethod
-    def build_from(cls, client: "GoogleCloudPilotAPI", project_id: str = None):
+    def build_from(cls, client: "GoogleCloudPilotAPI", project_id: str | None = None):
         return cls(
             credentials=client.credentials,
             project_id=project_id or client.project_id,
         )
 
-    def _get_project_default_location(self, project_id: str = None) -> Union[str, None]:
+    def _get_project_default_location(self, project_id: str | None = None) -> Union[str, None]:
         location = _CACHED_LOCATIONS.get(project_id or self.project_id, None)
         if location:
             return location
@@ -223,10 +229,10 @@ class GoogleCloudPilotAPI(abc.ABC):
         except exceptions.NotFound:
             return None
 
-    def _project_path(self, project_id: str = None) -> str:
+    def _project_path(self, project_id: str | None = None) -> str:
         return f"projects/{project_id or self.project_id}"
 
-    def _location_path(self, project_id: str = None, location: str = None) -> str:
+    def _location_path(self, project_id: str | None = None, location: str | None = None) -> str:
         project_path = self._project_path(project_id=project_id)
         return f"{project_path}/locations/{location or self.location}"
 
@@ -248,13 +254,13 @@ class AccountManagerMixin:
         prefix = "serviceAccount" if is_service_account else "member"
         return f"{prefix}:{email}"
 
-    def _make_public(self, role: str, policy: Dict) -> Dict:
+    def _make_public(self, role: str, policy: dict) -> dict:
         return self._bind_email_to_policy(email="allUsers", role=role, policy=policy)
 
-    def _make_private(self, role: str, policy: Dict) -> Dict:
+    def _make_private(self, role: str, policy: dict) -> dict:
         return self._unbind_email_from_policy(email="allUsers", role=role, policy=policy)
 
-    def _bind_email_to_policy(self, email: str, role: str, policy: Dict) -> Dict:
+    def _bind_email_to_policy(self, email: str, role: str, policy: dict) -> dict:
         new_policy = policy.copy()
 
         role_id = role if (role.startswith("organizations/") or role.startswith("roles/")) else f"roles/{role}"
@@ -277,7 +283,7 @@ class AccountManagerMixin:
             new_policy["version"] = 1  # TODO: handle version 2 and 3 as its conditional roles
         return new_policy
 
-    def _unbind_email_from_policy(self, email: str, role: str, policy: Dict):
+    def _unbind_email_from_policy(self, email: str, role: str, policy: dict):
         role_id = f"roles/{role}"
         member = self._as_member(email=email)
 
@@ -298,7 +304,7 @@ class AppEngineBasedService:
     # is created in a region and this region cannot be changed ever.
     # So these clients cannot just choose a desired region to work on, they must use the App Engine's
     # previously chosen region.
-    def _set_location(self, location: str = None):
+    def _set_location(self, location: str | None = None):
         project_location = self._get_project_default_location()
 
         explicit_location = location
@@ -377,7 +383,7 @@ class DiscoveryMixin:
         self,
         method: Callable,
         result_key: str = "items",
-        params: Dict[str, Any] = None,
+        params: dict[str, Any] | None = None,
     ) -> Generator[ResourceType, None, None]:
         results = self._execute(
             method=method,
@@ -392,9 +398,9 @@ class DiscoveryMixin:
         result_key: str = "items",
         pagination_key: str = "pageToken",  # Because GCP can be weird sometimes
         next_pagination_key: str = "nextPageToken",
-        params: Dict[str, Any] = None,
-        order_by: str = None,
-        limit: int = None,
+        params: dict[str, Any] | None = None,
+        order_by: str | None = None,
+        limit: int | None = None,
     ) -> Generator[ResourceType, None, None]:
         page_token = None
         params = params or {}

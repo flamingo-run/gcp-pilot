@@ -2,12 +2,12 @@
 import datetime
 from dataclasses import dataclass
 from enum import Enum
-from typing import Generator, List, Dict, Optional
+from typing import Generator, List, Optional, dict
 from uuid import uuid4
 
 import pytz
 
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, ResourceType
+from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType
 
 
 class ResponseStatus(Enum):
@@ -24,9 +24,9 @@ class ResponseStatus(Enum):
 class Attendee:
     email: str
     optional: bool = False
-    response_status: ResponseStatus = None
+    response_status: ResponseStatus | None = None
 
-    def as_data(self) -> Dict:
+    def as_data(self) -> dict:
         return {
             "email": self.email,
             "optional": self.optional,

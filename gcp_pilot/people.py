@@ -1,9 +1,9 @@
 # More Information: https://developers.google.com/admin-sdk/directory/reference/rest
-from typing import Dict, Any, Generator, Union, List
+from typing import Any, Generator, List, Union, dict
 
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
+from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI
 
-UserType = GroupType = MemberType = Dict[str, Any]
+UserType = GroupType = MemberType = dict[str, Any]
 USER_FIELDS = [
     "addresses",
     "addresses",

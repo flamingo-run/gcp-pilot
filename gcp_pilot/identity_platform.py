@@ -4,7 +4,7 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Iterator, Optional, Union, dict
+from typing import Iterator
 from urllib.parse import parse_qs, urlparse
 
 from google.auth.transport import requests
@@ -21,7 +21,7 @@ class OOBCodeType(Enum):
     SIGNIN = "EMAIL_SIGNIN"
 
 
-def parse_timestamp(timestamp: Union[str, int, float]) -> Optional[datetime]:
+def parse_timestamp(timestamp: str | int | float) -> datetime | None:
     if not timestamp:
         return None
     if len(str(timestamp)) > 10:
@@ -48,13 +48,13 @@ class User:
     email: str
     verified: bool
     disabled: bool
-    created_at: Optional[datetime]
+    created_at: datetime | None
     name: str | None = None
     photo_url: bool | None = None
-    last_login_at: Optional[datetime] | None = None
-    password_changed_at: Optional[datetime] | None = None
+    last_login_at: datetime | None = None
+    password_changed_at: datetime | None = None
     extra_attributes: dict[str, str] | None = None
-    tenant_id: Optional[str] | None = None
+    tenant_id: str | None | None = None
 
     @classmethod
     def create(cls, data: ResourceType) -> "User":
@@ -83,7 +83,7 @@ class FirebaseOAuth:
 @dataclass
 class FirebaseAuthToken:
     jwt_token: str
-    request: Optional[requests.Request] | None = None
+    request: requests.Request | None = None
     validate_expiration: bool = True
 
     def __post_init__(self):
@@ -100,7 +100,7 @@ class FirebaseAuthToken:
         return self._data["sign_in_method"]
 
     @property
-    def tenant_id(self) -> Optional[str]:
+    def tenant_id(self) -> str | None:
         return self._data.get("tenant_id", None)
 
     @property

@@ -1,6 +1,6 @@
 # More Information: https://cloud.google.com/cloud-build/docs/api
 from dataclasses import dataclass, field
-from typing import Any, Generator, List, Union, dict
+from typing import Any, Generator
 from urllib.parse import urlparse
 
 from google.api_core.exceptions import AlreadyExists
@@ -10,7 +10,7 @@ from gcp_pilot import exceptions
 from gcp_pilot.base import GoogleCloudPilotAPI
 
 TriggerType = cloudbuild_v1.BuildTrigger
-AnyEventType = Union[cloudbuild_v1.GitHubEventsConfig, cloudbuild_v1.RepoSource]
+AnyEventType = cloudbuild_v1.GitHubEventsConfig | cloudbuild_v1.RepoSource
 
 
 @dataclass
@@ -133,10 +133,10 @@ class CloudBuild(GoogleCloudPilotAPI):
         self,
         name: str,
         description: str,
-        steps: List[cloudbuild_v1.BuildStep],
+        steps: list[cloudbuild_v1.BuildStep],
         event: AnyEventType,
-        tags: List[str],
-        images: List[str] | None = None,
+        tags: list[str],
+        images: list[str] | None = None,
         substitutions: Substitutions | None = None,
         timeout: int | None = None,
         machine_type: str = cloudbuild_v1.BuildOptions.MachineType.UNSPECIFIED,
@@ -186,10 +186,10 @@ class CloudBuild(GoogleCloudPilotAPI):
         name: str,
         description: str,
         event: AnyEventType,
-        steps: List[cloudbuild_v1.BuildStep],
-        tags: List[str] | None = None,
+        steps: list[cloudbuild_v1.BuildStep],
+        tags: list[str] | None = None,
         project_id: str = None,
-        images: List[str] = None,
+        images: list[str] = None,
         substitutions: Substitutions = None,
         timeout: int = None,
         machine_type: str = None,
@@ -217,9 +217,9 @@ class CloudBuild(GoogleCloudPilotAPI):
         name: str,
         description: str,
         event: AnyEventType,
-        steps: List[cloudbuild_v1.BuildStep],
-        tags: List[str] = None,
-        images: List[str] = None,
+        steps: list[cloudbuild_v1.BuildStep],
+        tags: list[str] = None,
+        images: list[str] = None,
         substitutions: Substitutions = None,
         project_id: str = None,
         timeout: int = None,
@@ -249,10 +249,10 @@ class CloudBuild(GoogleCloudPilotAPI):
         name: str,
         description: str,
         event: AnyEventType,
-        steps: List[cloudbuild_v1.BuildStep],
-        tags: List[str] = None,
+        steps: list[cloudbuild_v1.BuildStep],
+        tags: list[str] = None,
         project_id: str = None,
-        images: List[str] = None,
+        images: list[str] = None,
         substitutions: Substitutions = None,
         timeout: int = None,
         machine_type: str = None,

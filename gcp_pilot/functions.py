@@ -1,5 +1,5 @@
 # More Information: <https://cloud.google.com/functions/docs/reference/rest>
-from typing import Any, Generator, dict
+from typing import Any, Generator
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI, PolicyType

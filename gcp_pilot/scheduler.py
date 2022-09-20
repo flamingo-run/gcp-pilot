@@ -1,6 +1,6 @@
 # More Information <https://cloud.google.com/scheduler/docs/reference/rest>
 import os
-from typing import Generator, dict
+from typing import Generator
 
 from google.api_core.exceptions import NotFound
 from google.cloud import scheduler

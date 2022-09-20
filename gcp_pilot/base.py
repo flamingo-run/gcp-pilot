@@ -2,7 +2,7 @@ import abc
 import json
 import logging
 import os
-from typing import Any, Callable, Generator, List, Tuple, Union
+from typing import Any, Callable, Generator
 
 from google import auth
 from google.auth import iam
@@ -24,8 +24,8 @@ DEFAULT_SERVICE_ACCOUNT = os.environ.get("GCP_SERVICE_ACCOUNT", None)
 TOKEN_URI = "https://accounts.google.com/o/oauth2/token"
 
 PolicyType = dict[str, Any]
-AuthType = Tuple[Credentials, str]
-ImpersonatedAuthType = Tuple[ImpersonatedCredentials, str]
+AuthType = tuple[Credentials, str]
+ImpersonatedAuthType = tuple[ImpersonatedCredentials, str]
 ResourceType = dict[str, Any]
 
 logger = logging.getLogger()
@@ -40,8 +40,8 @@ MINIMAL_SCOPES = [
 
 class GoogleCloudPilotAPI(abc.ABC):
     _client_class = None
-    _scopes: List[str] = []
-    _iam_roles: List[str] = []
+    _scopes: list[str] = []
+    _iam_roles: list[str] = []
     _cached_credentials: AuthType | None = None
     _service_name = None
     _google_managed_service = False  # Service agent requires impersonation
@@ -71,7 +71,7 @@ class GoogleCloudPilotAPI(abc.ABC):
     def _get_client_extra_kwargs(self):
         return {}
 
-    def _build_client(self, **kwargs) -> Union[Resource, _client_class]:
+    def _build_client(self, **kwargs) -> Resource | _client_class:
         kwargs.update(self._get_client_extra_kwargs())
 
         return (self._client_class or build)(credentials=self.credentials, **kwargs)
@@ -93,7 +93,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         cls,
         credentials: Credentials,
         service_account: str,
-        scopes: List[str],
+        scopes: list[str],
     ) -> ImpersonatedAuthType:
         credentials = ImpersonatedCredentials(
             source_credentials=credentials,
@@ -114,7 +114,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         cls,
         credentials: Credentials,
         subject: str,
-        scopes: List[str],
+        scopes: list[str],
     ) -> ServiceAccountCredentials:
         try:
             admin_credentials = credentials.with_subject(subject).with_scopes(scopes)
@@ -216,7 +216,7 @@ class GoogleCloudPilotAPI(abc.ABC):
             project_id=project_id or client.project_id,
         )
 
-    def _get_project_default_location(self, project_id: str | None = None) -> Union[str, None]:
+    def _get_project_default_location(self, project_id: str | None = None) -> str | None:
         location = _CACHED_LOCATIONS.get(project_id or self.project_id, None)
         if location:
             return location

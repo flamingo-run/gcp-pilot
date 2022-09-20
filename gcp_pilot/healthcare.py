@@ -4,7 +4,7 @@ import json
 import logging
 import math
 from dataclasses import dataclass
-from typing import Any, Callable, Generator, List, Optional, Type, dict
+from typing import Any, Callable, Generator, Type
 from urllib.parse import parse_qsl, urlsplit
 
 from fhir.resources.domainresource import DomainResource
@@ -166,7 +166,7 @@ class FHIRResultSet:
             yield self.resource_class(**entry["resource"])
 
     @property
-    def next_cursor(self) -> Optional[str]:
+    def next_cursor(self) -> str | None:
         for link in self.response["link"]:
             if link["relation"] == "next":
                 query_params = dict(parse_qsl(urlsplit(link["url"]).query))
@@ -174,7 +174,7 @@ class FHIRResultSet:
         return None
 
     @property
-    def previous_cursor(self) -> Optional[str]:
+    def previous_cursor(self) -> str | None:
         for link in self.response["link"]:
             if link["relation"] == "previous":
                 return link["url"]
@@ -421,7 +421,7 @@ class HealthcareFHIR(HealthcareBase):
         location: str = None,
     ) -> DomainResource:
         if not query:
-            identifiers: List[Identifier] = getattr(resource, "identifier")
+            identifiers: list[Identifier] = getattr(resource, "identifier")
             if not identifiers:
                 raise exceptions.ValidationError("Either `query` or identifiers must be provided to create-or-update")
 

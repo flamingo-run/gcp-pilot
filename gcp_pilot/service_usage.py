@@ -1,6 +1,6 @@
 # More Information: https://cloud.google.com/service-usage/docs/reference/rest
 from enum import Enum
-from typing import Generator, Optional
+from typing import Generator
 
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType
 
@@ -25,7 +25,7 @@ class ServiceUsage(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def list_services(
         self,
-        project_id: Optional[str] = None,
+        project_id: str | None = None,
         status: ServiceStatus = ServiceStatus.ENABLED,
     ) -> Generator[ResourceType, None, None]:
         params = dict(
@@ -43,7 +43,7 @@ class ServiceUsage(DiscoveryMixin, GoogleCloudPilotAPI):
     def get_service(
         self,
         service_name: str,
-        project_id: Optional[str] = None,
+        project_id: str | None = None,
     ) -> ResourceType:
         name = self._service_path(service_name=service_name, project_id=project_id)
         return self._execute(
@@ -54,7 +54,7 @@ class ServiceUsage(DiscoveryMixin, GoogleCloudPilotAPI):
     def enable_service(
         self,
         service_name: str,
-        project_id: Optional[str] = None,
+        project_id: str | None = None,
     ) -> ResourceType:
         name = self._service_path(service_name=service_name, project_id=project_id)
         return self._execute(
@@ -65,7 +65,7 @@ class ServiceUsage(DiscoveryMixin, GoogleCloudPilotAPI):
     def disable_service(
         self,
         service_name: str,
-        project_id: Optional[str] = None,
+        project_id: str | None = None,
     ) -> ResourceType:
         name = self._service_path(service_name=service_name, project_id=project_id)
         return self._execute(

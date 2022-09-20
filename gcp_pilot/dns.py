@@ -1,7 +1,7 @@
 # More Information: <https://googleapis.dev/python/dns/latest/index.html>
 import time
 from enum import Enum
-from typing import Generator, List
+from typing import Generator
 
 from google.api_core.exceptions import BadRequest, Conflict
 from google.cloud import dns
@@ -82,7 +82,7 @@ class CloudDNS(GoogleCloudPilotAPI):
         zone_dns: str,
         name: str,
         record_type: RecordType,
-        record_data: List[str] = None,
+        record_data: list[str] = None,
         ttl: int = 60 * 60,
         wait: bool = True,
     ) -> dns.ResourceRecordSet:
@@ -131,7 +131,7 @@ class CloudDNS(GoogleCloudPilotAPI):
         zone_dns: str,
         name: str,
         record_type: RecordType,
-        record_data: List[str],
+        record_data: list[str],
         ttl: int = 5 * 60,
         wait: bool = True,
         exists_ok: bool = True,

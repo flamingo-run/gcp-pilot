@@ -1,5 +1,5 @@
 # More Information: https://developers.google.com/admin-sdk/directory/reference/rest
-from typing import Any, Generator, Union, dict
+from typing import Any, Generator
 
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI
 
@@ -22,7 +22,7 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    def _get_project_default_location(self, project_id: str = None) -> Union[str, None]:
+    def _get_project_default_location(self, project_id: str = None) -> str | None:
         return "us"
 
     def _build_context(self, customer: str = None, domain: str = None) -> dict[str, str]:

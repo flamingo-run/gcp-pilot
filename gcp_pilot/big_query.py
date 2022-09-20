@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Union, dict
+from typing import Any
 
 from google.cloud import bigquery
 from google.cloud.bigquery import DatasetReference, Table
@@ -12,7 +12,7 @@ from gcp_pilot.storage import CloudStorage
 class BigQuery(GoogleCloudPilotAPI):
     _client_class = bigquery.Client
 
-    def _get_project_default_location(self, project_id: str | None = None) -> Union[str, None]:
+    def _get_project_default_location(self, project_id: str | None = None) -> str | None:
         return "us"
 
     def _dataset_ref(self, dataset_name: str, project_id: str | None = None) -> DatasetReference:
@@ -230,7 +230,7 @@ class _BigQueryParam:
         return variable
 
     @classmethod
-    def parse(cls, key: str, value: Any) -> Union[bigquery.ArrayQueryParameter, bigquery.ScalarQueryParameter]:
+    def parse(cls, key: str, value: Any) -> bigquery.ArrayQueryParameter | bigquery.ScalarQueryParameter:
         if isinstance(value, list):
             param_type = cls._get_type(variable=value[0])
             param_class = bigquery.ArrayQueryParameter

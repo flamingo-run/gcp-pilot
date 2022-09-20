@@ -1,5 +1,5 @@
 # More Information: <https://cloud.google.com/source-repositories/docs/reference/rest>
-from typing import Any, dict
+from typing import Any
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI

@@ -1,5 +1,5 @@
 # More Information: https://developers.google.com/admin-sdk/directory/reference/rest
-from typing import Any, Generator, List, Union, dict
+from typing import Any, Generator
 
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI
 
@@ -54,10 +54,10 @@ class People(DiscoveryMixin, GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    def _get_project_default_location(self, project_id: str = None) -> Union[str, None]:
+    def _get_project_default_location(self, project_id: str | None = None) -> str | None:
         return None
 
-    def get_people(self, query: str = None, fields: List[str] = None) -> Generator[UserType, None, None]:
+    def get_people(self, query: str = None, fields: list[str] | None = None) -> Generator[UserType, None, None]:
         params = {
             "readMask": ",".join(fields or USER_FIELDS),
             "sources": ["DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE", "DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT"],

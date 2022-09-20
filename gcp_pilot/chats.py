@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass, field
-from typing import Generator, List, dict
+from typing import Generator
 
 import requests
 
@@ -23,7 +23,7 @@ class Text:
 
 
 class Widget(dict):
-    _key | None = None
+    _key: str | None = None
 
     def as_data(self):
         if self._key:
@@ -126,7 +126,7 @@ class ImageWidget(Widget):
 @dataclass
 class Section:
     header: str = None
-    widgets: List[Widget] = field(default_factory=list)
+    widgets: list[Widget] = field(default_factory=list)
 
     def add_header(self, text: str):
         self.header = text
@@ -184,7 +184,7 @@ class Section:
 @dataclass
 class Card:
     header: Widget = None
-    sections: List[Section] = field(default_factory=list)
+    sections: list[Section] = field(default_factory=list)
 
     def add_header(self, title: str, subtitle: str = "", image_url: str = None, style: str = "IMAGE"):
         self.header = Widget(

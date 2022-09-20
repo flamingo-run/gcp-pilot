@@ -1,6 +1,6 @@
 # More Information: <https://cloud.google.com/iam/docs/reference/rest>
 import base64
-from typing import Any, Generator, dict
+from typing import Any, Generator
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI, PolicyType

@@ -1,7 +1,7 @@
 # More Information: https://cloud.google.com/sql/docs/mysql/apis#rest-api
 import json
 import time
-from typing import Any, Generator, dict
+from typing import Any, Generator
 
 from googleapiclient.errors import HttpError
 

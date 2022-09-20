@@ -2,7 +2,7 @@
 import base64
 import time
 from pathlib import Path
-from typing import Generator, Optional, Dict
+from typing import Generator, Optional, dict
 
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType
 from gcp_pilot.service_usage import ServiceUsage
@@ -17,7 +17,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    def _api_path(self, api_name: str, project_id: str = None) -> str:
+    def _api_path(self, api_name: str, project_id: str | None = None) -> str:
         location_path = self._location_path(project_id=project_id, location="global")
         return f"{location_path}/apis/{api_name}"
 
@@ -58,7 +58,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         api_name: str,
         display_name: str = "",
-        labels: Optional[Dict[str, str]] = None,
+        labels: Optional[dict[str, str]] = None,
         project_id: Optional[str] = None,
         wait: bool = True,
     ) -> ResourceType:
@@ -124,7 +124,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         service_account: str,
         open_api_file: Path,
         display_name: str = "",
-        labels: Optional[Dict[str, str]] = None,
+        labels: Optional[dict[str, str]] = None,
         project_id: Optional[str] = None,
         wait: bool = True,
     ) -> ResourceType:
@@ -193,7 +193,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         gateway_name: str,
         api_name: str,
         config_name: str,
-        labels: Optional[Dict[str, str]] = None,
+        labels: Optional[dict[str, str]] = None,
         project_id: Optional[str] = None,
         location: Optional[str] = None,
         wait: bool = True,

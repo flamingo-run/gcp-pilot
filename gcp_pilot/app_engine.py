@@ -1,4 +1,4 @@
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, _CACHED_LOCATIONS, AppEngineBasedService
+from gcp_pilot.base import _CACHED_LOCATIONS, AppEngineBasedService, DiscoveryMixin, GoogleCloudPilotAPI
 
 
 class AppEngine(AppEngineBasedService, DiscoveryMixin, GoogleCloudPilotAPI):

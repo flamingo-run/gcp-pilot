@@ -1,27 +1,15 @@
 from __future__ import annotations
 
 import abc
-from datetime import datetime, date
+import inspect
 import itertools
 import json
-import inspect
 import os
 from collections import defaultdict
 from dataclasses import dataclass
+from datetime import date, datetime
 from functools import cached_property
-from typing import (
-    Type,
-    Generator,
-    Dict,
-    ClassVar,
-    Any,
-    Tuple,
-    Union,
-    List,
-    Callable,
-    Iterable,
-    Optional,
-)
+from typing import Any, Callable, ClassVar, Generator, Iterable, List, Optional, Tuple, Type, Union, dict
 
 from google.cloud import datastore
 from pydantic import BaseModel
@@ -43,13 +31,13 @@ def _chunks(lst, n):
 @dataclass
 class DoesNotExist(Exception):
     cls: Type[EmbeddedDocument]
-    filters: Dict
+    filters: dict
 
 
 @dataclass
 class MultipleObjectsFound(Exception):
     cls: Type[EmbeddedDocument]
-    filters: Dict
+    filters: dict
 
 
 def _starts_with_operator(lookup_fields, value) -> List[Tuple[str, str, Any]]:
@@ -62,7 +50,7 @@ def _starts_with_operator(lookup_fields, value) -> List[Tuple[str, str, Any]]:
 
 @dataclass
 class Manager:
-    LOOKUP_OPERATORS: ClassVar[Dict[str, Union[str, Callable]]] = {
+    LOOKUP_OPERATORS: ClassVar[dict[str, Union[str, Callable]]] = {
         "eq": "=",
         "gt": ">",
         "gte": ">=",
@@ -97,7 +85,7 @@ class Manager:
     def fields(self) -> Iterable[str]:
         return self.doc_klass.__fields__.keys()
 
-    def build_key(self, pk: Any = None) -> datastore.Key:
+    def build_key(self, pk: Any | None = None) -> datastore.Key:
         if self.is_embedded:
             return self.client.key(self.kind)
 
@@ -122,9 +110,9 @@ class Manager:
 
     def query(
         self,
-        distinct_on: str = None,
-        order_by: Union[str, List[str]] = None,
-        page_size: int = None,
+        distinct_on: str | None = None,
+        order_by: Union[str, List[str]] | None = None,
+        page_size: int | None = None,
         **kwargs,
     ) -> datastore.query.Iterator:
         # base query
@@ -210,7 +198,7 @@ class Manager:
             self.client.put(entity=entity)
         return self.get(id=pk)
 
-    def delete(self, pk: str = None):
+    def delete(self, pk: str | None = None):
         if pk:
             self.client.delete(key=self.build_key(pk=pk))
         else:
@@ -255,7 +243,7 @@ class EmbeddedDocument(BaseModel, abc.ABC):
     def from_dict(cls, **kwargs) -> EmbeddedDocument:
         return cls(**kwargs)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return self.dict()
 
     @classmethod

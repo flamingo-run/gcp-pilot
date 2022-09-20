@@ -6,10 +6,10 @@ from typing import AsyncIterator
 import requests
 from google.cloud import storage
 from google.cloud.exceptions import Conflict
-from google.cloud.storage import Bucket, Blob
+from google.cloud.storage import Blob, Bucket
 
-from gcp_pilot.base import GoogleCloudPilotAPI
 from gcp_pilot import exceptions
+from gcp_pilot.base import GoogleCloudPilotAPI
 
 
 class CloudStorage(GoogleCloudPilotAPI):
@@ -18,8 +18,8 @@ class CloudStorage(GoogleCloudPilotAPI):
     async def create_bucket(
         self,
         name: str,
-        region: str = None,
-        project_id: str = None,
+        region: str | None = None,
+        project_id: str | None = None,
         exists_ok: bool = True,
     ) -> Bucket:
         bucket = self.client.bucket(name)
@@ -41,12 +41,12 @@ class CloudStorage(GoogleCloudPilotAPI):
         self,
         source_file,
         bucket_name: str,
-        target_file_name: str = None,
-        chunk_size: int = None,
-        project_id: str = None,
-        region: str = None,
+        target_file_name: str | None = None,
+        chunk_size: int | None = None,
+        project_id: str | None = None,
+        region: str | None = None,
         is_public: bool = False,
-        content_type: str = None,
+        content_type: str | None = None,
     ) -> Blob:
         target_bucket = await self.create_bucket(name=bucket_name, project_id=project_id, region=region)
 

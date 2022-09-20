@@ -1,10 +1,10 @@
 # More Information: <https://cloud.google.com/functions/docs/reference/rest>
-from typing import Dict, Any, Generator
+from typing import Any, Generator, dict
 
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, PolicyType, AccountManagerMixin
 from gcp_pilot import exceptions
+from gcp_pilot.base import AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI, PolicyType
 
-FunctionType = Dict[str, Any]
+FunctionType = dict[str, Any]
 
 
 class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
@@ -53,7 +53,7 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
         tag: str = None,
         directory: str = None,
         project_id: str = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
 
         valid_references = [ref for ref in [branch, commit, tag] if ref]
         if len(valid_references) > 1:
@@ -96,8 +96,8 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
         repo_tag: str = None,
         repo_commit: str = None,
         repo_directory: str = None,
-        labels: Dict[str, str] = None,
-        env_vars: Dict[str, str] = None,
+        labels: dict[str, str] = None,
+        env_vars: dict[str, str] = None,
         max_instances: int = None,
         project_id: str = None,
         location: str = None,

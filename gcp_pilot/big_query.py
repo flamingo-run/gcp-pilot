@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Any, Dict, Union
+from typing import Any, Union, dict
 
 from google.cloud import bigquery
-from google.cloud.bigquery import Table, DatasetReference
+from google.cloud.bigquery import DatasetReference, Table
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import GoogleCloudPilotAPI
@@ -12,10 +12,10 @@ from gcp_pilot.storage import CloudStorage
 class BigQuery(GoogleCloudPilotAPI):
     _client_class = bigquery.Client
 
-    def _get_project_default_location(self, project_id: str = None) -> Union[str, None]:
+    def _get_project_default_location(self, project_id: str | None = None) -> Union[str, None]:
         return "us"
 
-    def _dataset_ref(self, dataset_name: str, project_id: str = None) -> DatasetReference:
+    def _dataset_ref(self, dataset_name: str, project_id: str | None = None) -> DatasetReference:
         return self.client.dataset(
             dataset_id=dataset_name,
             project=project_id or self.project_id,
@@ -24,11 +24,11 @@ class BigQuery(GoogleCloudPilotAPI):
     async def execute(
         self,
         sql: str,
-        params: Dict[str, Any] = None,
-        destination_table_name: str = None,
-        destination_dataset_name: str = None,
-        destination_project: str = None,
-        truncate: bool = None,
+        params: dict[str, Any] | None = None,
+        destination_table_name: str | None = None,
+        destination_dataset_name: str | None = None,
+        destination_project: str | None = None,
+        truncate: bool | None = None,
     ):
         job_config = bigquery.QueryJobConfig()
         if destination_table_name or destination_dataset_name:
@@ -53,7 +53,7 @@ class BigQuery(GoogleCloudPilotAPI):
         return self._wait_for_job(job=query_job)
 
     async def insert_rows(self, dataset_name: str, table_name: str, rows, project_id: str = None):
-        table = await self.get_table(
+        table = self.get_table(
             table_name=table_name,
             project_id=project_id,
             dataset_name=dataset_name,
@@ -71,12 +71,12 @@ class BigQuery(GoogleCloudPilotAPI):
         self,
         table_name: str,
         filename: str,
-        project_id: str = None,
-        dataset_name: str = None,
+        project_id: str | None = None,
+        dataset_name: str | None = None,
         schema=None,
         wait: bool = False,
-        truncate: bool = None,
-        gcs_bucket: str = None,
+        truncate: bool | None = None,
+        gcs_bucket: str | None = None,
     ) -> None:
         job_config = bigquery.LoadJobConfig()
         if schema:
@@ -143,7 +143,7 @@ class BigQuery(GoogleCloudPilotAPI):
         source_table_name: str,
         destination_table_name: str,
         destination_dataset_name: str,
-        destination_project: str = None,
+        destination_project: str | None = None,
         wait: bool = False,
     ) -> None:
         source_ref = await self.get_table(dataset_name=source_dataset_name, table_name=source_table_name)
@@ -182,7 +182,7 @@ class BigQuery(GoogleCloudPilotAPI):
         delimiter: str = ",",
         quote: str = '"',
         source_format: str = "CSV",
-        project_id: str = None,
+        project_id: str | None = None,
     ):
         dataset_ref = self._dataset_ref(dataset_name=dataset_name, project_id=project_id)
         table = dataset_ref.table(table_name)

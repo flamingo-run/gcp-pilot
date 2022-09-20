@@ -4,15 +4,15 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Dict, Optional, Union, Iterator
-from urllib.parse import urlparse, parse_qs
+from typing import Iterator, Optional, Union, dict
+from urllib.parse import parse_qs, urlparse
 
 from google.auth.transport import requests
 from google.oauth2 import id_token
 from tenacity import Retrying, stop_after_attempt, wait_fixed
 
 from gcp_pilot import exceptions
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, ResourceType
+from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType
 
 
 class OOBCodeType(Enum):
@@ -49,12 +49,12 @@ class User:
     verified: bool
     disabled: bool
     created_at: Optional[datetime]
-    name: str = None
-    photo_url: bool = None
-    last_login_at: Optional[datetime] = None
-    password_changed_at: Optional[datetime] = None
-    extra_attributes: Dict[str, str] = None
-    tenant_id: Optional[str] = None
+    name: str | None = None
+    photo_url: bool | None = None
+    last_login_at: Optional[datetime] | None = None
+    password_changed_at: Optional[datetime] | None = None
+    extra_attributes: dict[str, str] | None = None
+    tenant_id: Optional[str] | None = None
 
     @classmethod
     def create(cls, data: ResourceType) -> "User":
@@ -76,14 +76,14 @@ class User:
 class FirebaseOAuth:
     id_token: str
     access_token: str
-    refresh_token: str = None
-    token_secret: str = None
+    refresh_token: str | None = None
+    token_secret: str | None = None
 
 
 @dataclass
 class FirebaseAuthToken:
     jwt_token: str
-    request: Optional[requests.Request] = None
+    request: Optional[requests.Request] | None = None
     validate_expiration: bool = True
 
     def __post_init__(self):
@@ -145,11 +145,11 @@ class FirebaseAuthToken:
         )
 
     @property
-    def raw_user(self) -> Dict:
+    def raw_user(self) -> dict:
         return json.loads(self._data["raw_user_info"])
 
     @property
-    def event_id(self) -> Dict:
+    def event_id(self) -> dict:
         return self._data["event_id"]
 
     @property
@@ -166,7 +166,7 @@ class FirebaseAuthToken:
 class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
     _scopes = ["https://www.googleapis.com/auth/identitytoolkit"]
 
-    def __init__(self, tenant_id: str = None, **kwargs):
+    def __init__(self, tenant_id: str | None = None, **kwargs):
         super().__init__(
             serviceName="identitytoolkit",
             version="v1",
@@ -178,9 +178,9 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def find(
         self,
-        email: str = None,
-        phone_number: str = None,
-        tenant_id: str = None,
+        email: str | None = None,
+        phone_number: str | None = None,
+        tenant_id: str | None = None,
         project_id: str = None,
     ) -> User:
         try:
@@ -369,7 +369,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         name: str = None,
         photo_url: str = None,
         project_id: str = None,
-        attributes: Dict[str, str] = None,
+        attributes: dict[str, str] = None,
         tenant_id: str = None,
         enabled: bool = None,
     ):

@@ -15,11 +15,11 @@ class Monitoring(DiscoveryMixin, GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    def _service_path(self, service_id: str, project_id: str = None) -> str:
+    def _service_path(self, service_id: str, project_id: str | None = None) -> str:
         parent = self._project_path(project_id=project_id)
         return f"{parent}/services/{service_id}"
 
-    def list_services(self, project_id: str = None) -> Generator[ResourceType, None, None]:
+    def list_services(self, project_id: str | None = None) -> Generator[ResourceType, None, None]:
         parent = self._project_path(project_id=project_id)
 
         params = dict(
@@ -32,7 +32,7 @@ class Monitoring(DiscoveryMixin, GoogleCloudPilotAPI):
             params=params,
         )
 
-    def get_service(self, service_id: str, project_id: str = None) -> ResourceType:
+    def get_service(self, service_id: str, project_id: str | None = None) -> ResourceType:
         service_path = self._service_path(service_id=service_id, project_id=project_id)
 
         return self._execute(
@@ -43,7 +43,7 @@ class Monitoring(DiscoveryMixin, GoogleCloudPilotAPI):
     def create_service(
         self,
         name: str,
-        project_id: str = None,
+        project_id: str | None = None,
     ):
         parent = self._project_path(project_id=project_id)
 

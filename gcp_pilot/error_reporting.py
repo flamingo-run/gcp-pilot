@@ -2,7 +2,7 @@
 from google.cloud import error_reporting
 from google.cloud.error_reporting import HTTPContext
 
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
+from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI
 
 
 class CloudErrorReporting(GoogleCloudPilotAPI):

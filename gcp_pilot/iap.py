@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import dict
 
 import requests
 from google.auth.transport.requests import Request
@@ -45,7 +45,7 @@ class IdentityAwareProxy(GoogleCloudPilotAPI):
             return credentials.token
 
     @property
-    def headers(self) -> Dict[str, str]:
+    def headers(self) -> dict[str, str]:
         return {"Authorization": f"Bearer {self.token}"}
 
 

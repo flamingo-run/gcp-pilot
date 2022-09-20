@@ -1,11 +1,11 @@
 import json
-from dataclasses import field, dataclass
-from typing import List, Dict, Generator
+from dataclasses import dataclass, field
+from typing import Generator, List, dict
 
 import requests
 
 from gcp_pilot import exceptions
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, ResourceType
+from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType
 
 
 class Text:
@@ -23,7 +23,7 @@ class Text:
 
 
 class Widget(dict):
-    _key = None
+    _key | None = None
 
     def as_data(self):
         if self._key:
@@ -198,7 +198,7 @@ class Card:
         if bool(section):
             self.sections.append(section)
 
-    def as_data(self) -> Dict:
+    def as_data(self) -> dict:
         data = {"sections": [section.as_data() for section in self.sections]}
         if self.header:
             data["header"] = self.header.as_data()
@@ -209,7 +209,7 @@ class ChatsHook:
     def __init__(self, hook_url: str):
         self.hook_url = hook_url
 
-    def _post(self, body: Dict, thread_key: str = None) -> Dict:
+    def _post(self, body: dict, thread_key: str = None) -> dict:
         url = self.hook_url
         if thread_key:
             url = f"{url}&threadKey={thread_key}"
@@ -222,11 +222,11 @@ class ChatsHook:
         response.raise_for_status()
         return response.json()
 
-    def send_text(self, text: str, thread_key: str = None) -> Dict:
+    def send_text(self, text: str, thread_key: str = None) -> dict:
         body = {"text": text}
         return self._post(body=body, thread_key=thread_key)
 
-    def send_card(self, card: Card, additional_text: str = None, thread_key: str = None) -> Dict:
+    def send_card(self, card: Card, additional_text: str = None, thread_key: str = None) -> dict:
         body = {
             "cards": [card.as_data()],
         }

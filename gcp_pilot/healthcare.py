@@ -1,17 +1,17 @@
 # More Information: https://cloud.google.com/healthcare-api/docs/reference/rest
 import abc
+import json
 import logging
 import math
-import json
 from dataclasses import dataclass
-from typing import Generator, Dict, Any, Callable, Optional, Type, List
-from urllib.parse import urlsplit, parse_qsl
+from typing import Any, Callable, Generator, List, Optional, Type, dict
+from urllib.parse import parse_qsl, urlsplit
 
 from fhir.resources.domainresource import DomainResource
 from fhir.resources.identifier import Identifier
 
 from gcp_pilot import exceptions
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin, ResourceType, friendly_http_error
+from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType, friendly_http_error
 
 logger = logging.getLogger("gcp-pilot")
 
@@ -101,7 +101,7 @@ class HealthcareBase(DiscoveryMixin, GoogleCloudPilotAPI, abc.ABC):
         )
 
 
-def as_json(resource: DomainResource) -> Dict[str, Any]:
+def as_json(resource: DomainResource) -> dict[str, Any]:
     return json.loads(resource.json())
 
 
@@ -110,11 +110,11 @@ class FHIRResultSet:
     method: Callable
     url: str
     resource_class: Type[DomainResource]
-    query: Dict[str, Any] = None
+    query: dict[str, Any] = None
     order_by: str = None
     limit: int = None
     cursor: str = None
-    _response: Dict = None
+    _response: dict = None
 
     @property
     def response(self):
@@ -144,7 +144,7 @@ class FHIRResultSet:
         request.raise_for_status()
         self.response = request.json()
 
-    def __iter__(self) -> Generator[Dict, None, None]:
+    def __iter__(self) -> Generator[dict, None, None]:
         while True:
             yield from self.get_page_resources()
             self.cursor = self.next_cursor
@@ -152,7 +152,7 @@ class FHIRResultSet:
                 break
             self._request()
 
-    def first(self) -> Dict:
+    def first(self) -> dict:
         try:
             return next(iter(self))
         except StopIteration as exc:
@@ -253,7 +253,7 @@ class HealthcareFHIR(HealthcareBase):
         resource_class: Type[DomainResource],
         project_id: str = None,
         location: str = None,
-        query: Dict[str, Any] = None,
+        query: dict[str, Any] = None,
         limit: int = 100,
         cursor: str = None,
     ) -> FHIRResultSet:
@@ -279,7 +279,7 @@ class HealthcareFHIR(HealthcareBase):
         self,
         name: str,
         dataset_name: str,
-        labels: Dict[str, str] = None,
+        labels: dict[str, str] = None,
         enable_upsert: bool = True,
         notify_pubsub_topic: str = None,
         export_to_bigquery_dataset: str = None,
@@ -416,7 +416,7 @@ class HealthcareFHIR(HealthcareBase):
         resource: DomainResource,
         store_name: str,
         dataset_name: str,
-        query: Dict[str, Any] = None,
+        query: dict[str, Any] = None,
         project_id: str = None,
         location: str = None,
     ) -> DomainResource:

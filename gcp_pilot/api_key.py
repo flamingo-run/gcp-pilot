@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Generator
 
-from gcp_pilot.base import GoogleCloudPilotAPI, DiscoveryMixin
+from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI
 
 
 @dataclass

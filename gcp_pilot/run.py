@@ -4,13 +4,9 @@ from typing import Generator
 from google.api_core.client_options import ClientOptions
 from googleapiclient.discovery import Resource
 
-from gcp_pilot.base import (
-    GoogleCloudPilotAPI,
-    ResourceType,
-    DiscoveryMixin,
-)
-from gcp_pilot.resource import ServiceAgent
 from gcp_pilot import exceptions
+from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType
+from gcp_pilot.resource import ServiceAgent
 
 
 class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):

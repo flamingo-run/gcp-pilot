@@ -31,7 +31,7 @@ class IdentityAwareProxy(GoogleCloudPilotAPI):
         token_request_url = f"{metadata_server_token_url}?audience={self.audience}"
         token_request_headers = {"Metadata-Flavor": "Google"}
 
-        token_response = requests.get(url=token_request_url, headers=token_request_headers)
+        token_response = requests.get(url=token_request_url, headers=token_request_headers, timeout=15)
         return token_response.content.decode("utf-8")
 
     @property

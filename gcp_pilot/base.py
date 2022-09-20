@@ -154,7 +154,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         else:
             credentials, project_id = cls._cached_credentials
 
-        current_account = getattr(credentials, "service_account_email")
+        current_account = getattr(credentials, "service_account_email", None)
         if current_account == "default":  # common when inside GCP
             current_account = DEFAULT_SERVICE_ACCOUNT
 

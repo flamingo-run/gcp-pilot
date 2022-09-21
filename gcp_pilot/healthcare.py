@@ -396,14 +396,15 @@ class HealthcareFHIR(HealthcareBase):
         dataset_name: str,
         project_id: str | None = None,
         location: str | None = None,
-    ) -> ResourceType:
+    ) -> DomainResource:
         parent = self._store_path(name=store_name, dataset_name=dataset_name, project_id=project_id, location=location)
-        return self._execute(
+        data = self._execute(
             method=self.client.projects().locations().datasets().fhirStores().fhir().create,
             parent=parent,
             type=resource.get_resource_type(),
             body=as_json(resource),
         )
+        return resource.__class__(**data)
 
     def update_resource(
         self,

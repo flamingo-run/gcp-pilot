@@ -117,7 +117,11 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
     def create_or_update_calendar(
-        self, summary: str, description: str = "", timezone: str = None, calendar_id: str = None
+        self,
+        summary: str,
+        description: str = "",
+        timezone: str | None = None,
+        calendar_id: str | None = None,
     ) -> ResourceType:
         if not calendar_id:
             return self.create_calendar(summary=summary, description=description, timezone=timezone)
@@ -125,7 +129,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
             calendar_id=calendar_id, summary=summary, description=description, timezone=timezone
         )
 
-    def create_calendar(self, summary: str, description: str = "", timezone: str = None) -> ResourceType:
+    def create_calendar(self, summary: str, description: str = "", timezone: str | None = None) -> ResourceType:
         data = {
             "summary": summary,
             "description": description,
@@ -137,7 +141,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
     def update_calendar(
-        self, calendar_id: str, summary: str = None, description: str = None, timezone: str = None
+        self, calendar_id: str, summary: str | None = None, description: str | None = None, timezone: str | None = None
     ) -> ResourceType:
         data = {}
         if summary:
@@ -153,7 +157,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
             body=data,
         )
 
-    def watch_calendars(self, hook_url: str, hook_token: str = None, uuid: str = None) -> ResourceType:
+    def watch_calendars(self, hook_url: str, hook_token: str | None = None, uuid: str | None = None) -> ResourceType:
         data = {
             "id": uuid or uuid4().hex,
             "type": "webhook",
@@ -182,15 +186,15 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         summary: str,
         start_at: datetime.date,
         end_at: datetime.date,
-        location: str = None,
-        event_id: str = None,
-        description: str = None,
-        attendees: list[Attendee] = None,
-        recurrence_type: str = None,
-        recurrence_amount: str = None,
-        calendar_id: str = "primary",
-        color: Color = None,
-        send_updates: SendUpdates = None,
+        location: str | None = None,
+        event_id: str | None = None,
+        description: str | None = None,
+        attendees: list[Attendee] | None = None,
+        recurrence_type: str | None = None,
+        recurrence_amount: str | None = None,
+        calendar_id: str | None = "primary",
+        color: Color | None = None,
+        send_updates: SendUpdates | None = None,
     ) -> ResourceType:
         def _build_time_field(dt):
             if isinstance(start_at, datetime.datetime):
@@ -291,8 +295,8 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         hook_url: str,
         calendar_id: str = "primary",
-        hook_token: str = None,
-        uuid: str = None,
+        hook_token: str | None = None,
+        uuid: str | None = None,
     ) -> ResourceType:
         data = {
             "id": uuid or uuid4().hex,
@@ -313,7 +317,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         starts_at: datetime,
         ends_at: datetime,
         timezone: str = None,
-        calendar_ids: list[str] = None,
+        calendar_ids: list[str] | None = None,
         calendar_id: str = "primary",
     ) -> ResourceType:
         data = {

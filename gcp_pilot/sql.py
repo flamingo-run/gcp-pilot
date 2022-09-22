@@ -22,7 +22,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    def list_instances(self, project_id: str = None) -> Generator[InstanceType, None, None]:
+    def list_instances(self, project_id: str | None = None) -> Generator[InstanceType, None, None]:
         params = dict(project=project_id or self.project_id)
         instances = self._paginate(
             method=self.client.instances().list,
@@ -32,7 +32,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
         for item in instances:
             yield item
 
-    def get_instance(self, name: str, project_id: str = None) -> InstanceType:
+    def get_instance(self, name: str, project_id: str | None = None) -> InstanceType:
         return self._execute(
             method=self.client.instances().get,
             instance=name,
@@ -46,7 +46,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
         tier: str,
         region: str,
         ha: bool = False,
-        project_id: str = None,
+        project_id: str | None = None,
         exists_ok: bool = True,
         wait_ready: bool = True,
     ) -> InstanceType:
@@ -87,7 +87,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
         print(f"Instance {name} is {current_state}!")
         return sql_instance
 
-    def get_database(self, instance: str, database: str, project_id: str = None) -> DatabaseType:
+    def get_database(self, instance: str, database: str, project_id: str | None = None) -> DatabaseType:
         project_id = project_id or self.project_id
         return self._execute(
             method=self.client.databases().get,
@@ -100,7 +100,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         name: str,
         instance: str,
-        project_id: str = None,
+        project_id: str | None = None,
         exists_ok: bool = True,
     ) -> DatabaseType:
         body = dict(
@@ -126,7 +126,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
                 return self.get_database(instance=instance, database=name, project_id=project_id)
             raise
 
-    def list_users(self, instance: str, project_id: str = None) -> Generator[UserType, None, None]:
+    def list_users(self, instance: str, project_id: str | None = None) -> Generator[UserType, None, None]:
         params = dict(
             instance=instance,
             project=project_id or self.project_id,
@@ -138,7 +138,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
         for item in users:
             yield item
 
-    def create_user(self, name: str, password: str, instance: str, project_id: str = None) -> UserType:
+    def create_user(self, name: str, password: str, instance: str, project_id: str | None = None) -> UserType:
         body = dict(
             name=name,
             password=password,

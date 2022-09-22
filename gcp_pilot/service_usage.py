@@ -19,7 +19,7 @@ class ServiceUsage(DiscoveryMixin, GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    def _service_path(self, service_name: str, project_id: str = None) -> str:
+    def _service_path(self, service_name: str, project_id: str | None = None) -> str:
         project_path = self._project_path(project_id=project_id)
         return f"{project_path}/services/{service_name}"
 

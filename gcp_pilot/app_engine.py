@@ -14,10 +14,10 @@ class AppEngine(AppEngineBasedService, DiscoveryMixin, GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    def _set_location(self, location: str = None) -> str:
+    def _set_location(self, location: str | None = None) -> str:
         return location or self._get_default_location()
 
-    def get_app(self, app_id: str = None):
+    def get_app(self, app_id: str | None = None):
         app_id = app_id or self.project_id
         return self._execute(
             method=self.client.apps().get,

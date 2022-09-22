@@ -188,11 +188,11 @@ class CloudBuild(GoogleCloudPilotAPI):
         event: AnyEventType,
         steps: list[cloudbuild_v1.BuildStep],
         tags: list[str] | None = None,
-        project_id: str = None,
-        images: list[str] = None,
-        substitutions: Substitutions = None,
-        timeout: int = None,
-        machine_type: str = None,
+        project_id: str | None = None,
+        images: list[str] | None = None,
+        substitutions: Substitutions | None = None,
+        timeout: int | None = None,
+        machine_type: str | None = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
             name=name,
@@ -218,12 +218,12 @@ class CloudBuild(GoogleCloudPilotAPI):
         description: str,
         event: AnyEventType,
         steps: list[cloudbuild_v1.BuildStep],
-        tags: list[str] = None,
-        images: list[str] = None,
-        substitutions: Substitutions = None,
-        project_id: str = None,
-        timeout: int = None,
-        machine_type: str = None,
+        tags: list[str] | None = None,
+        images: list[str] | None = None,
+        substitutions: Substitutions | None = None,
+        project_id: str | None = None,
+        timeout: int | None = None,
+        machine_type: str | None = None,
     ) -> TriggerType:
         trigger = self._make_trigger(
             name=name,
@@ -250,12 +250,12 @@ class CloudBuild(GoogleCloudPilotAPI):
         description: str,
         event: AnyEventType,
         steps: list[cloudbuild_v1.BuildStep],
-        tags: list[str] = None,
-        project_id: str = None,
-        images: list[str] = None,
-        substitutions: Substitutions = None,
-        timeout: int = None,
-        machine_type: str = None,
+        tags: list[str] | None = None,
+        project_id: str | None = None,
+        images: list[str] | None = None,
+        substitutions: Substitutions | None = None,
+        timeout: int | None = None,
+        machine_type: str | None = None,
     ) -> TriggerType:
         create_args = dict(
             name=name,
@@ -278,10 +278,10 @@ class CloudBuild(GoogleCloudPilotAPI):
     def run_trigger(
         self,
         name: str,
-        tag_name: str = None,
-        branch_name: str = None,
-        commit_sha: str = None,
-        project_id: str = None,
+        tag_name: str | None = None,
+        branch_name: str | None = None,
+        commit_sha: str | None = None,
+        project_id: str | None = None,
     ) -> TriggerType:
         params = [tag_name, branch_name, commit_sha]
         if len([x for x in params if x]) != 1:
@@ -302,9 +302,9 @@ class CloudBuild(GoogleCloudPilotAPI):
 
     def get_builds(
         self,
-        trigger_id: str = None,
-        project_id: str = None,
-        status: str = None,
+        trigger_id: str | None = None,
+        project_id: str | None = None,
+        status: str | None = None,
     ) -> Generator[cloudbuild_v1.Build, None, None]:
         # https://cloud.google.com/cloud-build/docs/view-build-results#filtering_build_results_using_queries
         filters = []
@@ -324,9 +324,9 @@ class CloudBuild(GoogleCloudPilotAPI):
     def subscribe(
         self,
         subscription_id: str,
-        project_id: str = None,
-        push_to_url: str = None,
-        use_oidc_auth: bool = False,
+        project_id: str | None = None,
+        push_to_url: str | None = None,
+        use_oidc_auth: bool | None = False,
     ):
         # https://cloud.google.com/cloud-build/docs/subscribe-build-notifications
         try:

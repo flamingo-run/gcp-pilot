@@ -27,7 +27,7 @@ class HealthcareBase(DiscoveryMixin, GoogleCloudPilotAPI, abc.ABC):
             **kwargs,
         )
 
-    def _set_location(self, location: str = None) -> str:
+    def _set_location(self, location: str | None = None) -> str:
         # Only some limited regions are available: https://cloud.google.com/healthcare-api/docs/concepts/regions
         valid_locations = [
             "us-central1",
@@ -52,11 +52,15 @@ class HealthcareBase(DiscoveryMixin, GoogleCloudPilotAPI, abc.ABC):
             location = "us"
         return location
 
-    def _dataset_path(self, name: str, project_id: str = None, location: str = None) -> str:
+    def _dataset_path(self, name: str, project_id: str | None = None, location: str | None = None) -> str:
         location_path = self._location_path(project_id=project_id, location=location)
         return f"{location_path}/datasets/{name}"
 
-    def list_datasets(self, project_id: str = None, location: str = None) -> Generator[ResourceType, None, None]:
+    def list_datasets(
+        self,
+        project_id: str | None = None,
+        location: str | None = None,
+    ) -> Generator[ResourceType, None, None]:
         params = dict(
             parent=self._location_path(project_id=project_id, location=location),
         )
@@ -67,7 +71,7 @@ class HealthcareBase(DiscoveryMixin, GoogleCloudPilotAPI, abc.ABC):
             params=params,
         )
 
-    def get_dataset(self, name: str, project_id: str = None, location: str = None) -> ResourceType:
+    def get_dataset(self, name: str, project_id: str | None = None, location: str | None = None) -> ResourceType:
         name = self._dataset_path(name=name, project_id=project_id, location=location)
 
         return self._execute(
@@ -75,7 +79,7 @@ class HealthcareBase(DiscoveryMixin, GoogleCloudPilotAPI, abc.ABC):
             name=name,
         )
 
-    def delete_dataset(self, name: str, project_id: str = None, location: str = None) -> ResourceType:
+    def delete_dataset(self, name: str, project_id: str | None = None, location: str | None = None) -> ResourceType:
         name = self._dataset_path(name=name, project_id=project_id, location=location)
 
         return self._execute(
@@ -86,8 +90,8 @@ class HealthcareBase(DiscoveryMixin, GoogleCloudPilotAPI, abc.ABC):
     def create_dataset(
         self,
         name: str,
-        project_id: str = None,
-        location: str = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> ResourceType:
         parent = self._location_path(project_id=project_id, location=location)
 
@@ -110,11 +114,11 @@ class FHIRResultSet:
     method: Callable
     url: str
     resource_class: Type[DomainResource]
-    query: dict[str, Any] = None
-    order_by: str = None
-    limit: int = None
-    cursor: str = None
-    _response: dict = None
+    query: dict[str, Any] | None = None
+    order_by: str | None = None
+    limit: int | None = None
+    cursor: str | None = None
+    _response: dict | None = None
 
     @property
     def response(self):
@@ -193,7 +197,13 @@ class FHIRResultSet:
 
 
 class HealthcareFHIR(HealthcareBase):
-    def _store_path(self, name: str, dataset_name: str, project_id: str = None, location: str = None) -> str:
+    def _store_path(
+        self,
+        name: str,
+        dataset_name: str,
+        project_id: str | None = None,
+        location: str | None = None,
+    ) -> str:
         dataset_path = self._dataset_path(name=dataset_name, project_id=project_id, location=location)
         return f"{dataset_path}/fhirStores/{name}"
 
@@ -203,8 +213,8 @@ class HealthcareFHIR(HealthcareBase):
         resource_id: str,
         store_name: str,
         dataset_name: str,
-        project_id: str = None,
-        location: str = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> str:
         store_path = self._store_path(
             name=store_name,
@@ -217,8 +227,8 @@ class HealthcareFHIR(HealthcareBase):
     def list_stores(
         self,
         dataset_name: str,
-        project_id: str = None,
-        location: str = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> Generator[ResourceType, None, None]:
         params = dict(
             parent=self._dataset_path(name=dataset_name, project_id=project_id, location=location),
@@ -230,7 +240,13 @@ class HealthcareFHIR(HealthcareBase):
             params=params,
         )
 
-    def get_store(self, name: str, dataset_name: str, project_id: str = None, location: str = None) -> ResourceType:
+    def get_store(
+        self,
+        name: str,
+        dataset_name: str,
+        project_id: str | None = None,
+        location: str | None = None,
+    ) -> ResourceType:
         name = self._store_path(name=name, dataset_name=dataset_name, project_id=project_id, location=location)
 
         return self._execute(
@@ -238,7 +254,9 @@ class HealthcareFHIR(HealthcareBase):
             name=name,
         )
 
-    def delete_store(self, name: str, dataset_name: str, project_id: str = None, location: str = None) -> ResourceType:
+    def delete_store(
+        self, name: str, dataset_name: str, project_id: str | None = None, location: str | None = None
+    ) -> ResourceType:
         name = self._store_path(name=name, dataset_name=dataset_name, project_id=project_id, location=location)
 
         return self._execute(
@@ -251,11 +269,11 @@ class HealthcareFHIR(HealthcareBase):
         store_name: str,
         dataset_name: str,
         resource_class: Type[DomainResource],
-        project_id: str = None,
-        location: str = None,
-        query: dict[str, Any] = None,
+        project_id: str | None = None,
+        location: str | None = None,
+        query: dict[str, Any] | None = None,
         limit: int = 100,
-        cursor: str = None,
+        cursor: str | None = None,
     ) -> FHIRResultSet:
         parent = self._store_path(
             name=store_name,
@@ -279,12 +297,12 @@ class HealthcareFHIR(HealthcareBase):
         self,
         name: str,
         dataset_name: str,
-        labels: dict[str, str] = None,
+        labels: dict[str, str] | None = None,
         enable_upsert: bool = True,
-        notify_pubsub_topic: str = None,
-        export_to_bigquery_dataset: str = None,
-        project_id: str = None,
-        location: str = None,
+        notify_pubsub_topic: str | None = None,
+        export_to_bigquery_dataset: str | None = None,
+        project_id: str | None = None,
+        location: str | None = None,
         version: str = "R4",
     ) -> ResourceType:
         parent = self._dataset_path(name=dataset_name, project_id=project_id, location=location)
@@ -327,8 +345,8 @@ class HealthcareFHIR(HealthcareBase):
         resource_id: str,
         store_name: str,
         dataset_name: str,
-        project_id: str = None,
-        location: str = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> DomainResource:
         resource_type = resource_class.get_resource_type()
         name = self._resource_path(
@@ -352,8 +370,8 @@ class HealthcareFHIR(HealthcareBase):
         resource_id: str,
         store_name: str,
         dataset_name: str,
-        project_id: str = None,
-        location: str = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> ResourceType:
         resource_type = resource_class.get_resource_type()
         name = self._resource_path(
@@ -376,8 +394,8 @@ class HealthcareFHIR(HealthcareBase):
         resource: DomainResource,
         store_name: str,
         dataset_name: str,
-        project_id: str = None,
-        location: str = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> ResourceType:
         parent = self._store_path(name=store_name, dataset_name=dataset_name, project_id=project_id, location=location)
         return self._execute(
@@ -392,8 +410,8 @@ class HealthcareFHIR(HealthcareBase):
         resource: DomainResource,
         store_name: str,
         dataset_name: str,
-        project_id: str = None,
-        location: str = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> DomainResource:
         name = self._resource_path(
             resource_type=resource.get_resource_type(),
@@ -416,9 +434,9 @@ class HealthcareFHIR(HealthcareBase):
         resource: DomainResource,
         store_name: str,
         dataset_name: str,
-        query: dict[str, Any] = None,
-        project_id: str = None,
-        location: str = None,
+        query: dict[str, Any] | None = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> DomainResource:
         if not query:
             identifiers: list[Identifier] = getattr(resource, "identifier")
@@ -462,8 +480,8 @@ class HealthcareFHIR(HealthcareBase):
         gcs_path: str,
         store_name: str,
         dataset_name: str,
-        project_id: str = None,
-        location: str = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> ResourceType:
         parent = self._store_path(name=store_name, dataset_name=dataset_name, project_id=project_id, location=location)
         body = {"gcsDestination": {"uriPrefix": f"gs://{gcs_path}"}}
@@ -478,8 +496,8 @@ class HealthcareFHIR(HealthcareBase):
         gcs_path: str,
         store_name: str,
         dataset_name: str,
-        project_id: str = None,
-        location: str = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> ResourceType:
         parent = self._store_path(name=store_name, dataset_name=dataset_name, project_id=project_id, location=location)
         body = {
@@ -497,8 +515,8 @@ class HealthcareFHIR(HealthcareBase):
         resource: DomainResource,
         store_name: str,
         dataset_name: str,
-        project_id: str = None,
-        location: str = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> ResourceType:
         name = self._resource_path(
             resource_type=resource.get_resource_type(),
@@ -525,8 +543,8 @@ class HealthcareFHIR(HealthcareBase):
         resource: DomainResource,
         store_name: str,
         dataset_name: str,
-        project_id: str = None,
-        location: str = None,
+        project_id: str | None = None,
+        location: str | None = None,
     ):
         parent = self._store_path(
             name=store_name,

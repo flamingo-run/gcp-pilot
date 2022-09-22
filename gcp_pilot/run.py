@@ -10,23 +10,23 @@ from gcp_pilot.resource import ServiceAgent
 
 
 class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
-    def _service_endpoint(self, location: str = None):
+    def _service_endpoint(self, location: str | None = None):
         if not location:
             return "https://run.googleapis.com"
         return f"https://{location}-run.googleapis.com"
 
-    def _namespace_path(self, project_id: str = None):
+    def _namespace_path(self, project_id: str | None = None):
         return f"namespaces/{project_id or self.project_id}"
 
-    def _service_path(self, service_name: str, project_id: str = None):
+    def _service_path(self, service_name: str, project_id: str | None = None):
         parent = self._namespace_path(project_id=project_id)
         return f"{parent}/services/{service_name}"
 
-    def _domain_mapping_path(self, domain: str, project_id: str = None):
+    def _domain_mapping_path(self, domain: str, project_id: str | None = None):
         parent = self._namespace_path(project_id=project_id)
         return f"{parent}/domainmappings/{domain}"
 
-    def list_services(self, project_id: str = None) -> Generator[ResourceType, None, None]:
+    def list_services(self, project_id: str | None = None) -> Generator[ResourceType, None, None]:
         params = dict(
             parent=self._namespace_path(project_id=project_id),
         )
@@ -36,7 +36,9 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             params=params,
         )
 
-    def get_service(self, service_name: str, project_id: str = None, location: str = None) -> ResourceType:
+    def get_service(
+        self, service_name: str, project_id: str | None = None, location: str | None = None
+    ) -> ResourceType:
         name = self._service_path(service_name=service_name, project_id=project_id)
         client = self._get_localized_client(project_id=project_id, location=location)
         return self._execute(
@@ -47,10 +49,10 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
     def create_service(
         self,
         service_name: str,
-        project_id: str = None,
-        location: str = None,
-        service_account: str = None,
-        trigger_id: str = None,
+        project_id: str | None = None,
+        location: str | None = None,
+        service_account: str | None = None,
+        trigger_id: str | None = None,
         image: str = "gcr.io/cloudrun/placeholder",
         ram: int = 256,
         concurrency: int = 80,
@@ -103,7 +105,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             body=body,
         )
 
-    def list_locations(self, project_id: str = None) -> Generator[ResourceType, None, None]:
+    def list_locations(self, project_id: str | None = None) -> Generator[ResourceType, None, None]:
         params = dict(
             name=self._project_path(project_id=project_id),
         )
@@ -113,7 +115,11 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             params=params,
         )
 
-    def list_revisions(self, service_name: str = None, project_id: str = None) -> Generator[ResourceType, None, None]:
+    def list_revisions(
+        self,
+        service_name: str | None = None,
+        project_id: str | None = None,
+    ) -> Generator[ResourceType, None, None]:
         params = dict(
             parent=self._namespace_path(project_id=project_id),
         )
@@ -126,7 +132,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             if not service_name or item["metadata"]["labels"]["serving.knative.dev/service"] == service_name:
                 yield item
 
-    def list_domain_mappings(self, project_id: str = None) -> Generator[ResourceType, None, None]:
+    def list_domain_mappings(self, project_id: str | None = None) -> Generator[ResourceType, None, None]:
         params = dict(
             parent=self._namespace_path(project_id=project_id),
         )
@@ -136,7 +142,12 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             params=params,
         )
 
-    def get_domain_mapping(self, domain: str, project_id: str = None, location: str = None) -> ResourceType:
+    def get_domain_mapping(
+        self,
+        domain: str,
+        project_id: str | None = None,
+        location: str | None = None,
+    ) -> ResourceType:
         name = self._domain_mapping_path(domain=domain, project_id=project_id)
         client = self._get_localized_client(project_id=project_id, location=location)
         return self._execute(
@@ -144,7 +155,12 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             name=name,
         )
 
-    def delete_domain_mapping(self, domain: str, project_id: str = None, location: str = None) -> ResourceType:
+    def delete_domain_mapping(
+        self,
+        domain: str,
+        project_id: str | None = None,
+        location: str | None = None,
+    ) -> ResourceType:
         name = self._domain_mapping_path(domain=domain, project_id=project_id)
         client = self._get_localized_client(project_id=project_id, location=location)
         return self._execute(
@@ -156,8 +172,8 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         domain: str,
         service_name: str,
-        project_id: str = None,
-        location: str = None,
+        project_id: str | None = None,
+        location: str | None = None,
         exists_ok: bool = True,
         force: bool = True,
     ) -> ResourceType:
@@ -185,7 +201,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
                 location=location,
             )
 
-    def _get_localized_client(self, project_id: str = None, location: str = None) -> Resource:
+    def _get_localized_client(self, project_id: str | None = None, location: str | None = None) -> Resource:
         # Reminder: List methods do not require a localized client
         if not location:
             if not project_id:
@@ -194,7 +210,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
                 location = self._get_project_default_location(project_id=project_id)
         return self._build_client(location=location)
 
-    def _build_client(self, location: str = None, **kwargs) -> Resource:
+    def _build_client(self, location: str | None = None, **kwargs) -> Resource:
         options = ClientOptions(api_endpoint=self._service_endpoint(location=location))
         kwargs.update(
             dict(

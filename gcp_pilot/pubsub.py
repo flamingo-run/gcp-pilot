@@ -20,9 +20,9 @@ class CloudPublisher(GoogleCloudPilotAPI):
     def create_topic(
         self,
         topic_id: str,
-        project_id: str = None,
+        project_id: str | None = None,
         exists_ok: bool = True,
-        labels: dict[str, str] = None,
+        labels: dict[str, str] | None = None,
     ) -> types.Topic:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -45,8 +45,8 @@ class CloudPublisher(GoogleCloudPilotAPI):
     def update_topic(
         self,
         topic_id: str,
-        project_id: str = None,
-        labels: dict[str, str] = None,
+        project_id: str | None = None,
+        labels: dict[str, str] | None = None,
     ) -> types.Topic:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -63,7 +63,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
             ),
         )
 
-    def get_topic(self, topic_id: str, project_id: str = None):
+    def get_topic(self, topic_id: str, project_id: str | None = None):
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
             topic=topic_id,
@@ -72,7 +72,12 @@ class CloudPublisher(GoogleCloudPilotAPI):
             topic=topic_path,
         )
 
-    def list_topics(self, prefix: str = "", suffix: str = "", project_id: str = None) -> Generator[Topic, None, None]:
+    def list_topics(
+        self,
+        prefix: str = "",
+        suffix: str = "",
+        project_id: str | None = None,
+    ) -> Generator[Topic, None, None]:
         project_path = self._project_path(project_id=project_id)
         topics = self.client.list_topics(
             project=project_path,
@@ -86,8 +91,8 @@ class CloudPublisher(GoogleCloudPilotAPI):
         self,
         message: str,
         topic_id: str,
-        project_id: str = None,
-        attributes: dict[str, Any] = None,
+        project_id: str | None = None,
+        attributes: dict[str, Any] | None = None,
     ) -> types.PublishResponse:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -122,7 +127,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         self,
         prefix: str = "",
         suffix: str = "",
-        project_id: str = None,
+        project_id: str | None = None,
     ) -> Generator[Subscription, None, None]:
         all_subscriptions = self.client.list_subscriptions(
             project=f"projects/{project_id or self.project_id}",
@@ -132,7 +137,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             if name.startswith(prefix) and name.endswith(suffix):
                 yield subscription
 
-    def get_subscription(self, subscription_id: str, project_id: str = None) -> Subscription:
+    def get_subscription(self, subscription_id: str, project_id: str | None = None) -> Subscription:
         subscription_path = self.client.subscription_path(
             project=project_id or self.project_id,
             subscription=subscription_id,
@@ -142,7 +147,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             subscription=subscription_path,
         )
 
-    def delete_subscription(self, subscription_id: str, project_id: str = None) -> None:
+    def delete_subscription(self, subscription_id: str, project_id: str | None = None) -> None:
         subscription_path = self.client.subscription_path(
             project=project_id or self.project_id,
             subscription=subscription_id,
@@ -156,11 +161,11 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         self,
         topic_id: str,
         subscription_id: str,
-        project_id: str = None,
+        project_id: str | None = None,
         exists_ok: bool = True,
         auto_create_topic: bool = True,
         enable_message_ordering: bool = False,
-        push_to_url: str = None,
+        push_to_url: str | None = None,
         use_oidc_auth: bool = False,
     ) -> Subscription:
         topic_path = self.client.topic_path(
@@ -206,8 +211,8 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         self,
         topic_id: str,
         subscription_id: str,
-        project_id: str = None,
-        push_to_url: str = None,
+        project_id: str | None = None,
+        push_to_url: str | None = None,
         use_oidc_auth: bool = False,
     ) -> Subscription:
         topic_path = self.client.topic_path(
@@ -240,10 +245,10 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         self,
         topic_id: str,
         subscription_id: str,
-        project_id: str = None,
+        project_id: str | None = None,
         auto_create_topic: bool = True,
         enable_message_ordering: bool = False,
-        push_to_url: str = None,
+        push_to_url: str | None = None,
         use_oidc_auth: bool = False,
     ) -> Subscription:
         try:
@@ -266,7 +271,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 use_oidc_auth=use_oidc_auth,
             )
 
-    def subscribe(self, topic_id: str, subscription_id: str, callback: Callable, project_id: str = None):
+    def subscribe(self, topic_id: str, subscription_id: str, callback: Callable, project_id: str | None = None):
         self.create_subscription(
             topic_id=topic_id,
             subscription_id=subscription_id,

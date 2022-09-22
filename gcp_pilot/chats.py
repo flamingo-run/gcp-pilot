@@ -33,7 +33,7 @@ class Widget(dict):
 
 
 class ButtonWidget(Widget):
-    def __init__(self, url, text: str = None, image_url: str = None, icon: str = None):
+    def __init__(self, url, text: str | None = None, image_url: str | None = None, icon: str | None = None):
         super().__init__()
         if text:
             self._key = "textButton"
@@ -81,12 +81,12 @@ class KeyValueWidget(Widget):
     def __init__(
         self,
         content: str,
-        top: str = None,
-        bottom: str = None,
+        top: str | None = None,
+        bottom: str | None = None,
         break_lines: bool = True,
-        on_click: OnClickWidget = None,
-        icon: str = None,
-        button: ButtonWidget = None,
+        on_click: OnClickWidget | None = None,
+        icon: str | None = None,
+        button: ButtonWidget | None = None,
     ):
         data = dict(
             content=content,
@@ -116,7 +116,7 @@ class TextWidget(Widget):
 class ImageWidget(Widget):
     _key = "image"
 
-    def __init__(self, image_url: str, on_click: OnClickWidget = None):
+    def __init__(self, image_url: str, on_click: OnClickWidget | None = None):
         data = dict(imageUrl=image_url)
         if on_click:
             data.update(on_click.as_data())
@@ -125,7 +125,7 @@ class ImageWidget(Widget):
 
 @dataclass
 class Section:
-    header: str = None
+    header: str | None = None
     widgets: list[Widget] = field(default_factory=list)
 
     def add_header(self, text: str):
@@ -136,9 +136,9 @@ class Section:
         content: str,
         title: str = "",
         footer: str = "",
-        click_url: str = None,
-        icon: str = None,
-        button: str = None,
+        click_url: str | None = None,
+        icon: str | None = None,
+        button: str | None = None,
     ):
 
         widget = KeyValueWidget(
@@ -155,14 +155,21 @@ class Section:
     def add_paragraph(self, text: str):
         self.widgets.append(TextWidget(text=text))
 
-    def add_button(self, url, text: str = None, image_url: str = None, icon: str = None, append: bool = True):
+    def add_button(
+        self,
+        url,
+        text: str | None = None,
+        image_url: str | None = None,
+        icon: str | None = None,
+        append: bool = True,
+    ):
         button = ButtonWidget(url=url, text=text, image_url=image_url, icon=icon)
         if append and self.widgets and "buttons" in self.widgets[-1]:
             self.widgets[-1]["buttons"].append(button)
         else:
             self.widgets.append(ButtonGroupWidget(buttons=[button]))
 
-    def add_image(self, image_url: str, click_url: str = None):
+    def add_image(self, image_url: str, click_url: str | None = None):
         widget = ImageWidget(
             image_url=image_url,
             on_click=OnClickWidget(url=click_url) if click_url else None,
@@ -183,10 +190,10 @@ class Section:
 
 @dataclass
 class Card:
-    header: Widget = None
+    header: Widget | None = None
     sections: list[Section] = field(default_factory=list)
 
-    def add_header(self, title: str, subtitle: str = "", image_url: str = None, style: str = "IMAGE"):
+    def add_header(self, title: str, subtitle: str = "", image_url: str | None = None, style: str = "IMAGE"):
         self.header = Widget(
             title=title,
             subtitle=subtitle,
@@ -209,7 +216,7 @@ class ChatsHook:
     def __init__(self, hook_url: str):
         self.hook_url = hook_url
 
-    def _post(self, body: dict, thread_key: str = None) -> dict:
+    def _post(self, body: dict, thread_key: str | None = None) -> dict:
         url = self.hook_url
         if thread_key:
             url = f"{url}&threadKey={thread_key}"
@@ -223,11 +230,11 @@ class ChatsHook:
         response.raise_for_status()
         return response.json()
 
-    def send_text(self, text: str, thread_key: str = None) -> dict:
+    def send_text(self, text: str, thread_key: str | None = None) -> dict:
         body = {"text": text}
         return self._post(body=body, thread_key=thread_key)
 
-    def send_card(self, card: Card, additional_text: str = None, thread_key: str = None) -> dict:
+    def send_card(self, card: Card, additional_text: str | None = None, thread_key: str | None = None) -> dict:
         body = {
             "cards": [card.as_data()],
         }
@@ -303,7 +310,7 @@ class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):
             body=body,
         )
 
-    def send_card(self, room_id: str, card: Card, additional_text: str = None) -> ResourceType:
+    def send_card(self, room_id: str, card: Card, additional_text: str | None = None) -> ResourceType:
         body = {
             "cards": [card.as_data()],
         }

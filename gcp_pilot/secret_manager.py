@@ -8,16 +8,16 @@ from gcp_pilot.base import GoogleCloudPilotAPI
 class SecretManager(GoogleCloudPilotAPI):
     _client_class = secretmanager.SecretManagerServiceClient
 
-    def _secret_path(self, key: str, project_id: str = None) -> str:
+    def _secret_path(self, key: str, project_id: str | None = None) -> str:
         parent = self._project_path(project_id=project_id)
         return f"{parent}/secrets/{key}"
 
-    def _secret_version_path(self, key: str, version: int = None, project_id: str = None):
+    def _secret_version_path(self, key: str, version: int | None = None, project_id: str | None = None):
         parent = self._secret_path(key=key, project_id=project_id)
         version_str = str(version) if version else "latest"
         return f"{parent}/versions/{version_str}"
 
-    def _create_secret(self, key: str, project_id: str = None):
+    def _create_secret(self, key: str, project_id: str | None = None):
         parent = self._project_path(project_id=project_id)
 
         return self.client.create_secret(
@@ -28,12 +28,17 @@ class SecretManager(GoogleCloudPilotAPI):
             }
         )
 
-    def _create_version(self, key: str, value: str, project_id: str = None):
+    def _create_version(self, key: str, value: str, project_id: str | None = None):
         parent = self._secret_path(key=key, project_id=project_id)
 
         return self.client.add_secret_version(request={"parent": parent, "payload": {"data": value.encode()}})
 
-    def list_secrets(self, prefix: str = None, suffix: str = None, project_id: str = None) -> list[tuple[str, str]]:
+    def list_secrets(
+        self,
+        prefix: str | None = None,
+        suffix: str | None = None,
+        project_id: str | None = None,
+    ) -> list[tuple[str, str]]:
         parent = self._project_path(project_id=project_id)
         secrets = self.client.list_secrets(
             request={
@@ -48,7 +53,7 @@ class SecretManager(GoogleCloudPilotAPI):
                 continue
             yield name, self.get_secret(key=name, project_id=project_id)
 
-    def add_secret(self, key: str, value: str, project_id: str = None) -> str:
+    def add_secret(self, key: str, value: str, project_id: str | None = None) -> str:
         try:
             version = self._create_version(
                 key=key,
@@ -67,13 +72,13 @@ class SecretManager(GoogleCloudPilotAPI):
             )
         return version.name
 
-    def get_secret(self, key: str, version: int = None, project_id: str = None) -> str:
+    def get_secret(self, key: str, version: int | None = None, project_id: str | None = None) -> str:
         response = self.client.access_secret_version(
             request={"name": self._secret_version_path(key=key, version=version, project_id=project_id)}
         )
         return response.payload.data.decode()
 
-    def rollback_secret(self, key: str, temporarily: bool = False, project_id: str = None):
+    def rollback_secret(self, key: str, temporarily: bool = False, project_id: str | None = None):
         secret_path = self._secret_version_path(key=key, project_id=project_id)
 
         if temporarily:

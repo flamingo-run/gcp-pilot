@@ -39,12 +39,12 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
         payload: str = "",
         method: int = DEFAULT_METHOD,
         delay_in_seconds: int = 0,
-        project_id: str = None,
-        task_name: str = None,
+        project_id: str | None = None,
+        task_name: str | None = None,
         unique: bool = True,
         use_oidc_auth: bool = True,
-        content_type: str = None,
-        headers: dict[str, str] = None,
+        content_type: str | None = None,
+        headers: dict[str, str] | None = None,
     ) -> tasks_v2.Task:
         queue_path = self.client.queue_path(
             project=project_id or self.project_id,
@@ -102,7 +102,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
     def _create_queue(
         self,
         queue_name: str,
-        project_id: str = None,
+        project_id: str | None = None,
     ) -> tasks_v2.Queue:
         parent = self._parent_path(project_id=project_id)
         queue_path = self._queue_path(queue=queue_name, project_id=project_id)

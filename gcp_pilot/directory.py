@@ -22,10 +22,10 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    def _get_project_default_location(self, project_id: str = None) -> str | None:
+    def _get_project_default_location(self, project_id: str | None = None) -> str | None:
         return "us"
 
-    def _build_context(self, customer: str = None, domain: str = None) -> dict[str, str]:
+    def _build_context(self, customer: str | None = None, domain: str | None = None) -> dict[str, str]:
         context = {
             "customer": customer or "my_customer",
         }
@@ -33,7 +33,7 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
             context["domain"] = domain
         return context
 
-    def get_groups(self, customer: str = None, domain: str = None) -> Generator[GroupType, None, None]:
+    def get_groups(self, customer: str | None = None, domain: str | None = None) -> Generator[GroupType, None, None]:
         params = self._build_context(customer=customer, domain=domain)
         yield from self._paginate(
             method=self.client.groups().list,
@@ -50,9 +50,9 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
     def create_or_update_group(
         self,
         email: str,
-        name: str = None,
-        description: str = None,
-        group_id: str = None,
+        name: str | None = None,
+        description: str | None = None,
+        group_id: str | None = None,
     ) -> GroupType:
         body = dict(
             email=email,
@@ -105,7 +105,7 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
             memberKey=member_id,
         )
 
-    def get_users(self, customer: str = None, domain: str = None) -> Generator[UserType, None, None]:
+    def get_users(self, customer: str | None = None, domain: str | None = None) -> Generator[UserType, None, None]:
         params = self._build_context(customer=customer, domain=domain)
         yield from self._paginate(
             method=self.client.users().list,
@@ -134,11 +134,11 @@ class Directory(DiscoveryMixin, GoogleCloudPilotAPI):
     def update_user(
         self,
         user_id: str,
-        email: str = None,
-        first_name: str = None,
-        last_name: str = None,
-        password: str = None,
-        suspended: bool = None,
+        email: str | None = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        password: str | None = None,
+        suspended: bool | None = None,
     ) -> UserType:
         body = {}
         if email:

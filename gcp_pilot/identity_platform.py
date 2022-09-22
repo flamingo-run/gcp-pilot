@@ -181,7 +181,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         email: str | None = None,
         phone_number: str | None = None,
         tenant_id: str | None = None,
-        project_id: str = None,
+        project_id: str | None = None,
     ) -> User:
         try:
             return next(self.lookup(email=email, phone_number=phone_number, tenant_id=tenant_id, project_id=project_id))
@@ -190,10 +190,10 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def lookup(
         self,
-        email: str = None,
-        phone_number: str = None,
-        tenant_id: str = None,
-        project_id: str = None,
+        email: str | None = None,
+        phone_number: str | None = None,
+        tenant_id: str | None = None,
+        project_id: str | None = None,
     ) -> Iterator[User]:
         if not email and not phone_number:
             raise exceptions.ValidationError("Either `email` or `phone_number` must be provided")
@@ -213,7 +213,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         for item in response.get("users", []):
             yield User.create(data=item)
 
-    def sign_in_with_password(self, email: str, password: str, tenant_id: str = None):
+    def sign_in_with_password(self, email: str, password: str, tenant_id: str | None = None):
         data = {
             "email": email,
             "password": password,
@@ -222,7 +222,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         response = self._execute(method=self.client.accounts().signInWithPassword, body=data)
         return response
 
-    def sign_in_with_phone_number(self, phone_number: str, code: str, tenant_id: str = None):
+    def sign_in_with_phone_number(self, phone_number: str, code: str, tenant_id: str | None = None):
         data = {
             "phone_number": phone_number,
             "code": code,
@@ -231,7 +231,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         response = self._execute(method=self.client.accounts().signInWithPhoneNumber, body=data)
         return response
 
-    def sign_in_with_email_link(self, email: str, code: str, tenant_id: str = None):
+    def sign_in_with_email_link(self, email: str, code: str, tenant_id: str | None = None):
         data = {
             "email": email,
             "oobCode": code,
@@ -253,11 +253,11 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         type: OOBCodeType,  # pylint: disable=redefined-builtin
         email: str,
-        ip_address: str = None,
-        project_id: str = None,
+        ip_address: str | None = None,
+        project_id: str | None = None,
         send_email: bool = False,
-        redirect_url: str = None,
-        tenant_id: str = None,
+        redirect_url: str | None = None,
+        tenant_id: str | None = None,
     ) -> ResourceType:
         data = {
             "requestType": type.value,
@@ -301,7 +301,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         response = self._execute(method=self.client.accounts().resetPassword, body=data)
         return response
 
-    def delete_user(self, user_id: str, tenant_id: str = None):
+    def delete_user(self, user_id: str, tenant_id: str | None = None):
         data = {
             "localId": user_id,
             "tenantId": tenant_id or self.tenant_id,
@@ -309,7 +309,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         response = self._execute(method=self.client.accounts().delete, body=data)
         return response
 
-    def disable_user(self, user_id: str, project_id: str = None, tenant_id: str = None):
+    def disable_user(self, user_id: str, project_id: str | None = None, tenant_id: str | None = None):
         data = {
             "localId": user_id,
             "disableUser": True,
@@ -319,7 +319,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         response = self._execute(method=self.client.accounts().update, body=data)
         return response
 
-    def enable_user(self, user_id: str, project_id: str = None, tenant_id: str = None):
+    def enable_user(self, user_id: str, project_id: str | None = None, tenant_id: str = None):
         data = {
             "localId": user_id,
             "disableUser": False,
@@ -333,12 +333,12 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         email: str,
         password: str,
-        phone_number: str = None,
-        name: str = None,
-        photo_url: str = None,
-        user_id: str = None,
-        project_id: str = None,
-        tenant_id: str = None,
+        phone_number: str | None = None,
+        name: str | None = None,
+        photo_url: str | None = None,
+        user_id: str | None = None,
+        project_id: str | None = None,
+        tenant_id: str | None = None,
     ):
         if phone_number and not phone_number.startswith("+"):
             phone_number = f"+{phone_number}"
@@ -363,15 +363,15 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
     def update(
         self,
         user_id: str,
-        email: str = None,
-        password: str = None,
-        phone_number: str = None,
-        name: str = None,
-        photo_url: str = None,
-        project_id: str = None,
-        attributes: dict[str, str] = None,
-        tenant_id: str = None,
-        enabled: bool = None,
+        email: str | None = None,
+        password: str | None = None,
+        phone_number: str | None = None,
+        name: str | None = None,
+        photo_url: str | None = None,
+        project_id: str | None = None,
+        attributes: dict[str, str] | None = None,
+        tenant_id: str | None = None,
+        enabled: bool | None = None,
     ):
         data = {
             "localId": user_id,

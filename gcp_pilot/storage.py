@@ -77,9 +77,9 @@ class CloudStorage(GoogleCloudPilotAPI):
         source_file_name,
         source_bucket_name: str,
         target_bucket_name: str,
-        target_file_name: str = None,
-        project_id: str = None,
-        region: str = None,
+        target_file_name: str | None = None,
+        project_id: str | None = None,
+        region: str | None = None,
     ) -> Blob:
         source_bucket = self.create_bucket(name=source_bucket_name, region=region, project_id=project_id)
         source_blob = source_bucket.blob(source_file_name)
@@ -95,9 +95,9 @@ class CloudStorage(GoogleCloudPilotAPI):
         source_file_name: str,
         source_bucket_name: str,
         target_bucket_name: str,
-        target_file_name: str = None,
-        project_id: str = None,
-        region: str = None,
+        target_file_name: str | None = None,
+        project_id: str | None = None,
+        region: str | None = None,
     ) -> Blob:
         data = self.copy(
             source_file_name=source_file_name,
@@ -110,12 +110,12 @@ class CloudStorage(GoogleCloudPilotAPI):
         self.delete(file_name=source_file_name, bucket_name=source_bucket_name)
         return data
 
-    def delete(self, file_name: str, bucket_name: str = None) -> None:
+    def delete(self, file_name: str, bucket_name: str | None = None) -> None:
         bucket = self.check_bucket(name=bucket_name)
         blob = bucket.blob(file_name)
         return blob.delete()
 
-    def list_files(self, bucket_name: str, prefix: str = None) -> Generator[Blob, None, None]:
+    def list_files(self, bucket_name: str, prefix: str | None = None) -> Generator[Blob, None, None]:
         blobs = self.client.list_blobs(
             bucket_name,
             prefix=prefix,

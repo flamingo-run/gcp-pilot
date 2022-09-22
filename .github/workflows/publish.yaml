@@ -12,8 +12,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.10
-      - name: Build & Release package
+          python-version: '3.10.x'
+      - name: Setup Environment
+        run: |
+          make setup
+      - name: Build & Publish package
         run: |
           make publish
         env:

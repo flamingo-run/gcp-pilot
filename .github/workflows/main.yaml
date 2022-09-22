@@ -13,14 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.10
+        python-version: '3.10.x'
 
     - name: Cache dependencies
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ~/.cache/pypoetry
         key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
@@ -28,7 +27,6 @@ jobs:
     - name: Install Python dependencies
       run: |
         make dependencies
-
     - name: Lint with pylint
       run: |
         make lint
@@ -37,14 +35,58 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.10
+          python-version: '3.10.x'
 
       - name: Cache dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install Python dependencies
+        run: |
+          make dependencies
+      - name: Install as a package
+        run: |
+          poetry build
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10.x'
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install Python dependencies
+        run: |
+          make dependencies
+      - name: Verify security vulnerabilities
+        run: |
+          make check
+
+  unit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10.x'
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
         with:
           path: ~/.cache/pypoetry
           key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
@@ -53,28 +95,11 @@ jobs:
         run: |
           make dependencies
 
-      - name: Build the package
-        run: |
-          poetry build
-
-  unit:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.10
-
-      - name: Install Python dependencies
-        run: |
-          make dependencies
-
-      - name: Unit test with nose test suite
+      - name: Unit test
         run: |
           make unit
+        env:
+          LOG_LEVEL: ERROR
 
       - name: Report Coverage
         run: |

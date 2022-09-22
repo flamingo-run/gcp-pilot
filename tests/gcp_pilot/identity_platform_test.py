@@ -2,7 +2,6 @@ import json
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import dict, tuple
 
 from gcp_pilot.factories.identity_platform import FirebaseAuthTokenFactory
 from gcp_pilot.identity_platform import FirebaseAuthToken, IdentityPlatform, parse_timestamp

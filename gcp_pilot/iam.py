@@ -18,18 +18,18 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             **kwargs,
         )
 
-    def _service_account_path(self, email: str, project_id: str = None) -> str:
+    def _service_account_path(self, email: str, project_id: str | None = None) -> str:
         parent_path = self._project_path(project_id=project_id)
         return f"{parent_path}/serviceAccounts/{email}"
 
-    def _key_path(self, key_id: str, email: str, project_id: str = None) -> str:
+    def _key_path(self, key_id: str, email: str, project_id: str | None = None) -> str:
         parent_path = self._service_account_path(email=email, project_id=project_id)
         return f"{parent_path}/keys/{key_id}"
 
-    def _build_service_account_email(self, name: str, project_id: str = None) -> str:
+    def _build_service_account_email(self, name: str, project_id: str | None = None) -> str:
         return f"{name}@{project_id or self.project_id}.iam.gserviceaccount.com"
 
-    def get_service_account(self, name: str, project_id: str = None) -> AccountType:
+    def get_service_account(self, name: str, project_id: str | None = None) -> AccountType:
         account_path = self._service_account_path(
             email=self._build_service_account_email(name=name, project_id=project_id),
             project_id=project_id,
@@ -44,7 +44,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
         self,
         name: str,
         display_name: str,
-        project_id: str = None,
+        project_id: str | None = None,
         exists_ok: bool = True,
     ) -> AccountType:
         try:
@@ -60,7 +60,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             service_account = self.get_service_account(name=name, project_id=project_id)
         return service_account
 
-    def list_service_accounts(self, project_id: str = None) -> Generator[AccountType, None, None]:
+    def list_service_accounts(self, project_id: str | None = None) -> Generator[AccountType, None, None]:
         params = dict(
             name=self._project_path(project_id=project_id),
         )
@@ -72,7 +72,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
         for item in pagination:
             yield item
 
-    def get_policy(self, email: str, project_id: str = None) -> PolicyType:
+    def get_policy(self, email: str, project_id: str | None = None) -> PolicyType:
         resource = self._service_account_path(email=email, project_id=project_id)
         return self._execute(
             method=self.client.projects().serviceAccounts().getIamPolicy,
@@ -94,13 +94,13 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
         target_email: str,
         member_email: str,
         role: str,
-        project_id: str = None,
+        project_id: str | None = None,
     ) -> PolicyType:
         policy = self.get_policy(email=target_email, project_id=project_id)
         changed_policy = self._unbind_email_from_policy(email=member_email, role=role, policy=policy)
         return self.set_policy(email=target_email, policy=changed_policy, project_id=project_id)
 
-    def set_policy(self, email: str, policy: PolicyType, project_id: str = None) -> PolicyType:
+    def set_policy(self, email: str, policy: PolicyType, project_id: str | None = None) -> PolicyType:
         resource = self._service_account_path(email=email, project_id=project_id)
         return self._execute(
             method=self.client.projects().serviceAccounts().setIamPolicy,
@@ -108,7 +108,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             body={"policy": policy, "updateMask": "bindings"},
         )
 
-    def get_key(self, key_id: str, service_account_name: str, project_id: str = None) -> KeyType:
+    def get_key(self, key_id: str, service_account_name: str, project_id: str | None = None) -> KeyType:
         key_path = self._key_path(
             key_id=key_id,
             email=self._build_service_account_email(name=service_account_name, project_id=project_id),
@@ -120,7 +120,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             name=key_path,
         )
 
-    def delete_key(self, key_id: str, service_account_name: str, project_id: str = None) -> KeyType:
+    def delete_key(self, key_id: str, service_account_name: str, project_id: str | None = None) -> KeyType:
         key_path = self._key_path(
             key_id=key_id,
             email=self._build_service_account_email(name=service_account_name, project_id=project_id),
@@ -135,7 +135,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
     def create_key(
         self,
         service_account_name: str,
-        project_id: str = None,
+        project_id: str | None = None,
     ) -> KeyType:
         body = {}
         parent = self._service_account_path(
@@ -149,7 +149,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
         )
         return self._format_key(data=account_key)
 
-    def list_keys(self, service_account_name: str, project_id: str = None) -> Generator[KeyType, None, None]:
+    def list_keys(self, service_account_name: str, project_id: str | None = None) -> Generator[KeyType, None, None]:
         parent = self._service_account_path(
             email=self._build_service_account_email(name=service_account_name, project_id=project_id),
             project_id=project_id,

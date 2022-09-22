@@ -22,7 +22,7 @@ class ResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
             body={"options": {"requestedPolicyVersion": version}},
         )
 
-    def set_policy(self, policy: PolicyType, project_id: str = None) -> PolicyType:
+    def set_policy(self, policy: PolicyType, project_id: str | None = None) -> PolicyType:
         if not policy["bindings"]:
             raise exceptions.NotAllowed("Too dangerous to set policy with empty bindings")
 
@@ -32,12 +32,12 @@ class ResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
             body={"policy": policy, "updateMask": "bindings"},
         )
 
-    def add_member(self, email: str, role: str, project_id: str = None) -> PolicyType:
+    def add_member(self, email: str, role: str, project_id: str | None = None) -> PolicyType:
         policy = self.get_policy(project_id=project_id)
         changed_policy = self._bind_email_to_policy(email=email, role=role, policy=policy)
         return self.set_policy(policy=changed_policy, project_id=project_id)
 
-    def remove_member(self, email: str, role: str, project_id: str = None) -> PolicyType:
+    def remove_member(self, email: str, role: str, project_id: str | None = None) -> PolicyType:
         policy = self.get_policy(project_id=project_id)
         changed_policy = self._unbind_email_from_policy(email=email, role=role, policy=policy)
         return self.set_policy(policy=changed_policy, project_id=project_id)
@@ -48,7 +48,7 @@ class ResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
             projectId=project_id or self.project_id,
         )
 
-    def allow_impersonation(self, email: str, project_id: str = None) -> PolicyType:
+    def allow_impersonation(self, email: str, project_id: str | None = None) -> PolicyType:
         return self.add_member(
             email=email,
             role="roles/iam.serviceAccountTokenCreator",
@@ -363,7 +363,7 @@ class ServiceAgent:
         return f"{project_number}-compute@developer.gserviceaccount.com"
 
     @classmethod
-    def get_cloud_build_service_account(cls, project_id: str = None) -> str:
+    def get_cloud_build_service_account(cls, project_id: str | None = None) -> str:
         project_number = cls.get_project_number(project_id=project_id)
         return f"{project_number}@cloudbuild.gserviceaccount.com"
 

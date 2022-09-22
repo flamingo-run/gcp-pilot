@@ -43,7 +43,7 @@ class CloudDNS(GoogleCloudPilotAPI):
     def list_zones(self) -> Generator[dns.ManagedZone, None, None]:
         yield from self.client.list_zones()
 
-    def _build_zone(self, name: str, dns_name: str, description: str = None) -> dns.ManagedZone:
+    def _build_zone(self, name: str, dns_name: str, description: str | None = None) -> dns.ManagedZone:
         return self.client.zone(
             name=name,
             dns_name=RecordType.build_dns_name(name=dns_name),
@@ -54,7 +54,7 @@ class CloudDNS(GoogleCloudPilotAPI):
         self,
         name: str,
         dns_name: str,
-        description: str = None,
+        description: str | None = None,
         exists_ok: bool = True,
     ) -> dns.ManagedZone:
         zone = self._build_zone(name=name, dns_name=dns_name, description=description)
@@ -82,7 +82,7 @@ class CloudDNS(GoogleCloudPilotAPI):
         zone_dns: str,
         name: str,
         record_type: RecordType,
-        record_data: list[str] = None,
+        record_data: list[str] | None = None,
         ttl: int = 60 * 60,
         wait: bool = True,
     ) -> dns.ResourceRecordSet:

@@ -19,10 +19,10 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         self.timezone = kwargs.pop("timezone", DEFAULT_TIMEZONE)
         super().__init__(**kwargs)
 
-    def _parent_path(self, project_id: str = None) -> str:
+    def _parent_path(self, project_id: str | None = None) -> str:
         return self._location_path(project_id=project_id, location=self.location)
 
-    def _job_path(self, job, project_id: str = None) -> str:
+    def _job_path(self, job, project_id: str | None = None) -> str:
         parent_name = self._parent_path(project_id=project_id)
         return f"{parent_name}/jobs/{job}"
 
@@ -32,10 +32,10 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         url: str,
         payload: str,
         cron: str,
-        timezone: str = None,
+        timezone: str | None = None,
         method: int = DEFAULT_METHOD,
-        headers: dict[str, str] = None,
-        project_id: str = None,
+        headers: dict[str, str] | None = None,
+        project_id: str | None = None,
         use_oidc_auth: bool = True,
         timeout_in_seconds: int = MAX_TIMEOUT,
     ) -> scheduler.Job:
@@ -64,10 +64,10 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         url: str,
         payload: str,
         cron: str,
-        timezone: str = None,
+        timezone: str | None = None,
         method: int = DEFAULT_METHOD,
-        headers: dict[str, str] = None,
-        project_id: str = None,
+        headers: dict[str, str] | None = None,
+        project_id: str | None = None,
         use_oidc_auth: bool = True,
         timeout_in_seconds: int = MAX_TIMEOUT,
     ) -> scheduler.Job:
@@ -91,19 +91,19 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         )
         return response
 
-    def list(self, prefix: str = "", project_id: str = None) -> Generator[scheduler.Job, None, None]:
+    def list(self, prefix: str = "", project_id: str | None = None) -> Generator[scheduler.Job, None, None]:
         parent = self._parent_path(project_id=project_id)
         for job in self.client.list_jobs(parent=parent):
             if job.name.split("/jobs/")[-1].startswith(prefix):
                 yield job
 
-    def get(self, name: str, project_id: str = None) -> scheduler.Job:
+    def get(self, name: str, project_id: str | None = None) -> scheduler.Job:
         job_name = self._job_path(job=name, project_id=project_id)
         return self.client.get_job(
             name=job_name,
         )
 
-    def delete(self, name: str, project_id: str = None) -> None:
+    def delete(self, name: str, project_id: str | None = None) -> None:
         job_name = self._job_path(job=name, project_id=project_id)
         return self.client.delete_job(
             name=job_name,
@@ -115,10 +115,10 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         url: str,
         payload: str,
         cron: str,
-        timezone: str = None,
+        timezone: str | None = None,
         method: int = DEFAULT_METHOD,
-        headers: dict[str, str] = None,
-        project_id: str = None,
+        headers: dict[str, str] | None = None,
+        project_id: str | None = None,
         use_oidc_auth: bool = True,
         timeout_in_seconds: int = MAX_TIMEOUT,
     ) -> scheduler.Job:

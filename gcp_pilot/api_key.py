@@ -54,7 +54,7 @@ class APIKey(DiscoveryMixin, GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    def _key_path(self, key_id: str, project_id: str = None) -> str:
+    def _key_path(self, key_id: str, project_id: str | None = None) -> str:
         location_path = self._location_path(project_id=project_id)
         return f"{location_path}/keys/{key_id}"
 
@@ -64,7 +64,7 @@ class APIKey(DiscoveryMixin, GoogleCloudPilotAPI):
             parent=key,
         )
 
-    def get(self, key_id: str, project_id: str = None) -> Key:
+    def get(self, key_id: str, project_id: str | None = None) -> Key:
         data = self._execute(
             method=self.client.projects().locations().keys().get,
             name=self._key_path(key_id=key_id, project_id=project_id),
@@ -75,8 +75,8 @@ class APIKey(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         key_id: str,
         display_name: str = "",
-        api_targets: list[str] = None,
-        project_id: str = None,
+        api_targets: list[str] | None = None,
+        project_id: str | None = None,
     ) -> dict:
         body = {
             "displayName": display_name,
@@ -92,19 +92,19 @@ class APIKey(DiscoveryMixin, GoogleCloudPilotAPI):
             body=body,
         )
 
-    def delete(self, key_id: str, project_id: str = None):
+    def delete(self, key_id: str, project_id: str | None = None):
         return self._execute(
             method=self.client.projects().locations().keys().delete,
             name=self._key_path(key_id=key_id, project_id=project_id),
         )
 
-    def undelete(self, key_id: str, project_id: str = None):
+    def undelete(self, key_id: str, project_id: str | None = None):
         return self._execute(
             method=self.client.projects().locations().keys().undelete,
             name=self._key_path(key_id=key_id, project_id=project_id),
         )
 
-    def list(self, project_id: str = None) -> Generator[Key, None, None]:
+    def list(self, project_id: str | None = None) -> Generator[Key, None, None]:
         params = dict(parent=self._location_path(project_id=project_id))
         data = self._paginate(
             method=self.client.projects().locations().keys().list,
@@ -114,7 +114,7 @@ class APIKey(DiscoveryMixin, GoogleCloudPilotAPI):
         for item in data:
             yield Key(raw=item, project_id=project_id or self.project_id)
 
-    def get_key_string(self, key_id: str, project_id: str = None) -> dict:
+    def get_key_string(self, key_id: str, project_id: str | None = None) -> dict:
         return self._execute(
             method=self.client.projects().locations().keys().getKeyString,
             name=self._key_path(key_id=key_id, project_id=project_id),

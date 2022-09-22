@@ -14,7 +14,7 @@ class CloudErrorReporting(GoogleCloudPilotAPI):
     def report(self, message, http_context=None, user=None) -> None:
         self.client.report(message=message, http_context=http_context, user=user)
 
-    def report_with_request(self, request: "WSGIRequest", status_code: int, message: str = None) -> None:
+    def report_with_request(self, request: "WSGIRequest", status_code: int, message: str | None = None) -> None:
         user = str(request.user) if request.user.is_authenticated else None
         http_context = self._wsgi_to_http_context(request=request, status_code=status_code)
 
@@ -50,11 +50,11 @@ class CloudErrorExplorer(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def get_events(
         self,
-        error_id: str = None,
-        service_name: str = None,
-        service_version: str = None,
-        resource_type: str = None,
-        project_id: str = None,
+        error_id: str | None = None,
+        service_name: str | None = None,
+        service_version: str | None = None,
+        resource_type: str | None = None,
+        project_id: str | None = None,
     ):
         params = dict(
             projectName=self._project_path(project_id=project_id),
@@ -75,10 +75,10 @@ class CloudErrorExplorer(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def get_errors(
         self,
-        service_name: str = None,
-        service_version: str = None,
-        resource_type: str = None,
-        project_id: str = None,
+        service_name: str | None = None,
+        service_version: str | None = None,
+        resource_type: str | None = None,
+        project_id: str | None = None,
     ):
         params = dict(
             projectName=self._project_path(project_id=project_id),

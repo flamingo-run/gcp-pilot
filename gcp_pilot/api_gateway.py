@@ -21,11 +21,11 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         location_path = self._location_path(project_id=project_id, location="global")
         return f"{location_path}/apis/{api_name}"
 
-    def _gateway_path(self, gateway_name: str, location: str = None, project_id: str = None) -> str:
+    def _gateway_path(self, gateway_name: str, location: str | None = None, project_id: str = None) -> str:
         location_path = self._location_path(project_id=project_id, location=location)
         return f"{location_path}/gateways/{gateway_name}"
 
-    def _config_path(self, config_name: str, api_name: str, project_id: str = None) -> str:
+    def _config_path(self, config_name: str, api_name: str, project_id: str | None = None) -> str:
         api_path = self._api_path(api_name=api_name, project_id=project_id)
         return f"{api_path}/configs/{config_name}"
 

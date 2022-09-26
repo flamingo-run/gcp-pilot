@@ -1,21 +1,35 @@
 # https://googleapis.dev/python/pubsub/latest/index.html
 import base64
 import json
+import logging
 from dataclasses import dataclass
 from typing import Any, Callable, Generator
 
 from google.api_core.exceptions import AlreadyExists, NotFound
 from google.cloud import pubsub_v1
+from google.protobuf.duration_pb2 import Duration  # pylint: disable=no-name-in-module
 from google.protobuf.field_mask_pb2 import FieldMask  # pylint: disable=no-name-in-module
-from google.pubsub_v1 import PushConfig, Subscription, Topic, types
+from google.pubsub_v1 import DeadLetterPolicy, ExpirationPolicy, PushConfig, RetryPolicy, Subscription, Topic, types
 
 from gcp_pilot.base import GoogleCloudPilotAPI
+from gcp_pilot.exceptions import ValidationError
+
+logger = logging.getLogger()
 
 
 class CloudPublisher(GoogleCloudPilotAPI):
     _client_class = pubsub_v1.PublisherClient
     _service_name = "Cloud Pub/Sub"
     _google_managed_service = True
+
+    def __init__(self, enable_message_ordering: bool = False, **kwargs):
+        if publisher_options := kwargs.pop("publisher_options", None):
+            publisher_options.enable_message_ordering = enable_message_ordering
+        else:
+            publisher_options = pubsub_v1.types.PublisherOptions(
+                enable_message_ordering=enable_message_ordering,
+            )
+        super().__init__(publisher_options=publisher_options, **kwargs)
 
     def create_topic(
         self,
@@ -167,6 +181,13 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         enable_message_ordering: bool = False,
         push_to_url: str | None = None,
         use_oidc_auth: bool = False,
+        dead_letter_topic_id: str | None = None,
+        dead_letter_subscription_id: str | None = None,
+        max_retries: int | None = None,
+        min_backoff: int | None = 10,
+        max_backoff: int | None = 600,
+        expiration_ttl: int | None = 31,
+        enable_exactly_once_delivery: bool = False,
     ) -> Subscription:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -184,11 +205,42 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 **(self.get_oidc_token(audience=push_to_url) if use_oidc_auth else {}),
             )
 
+        if max_retries and not dead_letter_topic_id:
+            raise ValidationError("max_retries requires dead_letter_topic_id")
+
+        extra_config = {}
+
+        if dead_letter_topic_id:
+            dead_letter_policy = DeadLetterPolicy(
+                dead_letter_topic=self.client.topic_path(
+                    project=project_id or self.project_id,
+                    topic=dead_letter_topic_id,
+                ),
+                max_delivery_attempts=max_retries,
+            )
+            extra_config["dead_letter_policy"] = dead_letter_policy
+
+        expiration_policy = (
+            ExpirationPolicy(ttl=Duration(seconds=expiration_ttl * 24 * 60 * 60))
+            if expiration_ttl
+            else ExpirationPolicy()
+        )
+        extra_config["expiration_policy"] = expiration_policy
+
+        if min_backoff is not None or max_backoff is not None:
+            retry_policy = RetryPolicy(
+                minimum_backoff=Duration(seconds=min_backoff or 10),
+                maximum_backoff=Duration(seconds=max_backoff or 600),
+            )
+            extra_config["retry_policy"] = retry_policy
+
         subscription = Subscription(
             name=subscription_path,
             topic=topic_path,
             push_config=push_config,
             enable_message_ordering=enable_message_ordering,
+            enable_exactly_once_delivery=enable_exactly_once_delivery,
+            **extra_config,
         )
 
         try:
@@ -201,6 +253,15 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 project_id=project_id,
                 exists_ok=False,
             )
+            if dead_letter_topic_id:
+                logger.info(
+                    f"Creating dead-letter topic {dead_letter_topic_id} & subscription {dead_letter_subscription_id}"
+                )
+                self.create_or_update_subscription(
+                    topic_id=dead_letter_topic_id,
+                    subscription_id=dead_letter_subscription_id,
+                )
+
             return self.client.create_subscription(request=subscription)
         except AlreadyExists:
             if not exists_ok:
@@ -214,6 +275,12 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         project_id: str | None = None,
         push_to_url: str | None = None,
         use_oidc_auth: bool = False,
+        dead_letter_topic_id: str | None = None,
+        dead_letter_subscription_id: str | None = None,
+        max_retries: int | None = None,
+        min_backoff: int | None = 10,
+        max_backoff: int | None = 600,
+        expiration_ttl: int | None = 31,
     ) -> Subscription:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -224,22 +291,64 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             subscription=subscription_id,
         )
 
+        update_paths = []
+
         push_config = None
         if push_to_url:
             push_config = PushConfig(
                 push_endpoint=push_to_url,
                 **(self.get_oidc_token(audience=push_to_url) if use_oidc_auth else {}),
             )
+            update_paths.append("push_config")
 
-        subscription = Subscription(
-            name=subscription_path,
-            topic=topic_path,
-            push_config=push_config,
+        if max_retries and not dead_letter_topic_id:
+            raise ValidationError("max_retries requires dead_letter_topic_id")
+
+        extra_config = {}
+
+        if dead_letter_topic_id:
+            dead_letter_policy = DeadLetterPolicy(
+                dead_letter_topic=self.client.topic_path(
+                    project=project_id or self.project_id,
+                    topic=dead_letter_topic_id,
+                ),
+                max_delivery_attempts=max_retries or 100,
+            )
+            extra_config["dead_letter_policy"] = dead_letter_policy
+            update_paths.append("dead_letter_policy")
+
+        expiration_policy = (
+            ExpirationPolicy(ttl=Duration(seconds=expiration_ttl * 24 * 60 * 60))
+            if expiration_ttl
+            else ExpirationPolicy()
         )
 
-        update_mask = {"paths": {"push_config"}}
+        extra_config["expiration_policy"] = expiration_policy
+        update_paths.append("expiration_policy")
 
-        return self.client.update_subscription(request={"subscription": subscription, "update_mask": update_mask})
+        retry_policy = RetryPolicy(
+            minimum_backoff=Duration(seconds=min_backoff),
+            maximum_backoff=Duration(seconds=max_backoff),
+        )
+        extra_config["retry_policy"] = retry_policy
+        update_paths.append("retry_policy")
+
+        subscription = Subscription(name=subscription_path, topic=topic_path, push_config=push_config, **extra_config)
+
+        update_mask = FieldMask(paths=update_paths)
+
+        try:
+            return self.client.update_subscription(request={"subscription": subscription, "update_mask": update_mask})
+        except NotFound:
+            logger.info(
+                f"Creating dead-letter topic {dead_letter_topic_id} & subscription {dead_letter_subscription_id}"
+            )
+            self.create_or_update_subscription(
+                topic_id=dead_letter_topic_id,
+                subscription_id=dead_letter_subscription_id,
+            )
+
+            return self.client.update_subscription(request={"subscription": subscription, "update_mask": update_mask})
 
     def create_or_update_subscription(
         self,
@@ -250,7 +359,15 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         enable_message_ordering: bool = False,
         push_to_url: str | None = None,
         use_oidc_auth: bool = False,
+        dead_letter_topic_id: str | None = None,
+        dead_letter_subscription_id: str | None = None,
+        max_retries: int | None = None,
+        min_backoff: int | None = 10,
+        max_backoff: int | None = 600,
+        expiration_ttl: int | None = 31,
     ) -> Subscription:
+        if not subscription_id:
+            raise ValidationError("subscritpion_id is mandatory to create or update a Subscription")
         try:
             return self.create_subscription(
                 topic_id=topic_id,
@@ -261,6 +378,12 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 enable_message_ordering=enable_message_ordering,
                 push_to_url=push_to_url,
                 use_oidc_auth=use_oidc_auth,
+                dead_letter_topic_id=dead_letter_topic_id,
+                dead_letter_subscription_id=dead_letter_subscription_id,
+                max_retries=max_retries,
+                min_backoff=min_backoff,
+                max_backoff=max_backoff,
+                expiration_ttl=expiration_ttl,
             )
         except AlreadyExists:
             return self.update_subscription(
@@ -269,6 +392,12 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 project_id=project_id,
                 push_to_url=push_to_url,
                 use_oidc_auth=use_oidc_auth,
+                dead_letter_topic_id=dead_letter_topic_id,
+                dead_letter_subscription_id=dead_letter_subscription_id,
+                max_retries=max_retries,
+                min_backoff=min_backoff,
+                max_backoff=max_backoff,
+                expiration_ttl=expiration_ttl,
             )
 
     def subscribe(self, topic_id: str, subscription_id: str, callback: Callable, project_id: str | None = None):

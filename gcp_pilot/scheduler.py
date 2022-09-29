@@ -7,7 +7,7 @@ from google.cloud import scheduler
 
 from gcp_pilot.base import AppEngineBasedService, GoogleCloudPilotAPI
 
-DEFAULT_TIMEZONE = os.environ.get("TIMEZONE", "Europe/London")  # UTC
+DEFAULT_TIMEZONE = os.environ.get("TIMEZONE", None)  # UTC
 MAX_TIMEOUT = 30 * 60  # max allowed to HTTP endpoints is 30 minutes
 
 

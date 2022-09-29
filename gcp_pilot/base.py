@@ -177,7 +177,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         return credentials, (project_id or getattr(credentials, "project_id", None)), service_account
 
     def get_oidc_token(self, audience: str | None = None) -> dict[str, dict[str, str]]:
-        oidc_token = {"service_account_email": self.credentials.service_account_email}
+        oidc_token = {"service_account_email": self.service_account_email}
         if audience:
             # TODO: make sure that, if URL, the query params are removed
             oidc_token["audience"] = audience

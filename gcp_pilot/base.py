@@ -24,7 +24,7 @@ DEFAULT_SERVICE_ACCOUNT = os.environ.get("GCP_SERVICE_ACCOUNT", None)
 TOKEN_URI = "https://accounts.google.com/o/oauth2/token"
 
 PolicyType = dict[str, Any]
-AuthType = tuple[Credentials, str]
+AuthType = tuple[Credentials, str, str]
 ImpersonatedAuthType = tuple[ImpersonatedCredentials, str]
 ResourceType = dict[str, Any]
 
@@ -56,9 +56,11 @@ class GoogleCloudPilotAPI(abc.ABC):
         **kwargs,
     ):
         if credentials:
-            self.credentials, credential_project_id = credentials, getattr(credentials, "project_id", None)
+            self.credentials = credentials
+            credential_project_id = getattr(credentials, "project_id", None)
+            self.service_account_email = getattr(credentials, "service_account_email", DEFAULT_SERVICE_ACCOUNT)
         else:
-            self.credentials, credential_project_id = self._set_credentials(
+            self.credentials, credential_project_id, self.service_account_email = self._set_credentials(
                 subject=subject,
                 impersonate_account=impersonate_account,
             )
@@ -150,11 +152,11 @@ class GoogleCloudPilotAPI(abc.ABC):
         all_scopes = MINIMAL_SCOPES + cls._scopes
         if not cls._cached_credentials:
             credentials, project_id = auth.default(scopes=all_scopes)
-            cls._cached_credentials = credentials, project_id
+            current_account = getattr(credentials, "service_account_email", None)
+            cls._cached_credentials = credentials, project_id, current_account
         else:
-            credentials, project_id = cls._cached_credentials
+            credentials, project_id, current_account = cls._cached_credentials
 
-        current_account = getattr(credentials, "service_account_email", None)
         if current_account == "default":  # common when inside GCP
             current_account = DEFAULT_SERVICE_ACCOUNT
 
@@ -165,11 +167,14 @@ class GoogleCloudPilotAPI(abc.ABC):
                 scopes=all_scopes,
             )
             project_id = impersonated_project_id or project_id
+            service_account = impersonate_account
+        else:
+            service_account = current_account
 
         if subject:
             credentials = cls._delegated_credential(credentials=credentials, subject=subject, scopes=all_scopes)
 
-        return credentials, (project_id or getattr(credentials, "project_id", None))
+        return credentials, (project_id or getattr(credentials, "project_id", None)), service_account
 
     def get_oidc_token(self, audience: str | None = None) -> dict[str, dict[str, str]]:
         oidc_token = {"service_account_email": self.credentials.service_account_email}

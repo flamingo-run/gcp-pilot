@@ -260,6 +260,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 self.create_or_update_subscription(
                     topic_id=dead_letter_topic_id,
                     subscription_id=dead_letter_subscription_id,
+                    expiration_ttl=None,  # dead letters should never expire
                 )
 
             return self.client.create_subscription(request=subscription)

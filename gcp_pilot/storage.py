@@ -43,12 +43,10 @@ class CloudStorage(GoogleCloudPilotAPI):
         bucket_name: str,
         target_file_name: str | None = None,
         chunk_size: int | None = None,
-        project_id: str | None = None,
-        region: str | None = None,
         is_public: bool = False,
         content_type: str | None = None,
     ) -> Blob:
-        target_bucket = self.create_bucket(name=bucket_name, project_id=project_id, region=region)
+        target_bucket = self.check_bucket(name=bucket_name)
 
         target_file_name = target_file_name or str(source_file).rsplit("/", maxsplit=1)[-1]
         blob = target_bucket.blob(target_file_name, chunk_size=chunk_size)
@@ -81,7 +79,7 @@ class CloudStorage(GoogleCloudPilotAPI):
         project_id: str | None = None,
         region: str | None = None,
     ) -> Blob:
-        source_bucket = self.create_bucket(name=source_bucket_name, region=region, project_id=project_id)
+        source_bucket = self.check_bucket(name=source_bucket_name)
         source_blob = source_bucket.blob(source_file_name)
 
         target_bucket = self.create_bucket(name=target_bucket_name, region=region, project_id=project_id)

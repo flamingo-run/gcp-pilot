@@ -119,6 +119,7 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
 - IAM
    - manage service accounts
    - manage permissions
+   - encode & decode JWT tokens
 - Identity Platform
   - sign in users
   - sign up users

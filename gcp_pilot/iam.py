@@ -2,10 +2,10 @@
 import base64
 import json
 from datetime import datetime
-from typing import Any, Generator, Mapping
+from typing import Any, Generator
 
-from google.auth import jwt
 import requests
+from google.auth import jwt
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI, PolicyType
@@ -198,12 +198,14 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
     @classmethod
     def decode_jwt(cls, token: str, issuer_email: str, audience: str | None, verify: bool = True) -> dict[str, Any]:
         certs = cls._fetch_public_certs(email=issuer_email)
-        return dict(jwt.decode(
-            token=token,
-            certs=certs,
-            audience=audience,
-            verify=verify,
-        ))
+        return dict(
+            jwt.decode(
+                token=token,
+                certs=certs,
+                audience=audience,
+                verify=verify,
+            )
+        )
 
     @classmethod
     def _fetch_public_certs(cls, email: str) -> dict:

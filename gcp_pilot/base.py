@@ -9,6 +9,7 @@ from google.auth import iam
 from google.auth.credentials import Credentials
 from google.auth.impersonated_credentials import Credentials as ImpersonatedCredentials
 from google.auth.transport import requests
+import google.auth.transport._http_client
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 from google.protobuf.duration_pb2 import Duration  # pylint: disable=no-name-in-module
 from googleapiclient.discovery import Resource, build
@@ -58,9 +59,9 @@ class GoogleCloudPilotAPI(abc.ABC):
         if credentials:
             self.credentials = credentials
             credential_project_id = getattr(credentials, "project_id", None)
-            self.service_account_email = getattr(credentials, "service_account_email", DEFAULT_SERVICE_ACCOUNT)
+            self._service_account_email = getattr(credentials, "service_account_email", DEFAULT_SERVICE_ACCOUNT)
         else:
-            self.credentials, credential_project_id, self.service_account_email = self._set_credentials(
+            self.credentials, credential_project_id, self._service_account_email = self._set_credentials(
                 subject=subject,
                 impersonate_account=impersonate_account,
             )
@@ -69,6 +70,13 @@ class GoogleCloudPilotAPI(abc.ABC):
         self.client = self._build_client(**kwargs)
 
         self._location = location or DEFAULT_LOCATION
+
+    @property
+    def service_account_email(self) -> str:
+        if self._service_account_email == "default":
+            self.credentials.refresh(request=google.auth.transport._http_client.Request())
+            self._service_account_email = getattr(self.credentials, "service_account_email", self._service_account_email)
+        return self._service_account_email
 
     def _get_client_extra_kwargs(self):
         return {}

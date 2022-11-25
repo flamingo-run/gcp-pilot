@@ -1,6 +1,11 @@
 # More Information: <https://cloud.google.com/iam/docs/reference/rest>
 import base64
-from typing import Any, Generator
+import json
+from datetime import datetime
+from typing import Any, Generator, Mapping
+
+from google.auth import jwt
+import requests
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI, PolicyType
@@ -174,6 +179,37 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
         if "privateKeyData" in data:
             data["json"] = base64.b64decode(data["privateKeyData"]).decode()
         return data
+
+    def encode_jwt(self, payload: dict, service_account_email: str | None, project_id: str | None = None) -> str:
+        parent = self._service_account_path(
+            email=service_account_email or self.service_account_email,
+            project_id=project_id or self.project_id,
+        )
+        if "iat" not in payload:
+            payload["iat"] = datetime.now().timestamp()
+
+        response = self._execute(
+            method=self.client.projects().serviceAccounts().signJwt,
+            name=parent,
+            body={"payload": json.dumps(payload)},
+        )
+        return response["signedJwt"]
+
+    @classmethod
+    def decode_jwt(cls, token: str, issuer_email: str, audience: str | None, verify: bool = True) -> dict[str, Any]:
+        certs = cls._fetch_public_certs(email=issuer_email)
+        return dict(jwt.decode(
+            token=token,
+            certs=certs,
+            audience=audience,
+            verify=verify,
+        ))
+
+    @classmethod
+    def _fetch_public_certs(cls, email: str) -> dict:
+        url = f"https://www.googleapis.com/robot/v1/metadata/x509/{email}"
+        response = requests.get(url=url, timeout=5)
+        return response.json()
 
 
 __all__ = ("IdentityAccessManager",)

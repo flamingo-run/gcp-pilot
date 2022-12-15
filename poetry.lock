@@ -495,7 +495,7 @@ name = "google-cloud-bigquery"
 version = "3.4.1"
 description = "Google BigQuery API client library"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "google-cloud-bigquery-3.4.1.tar.gz", hash = "sha256:884689714d98a2364dde9c7c367e8228c7116108bbad7a6365dfde391638985b"},
@@ -545,7 +545,7 @@ name = "google-cloud-core"
 version = "2.3.2"
 description = "Google Cloud API client core library"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "google-cloud-core-2.3.2.tar.gz", hash = "sha256:b9529ee7047fd8d4bf4a2182de619154240df17fbe60ead399078c1ae152af9a"},
@@ -763,7 +763,7 @@ name = "google-crc32c"
 version = "1.5.0"
 description = "A python wrapper of the C library 'Google CRC32C'"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "google-crc32c-1.5.0.tar.gz", hash = "sha256:89284716bc6a5a415d4eaa11b1726d2d60a0cd12aadf5439828353662ede9dd7"},
@@ -844,7 +844,7 @@ name = "google-resumable-media"
 version = "2.4.0"
 description = "Utilities for Google Media Downloads and Resumable Uploads"
 category = "main"
-optional = false
+optional = true
 python-versions = ">= 3.7"
 files = [
     {file = "google-resumable-media-2.4.0.tar.gz", hash = "sha256:8d5518502f92b9ecc84ac46779bd4f09694ecb3ba38a3e7ca737a86d15cbca1f"},
@@ -898,7 +898,7 @@ name = "grpcio"
 version = "1.51.1"
 description = "HTTP/2-based RPC framework"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "grpcio-1.51.1-cp310-cp310-linux_armv7l.whl", hash = "sha256:cc2bece1737b44d878cc1510ea04469a8073dbbcdd762175168937ae4742dfb3"},
@@ -956,7 +956,7 @@ name = "grpcio-status"
 version = "1.51.1"
 description = "Status proto mapping for gRPC"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.6"
 files = [
     {file = "grpcio-status-1.51.1.tar.gz", hash = "sha256:ac2617a3095935ebd785e2228958f24b10a0d527a0c9eb5a0863c784f648a816"},
@@ -1175,7 +1175,7 @@ name = "proto-plus"
 version = "1.22.1"
 description = "Beautiful, Pythonic protocol buffers."
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.6"
 files = [
     {file = "proto-plus-1.22.1.tar.gz", hash = "sha256:6c7dfd122dfef8019ff654746be4f5b1d9c80bba787fe9611b508dd88be3a2fa"},
@@ -1759,4 +1759,4 @@ tasks = ["google-cloud-tasks", "google-cloud-scheduler"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "a5f5e43897a1af687cb7e0da5c4f5f8b437d4469cc943f87d2b99eef3e0f01e6"
+content-hash = "c01dda9936ab7ad0d0823bde4782793969043765bef23c1755927bb7581429f0"

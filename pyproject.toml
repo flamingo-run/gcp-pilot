@@ -21,7 +21,7 @@ google-cloud-tasks = { version = "^2", optional = true}
 google-cloud-scheduler = { version = "^2", optional = true}
 google-cloud-storage = { version = "^2", optional = true}
 google-cloud-build = { version = "^3", optional = true}
-google-cloud-bigquery = {extras = ["storage"], version = "^3.4.1"}
+google-cloud-bigquery = {version = "^3", optional = true, extras = ["storage"]}
 google-cloud-speech = { version = "^2", optional = true}
 gspread = { version = "^5", optional = true}
 google-cloud-pubsub = { version = "^2", optional = true}

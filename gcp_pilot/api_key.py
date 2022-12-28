@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Generator
 
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI
+from gcp_pilot.exceptions import NotAllowed
 
 
 @dataclass
@@ -59,10 +60,23 @@ class APIKey(DiscoveryMixin, GoogleCloudPilotAPI):
         return f"{location_path}/keys/{key_id}"
 
     def lookup(self, key: str):
-        return self._execute(
+        data = self._execute(
             method=self.client.keys().lookupKey,
-            parent=key,
+            keyString=key,
         )
+        project_number = data["name"].split("/", 2)[1]
+        key_id = data["name"].rsplit("/", 1)[-1]
+        return self.get(key_id=key_id, project_id=project_number)
+
+    def exists(self, key: str) -> bool:
+        try:
+            self._execute(
+                method=self.client.keys().lookupKey,
+                keyString=key,
+            )
+            return True
+        except NotAllowed:
+            return False
 
     def get(self, key_id: str, project_id: str | None = None) -> Key:
         data = self._execute(

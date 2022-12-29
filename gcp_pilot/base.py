@@ -387,12 +387,14 @@ def friendly_http_error(func):
 
 class DiscoveryMixin:
     @friendly_http_error
-    def _execute(self, method: Callable, **kwargs) -> ResourceType:
+    def _execute(self, method: Callable, method_http_headers=None, **kwargs) -> ResourceType:
         call = method(**kwargs)
         if isinstance(call, Response):
             call.raise_for_status()
             return call.json()
-        return method(**kwargs).execute()
+        if method_http_headers:
+            call.headers = (call.headers or {}) | method_http_headers
+        return call.execute()
 
     def _list(
         self,

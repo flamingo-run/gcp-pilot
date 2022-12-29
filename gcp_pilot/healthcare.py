@@ -4,7 +4,7 @@ import json
 import logging
 import math
 from dataclasses import dataclass
-from typing import Any, Callable, Generator, Type
+from typing import Any, Callable, Dict, Generator, Type
 from urllib.parse import parse_qsl, urlsplit
 
 from fhir.resources.domainresource import DomainResource
@@ -435,6 +435,34 @@ class HealthcareFHIR(HealthcareBase):
             body=as_json(resource),
         )
         return resource.__class__(**data)
+
+    def patch_update(
+        self,
+        resource_class: Type[DomainResource],
+        data: Dict,
+        resource_id: str,
+        store_name: str,
+        dataset_name: str,
+        project_id: str | None = None,
+        location: str | None = None,
+    ) -> DomainResource:
+
+        name = self._resource_path(
+            resource_type=resource_class.get_resource_type(),
+            resource_id=resource_id,
+            store_name=store_name,
+            dataset_name=dataset_name,
+            project_id=project_id,
+            location=location,
+        )
+        body = [{"op": "replace", "path": f"/{key}", "value": value} for key, value in data.items()]
+        data = self._execute(
+            method=self.client.projects().locations().datasets().fhirStores().fhir().patch,
+            method_http_headers={"Content-Type": "application/json-patch+json"},
+            name=name,
+            body=body,
+        )
+        return resource_class(**data)
 
     def create_or_update_resource(
         self,

@@ -3,7 +3,7 @@ setup:
 
 dependencies:
 	@make setup
-	@poetry install --no-root --extras "tasks build storage bigquery speech sheets pubsub datastore dns monitoring secret healthcare"
+	@poetry install --no-root --all-extras
 
 update:
 	@poetry update

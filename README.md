@@ -21,6 +21,7 @@ Some APIs need extra packages, thus you must use `extras` to add them:
 - Cloud DNS: `pip install gcp-pilot[dns]`
 - Secret Manager: `pip install gcp-pilot[secret]`
 - Healthcare Engine: `pip install gcp-pilot[healthcare]`
+- IAM: `pip install gcp-pilot[iam]`
 
 
 ## Usage

@@ -6,9 +6,10 @@ from typing import Any, Generator
 
 import requests
 from google.auth import jwt
+from google.cloud import iam_credentials_v1
 
 from gcp_pilot import exceptions
-from gcp_pilot.base import AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI, PolicyType
+from gcp_pilot.base import AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI, PolicyType, friendly_http_error
 
 AccountType = dict[str, Any]
 KeyType = dict[str, Any]
@@ -180,20 +181,29 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             data["json"] = base64.b64decode(data["privateKeyData"]).decode()
         return data
 
+
+class IAMCredentials(GoogleCloudPilotAPI):
+    _client_class = iam_credentials_v1.IAMCredentialsClient
+
+    @friendly_http_error
     def encode_jwt(self, payload: dict, service_account_email: str | None, project_id: str | None = None) -> str:
-        parent = self._service_account_path(
-            email=service_account_email or self.service_account_email,
-            project_id=project_id or self.project_id,
-        )
+        max_expiration = 12 * 60 * 60
         if "iat" not in payload:
             payload["iat"] = datetime.now().timestamp()
+        if "exp" not in payload:
+            payload["exp"] = datetime.now().timestamp() + max_expiration
+        else:
+            if payload["exp"] - datetime.now().timestamp() > max_expiration:
+                raise ValueError("JWT tokens cannot be valid for more than 12 hours")
 
-        response = self._execute(
-            method=self.client.projects().serviceAccounts().signJwt,
-            name=parent,
-            body={"payload": json.dumps(payload)},
+        payload["iam"] = int(payload["iat"])
+        payload["exp"] = int(payload["exp"])
+
+        response = self.client.sign_jwt(
+            name=self.client.service_account_path(service_account=service_account_email, project="-"),
+            payload=json.dumps(payload),
         )
-        return response["signedJwt"]
+        return response.signed_jwt
 
     @classmethod
     def decode_jwt(cls, token: str, issuer_email: str, audience: str | None, verify: bool = True) -> dict[str, Any]:

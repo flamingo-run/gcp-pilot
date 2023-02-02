@@ -173,7 +173,7 @@ class FHIRResultSet:
             return
 
         for entry in self.response["entry"]:
-            yield self.resource_class(**entry["resource"])
+            yield self.resource_class.construct(**entry["resource"])
 
     @property
     def next_cursor(self) -> str | None:

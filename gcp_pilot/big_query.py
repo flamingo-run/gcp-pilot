@@ -5,7 +5,7 @@ from google.cloud import bigquery
 from google.cloud.bigquery import DatasetReference, Table
 
 from gcp_pilot import exceptions
-from gcp_pilot.base import GoogleCloudPilotAPI
+from gcp_pilot.base import GoogleCloudPilotAPI, friendly_http_error
 from gcp_pilot.storage import CloudStorage
 
 
@@ -20,6 +20,20 @@ class BigQuery(GoogleCloudPilotAPI):
             dataset_id=dataset_name,
             project=project_id or self.project_id,
         )
+
+    def list_datasets(self):
+        yield from self.client.list_datasets()
+
+    def list_tables(self, dataset_id: str):
+        yield from self.client.list_tables(dataset=dataset_id)
+
+    @friendly_http_error
+    def create_table(self, table: Table):
+        return self.client.create_table(table=table)
+
+    @friendly_http_error
+    def delete_table(self, table: Table):
+        return self.client.delete_table(table=table)
 
     def execute(
         self,

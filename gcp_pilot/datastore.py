@@ -95,7 +95,7 @@ class Manager:
         # If no primary key is provided, we let the server create a new ID
         return self.client.allocate_ids(self.client.key(self.kind), 1)[0]
 
-    def _iterate(self, query, page_size):
+    def _iterate(self, query, page_size: int = 10):
         cursor = None
         empty = False
 
@@ -105,8 +105,9 @@ class Manager:
             page = next(query_iter.pages, [])
             for item in page:
                 yield item
-            cursor = query_iter.next_page_token
-            empty = not bool(cursor)
+            next_cursor = query_iter.next_page_token
+            empty = not bool(cursor) or cursor == next_cursor
+            cursor = next_cursor
 
     def query(
         self,

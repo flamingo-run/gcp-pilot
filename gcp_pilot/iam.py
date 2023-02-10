@@ -186,7 +186,7 @@ class IAMCredentials(GoogleCloudPilotAPI):
     _client_class = iam_credentials_v1.IAMCredentialsClient
 
     @friendly_http_error
-    def encode_jwt(self, payload: dict, service_account_email: str | None, project_id: str | None = None) -> str:
+    def encode_jwt(self, payload: dict, service_account_email: str | None) -> str:
         max_expiration = 12 * 60 * 60
         if "iat" not in payload:
             payload["iat"] = datetime.now().timestamp()
@@ -204,6 +204,17 @@ class IAMCredentials(GoogleCloudPilotAPI):
             payload=json.dumps(payload),
         )
         return response.signed_jwt
+
+    @friendly_http_error
+    def generate_id_token(self, audience: str, service_account_email: str | None = None) -> str:
+        response = self.client.generate_id_token(
+            name=self.client.service_account_path(
+                service_account=service_account_email or self.service_account_email,
+                project="-",
+            ),
+            audience=audience,
+        )
+        return response.token
 
     @classmethod
     def decode_jwt(cls, token: str, issuer_email: str, audience: str | None, verify: bool = True) -> dict[str, Any]:
@@ -224,4 +235,7 @@ class IAMCredentials(GoogleCloudPilotAPI):
         return response.json()
 
 
-__all__ = ("IdentityAccessManager",)
+__all__ = (
+    "IdentityAccessManager",
+    "IAMCredentials",
+)

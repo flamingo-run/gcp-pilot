@@ -39,6 +39,7 @@ grm = ResourceManager()
 `gcp-pilot` uses [ADC](https://cloud.google.com/docs/authentication/production#automatically) to detect credentials. This means that you must have one of the following setups:
 - Environment variable `GOOGLE_APPLICATION_CREDENTIALS` pointing to the JSON file with the credentials
 - Run inside GCP (Compute Engine, Cloud Run, GKE, AppEngine), so the machine's credentials will be used
+- Run locally after authenticating with `gcloud auth application-default login`
 
 You can also globally set a service account using the environment variable `DEFAULT_SERVICE_ACCOUNT`, which will require impersonation.
 

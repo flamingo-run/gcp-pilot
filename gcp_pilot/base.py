@@ -78,6 +78,12 @@ class GoogleCloudPilotAPI(abc.ABC):
             self._service_account_email = getattr(
                 self.credentials, "service_account_email", self._service_account_email
             )
+        elif self._service_account_email is None:  # SDK local authentication
+            self._service_account_email = os.environ.get("GCP_SERVICE_ACCOUNT", None)
+            if not self._service_account_email:
+                logger.warning(
+                    "Using local SDK authentication. Set GCP_SERVICE_ACCOUNT or some features might not work."
+                )
         return self._service_account_email
 
     def _get_client_extra_kwargs(self):

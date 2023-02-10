@@ -446,7 +446,6 @@ class HealthcareFHIR(HealthcareBase):
         project_id: str | None = None,
         location: str | None = None,
     ) -> DomainResource:
-
         name = self._resource_path(
             resource_type=resource_class.get_resource_type(),
             resource_id=resource_id,

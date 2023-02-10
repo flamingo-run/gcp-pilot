@@ -58,7 +58,6 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
         directory: str | None = None,
         project_id: str | None = None,
     ) -> dict[str, Any]:
-
         valid_references = [ref for ref in [branch, commit, tag] if ref]
         if len(valid_references) > 1:
             raise exceptions.ValidationError("Only one of branch|tag|commit must be provided")

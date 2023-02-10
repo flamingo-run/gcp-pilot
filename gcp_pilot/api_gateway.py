@@ -62,7 +62,6 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         project_id: str | None = None,
         wait: bool = True,
     ) -> ResourceType:
-
         parent = self._location_path(location="global", project_id=project_id)
         body = {
             "displayName": display_name,
@@ -128,7 +127,6 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         project_id: str | None = None,
         wait: bool = True,
     ) -> ResourceType:
-
         parent = self._api_path(api_name=api_name, project_id=project_id)
         file_content = {"path": open_api_file.name, "contents": base64.b64encode(open_api_file.read_bytes()).decode()}
         body = {
@@ -198,7 +196,6 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         location: str | None = None,
         wait: bool = True,
     ) -> ResourceType:
-
         parent = self._location_path(project_id=project_id, location=location)
         config_path = self._config_path(
             api_name=api_name,

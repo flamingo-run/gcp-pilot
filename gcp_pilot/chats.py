@@ -140,7 +140,6 @@ class Section:
         icon: str | None = None,
         button: str | None = None,
     ):
-
         widget = KeyValueWidget(
             top=title,
             content=content,

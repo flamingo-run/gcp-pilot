@@ -1,5 +1,6 @@
 import gspread
 from google.auth.transport.requests import AuthorizedSession
+from gspread.client import extract_id_from_url
 
 from gcp_pilot.base import GoogleCloudPilotAPI
 
@@ -12,6 +13,8 @@ class Spreadsheet(GoogleCloudPilotAPI):
 
     def __init__(self, sheet_id: str, **kwargs):
         super().__init__(**kwargs)
+        if sheet_id.startswith("https://"):
+            sheet_id = extract_id_from_url(sheet_id)
         self.sheet_id = sheet_id
         self.spreadsheet = self.client.open_by_key(self.sheet_id)
 

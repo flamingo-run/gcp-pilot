@@ -74,7 +74,7 @@ class BigQuery(GoogleCloudPilotAPI):
         )
         errors = self.client.insert_rows(table=table, rows=rows)
         if errors:
-            raise Exception(f"Bigquery insert error: {errors}")
+            raise Exception(f"Bigquery insert error: {errors}")  # pylint: disable=broad-exception-raised
 
     def get_table(self, table_name: str, project_id: str | None = None, dataset_name: str | None = None) -> Table:
         dataset_ref = self._dataset_ref(project_id=project_id, dataset_name=dataset_name)

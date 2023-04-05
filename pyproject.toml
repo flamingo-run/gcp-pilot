@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gcp-pilot"
-version = "1.9.0"
+version = "1.10.0"
 description = "Google Cloud Platform Friendly Pilot"
 authors = ["Joao Daher <joao@daher.dev>"]
 repository = "https://github.com/flamingo-run/gcp-pilot"
@@ -38,7 +38,7 @@ google-cloud-secret-manager = { version = "*", optional = true}
 tasks = ["google-cloud-tasks", "google-cloud-scheduler"]
 build = ["google-cloud-build"]
 storage = ["google-cloud-storage"]
-bigquery = ["google-cloud-bigquery"]
+bigquery = ["google-cloud-bigquery", "google-cloud-storage"]
 speech = ["google-cloud-speech"]
 sheets = ["gspread"]
 pubsub = ["google-cloud-pubsub"]

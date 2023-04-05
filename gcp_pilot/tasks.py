@@ -95,11 +95,11 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             if exc.message != "Queue does not exist.":
                 raise
 
-            self._create_queue(queue_name=queue_name, project_id=project_id)
+            self.create_queue(queue_name=queue_name, project_id=project_id)
             response = self.client.create_task(parent=queue_path, task=task)
         return response
 
-    def _create_queue(
+    def create_queue(
         self,
         queue_name: str,
         project_id: str | None = None,
@@ -114,6 +114,14 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             parent=parent,
             queue=queue,
         )
+
+    def get_queue(
+        self,
+        queue_name: str,
+        project_id: str | None = None,
+    ) -> tasks_v2.Queue:
+        queue_path = self._queue_path(queue=queue_name, project_id=project_id)
+        return self.client.get_queue(name=queue_path)
 
 
 __all__ = ("CloudTasks",)

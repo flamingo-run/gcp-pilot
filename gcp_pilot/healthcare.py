@@ -230,6 +230,16 @@ class HealthcareFHIR(HealthcareBase):
         )
         return f"{store_path}/fhir/{resource_type}/{resource_id}"
 
+    def _operation_path(
+        self,
+        operation_id: str,
+        dataset_name: str,
+        project_id: str | None = None,
+        location: str | None = None,
+    ) -> str:
+        dataset_path = self._dataset_path(name=dataset_name, project_id=project_id, location=location)
+        return f"{dataset_path}/operations/{operation_id}"
+
     def list_stores(
         self,
         dataset_name: str,
@@ -516,13 +526,37 @@ class HealthcareFHIR(HealthcareBase):
         dataset_name: str,
         project_id: str | None = None,
         location: str | None = None,
-    ) -> ResourceType:
-        parent = self._store_path(name=store_name, dataset_name=dataset_name, project_id=project_id, location=location)
+        resource_names: list[str] | None = None,
+    ) -> dict[str, str]:
+        name = self._store_path(name=store_name, dataset_name=dataset_name, project_id=project_id, location=location)
         body = {"gcsDestination": {"uriPrefix": f"gs://{gcs_path}"}}
-        return self._execute(
+        if resource_names:
+            body["_type"] = ",".join(resource_names)
+        data = self._execute(
             method=self.client.projects().locations().datasets().fhirStores().export,
-            parent=parent,
+            name=name,
             body=body,
+        )
+
+        _, project_id, _, location, _ , dataset_name, _, operation_id = data["name"].split("/")
+        return {
+            "project_id": project_id,
+            "location": location,
+            "dataset_name": dataset_name,
+            "operation_id": operation_id,
+        }
+
+    def get_operation(
+        self,
+        operation_id: str,
+        dataset_name: str,
+        project_id: str | None = None,
+        location: str | None = None,
+    ) -> ResourceType:
+        name = self._operation_path(operation_id=operation_id, dataset_name=dataset_name, project_id=project_id, location=location)
+        return self._execute(
+            method=self.client.projects().locations().datasets().operations().get,
+            name=name,
         )
 
     def import_resources(

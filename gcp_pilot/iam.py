@@ -1,7 +1,7 @@
 # More Information: <https://cloud.google.com/iam/docs/reference/rest>
 import base64
 import json
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, Generator
 
 import requests
@@ -13,6 +13,9 @@ from gcp_pilot.base import AccountManagerMixin, DiscoveryMixin, GoogleCloudPilot
 
 AccountType = dict[str, Any]
 KeyType = dict[str, Any]
+
+
+IDP_JWT_AUDIENCE = "https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit"
 
 
 class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
@@ -226,6 +229,41 @@ class IAMCredentials(GoogleCloudPilotAPI):
                 audience=audience,
                 verify=verify,
             )
+        )
+
+    @classmethod
+    def decode_id_token(cls, token: str, issuer_email: str, verify: bool = True) -> dict[str, Any]:
+        return cls.decode_jwt(
+            token=token,
+            issuer_email=issuer_email,
+            audience=IDP_JWT_AUDIENCE,
+            verify=verify,
+        )
+
+    def generate_custom_token(
+        self,
+        uid: str,
+        expires_in_seconds: int,
+        tenant_id: str | None = None,
+        auth_email: str | None = None,
+        claims: dict | None = None,
+    ) -> str:
+        authenticator_email = auth_email or self.service_account_email
+        payload = {
+            "iat": datetime.now(tz=UTC).timestamp(),
+            "exp": (datetime.now(tz=UTC) + timedelta(seconds=expires_in_seconds)).timestamp(),
+            "aud": IDP_JWT_AUDIENCE,
+            "iss": authenticator_email,
+            "sub": authenticator_email,
+            "email": authenticator_email,
+            "uid": uid,
+            "tenant_id": tenant_id,
+            "claims": claims or {},
+        }
+
+        return self.encode_jwt(
+            payload=payload,
+            service_account_email=authenticator_email,
         )
 
     @classmethod

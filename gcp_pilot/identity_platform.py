@@ -301,9 +301,10 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         response = self._execute(method=self.client.accounts().resetPassword, body=data)
         return response
 
-    def delete_user(self, user_id: str, tenant_id: str | None = None):
+    def delete_user(self, user_id: str, project_id: str | None = None, tenant_id: str | None = None):
         data = {
             "localId": user_id,
+            "targetProjectId": project_id or self.project_id,
             "tenantId": tenant_id or self.tenant_id,
         }
         response = self._execute(method=self.client.accounts().delete, body=data)

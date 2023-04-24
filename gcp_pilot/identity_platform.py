@@ -231,6 +231,15 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         response = self._execute(method=self.client.accounts().signInWithPhoneNumber, body=data)
         return response
 
+    def sign_in_with_custom_token(self, token: str, tenant_id: str | None = None):
+        data = {
+            "token": token,
+            "returnSecureToken": True,
+            "tenantId": tenant_id or self.tenant_id,
+        }
+        response = self._execute(method=self.client.accounts().signInWithCustomToken, body=data)
+        return response
+
     def sign_in_with_email_link(self, email: str, code: str, tenant_id: str | None = None):
         data = {
             "email": email,

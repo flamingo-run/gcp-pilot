@@ -538,7 +538,7 @@ class HealthcareFHIR(HealthcareBase):
             body=body,
         )
 
-        _, project_id, _, location, _ , dataset_name, _, operation_id = data["name"].split("/")
+        _, project_id, _, location, _, dataset_name, _, operation_id = data["name"].split("/")
         return {
             "project_id": project_id,
             "location": location,
@@ -553,7 +553,9 @@ class HealthcareFHIR(HealthcareBase):
         project_id: str | None = None,
         location: str | None = None,
     ) -> ResourceType:
-        name = self._operation_path(operation_id=operation_id, dataset_name=dataset_name, project_id=project_id, location=location)
+        name = self._operation_path(
+            operation_id=operation_id, dataset_name=dataset_name, project_id=project_id, location=location
+        )
         return self._execute(
             method=self.client.projects().locations().datasets().operations().get,
             name=name,

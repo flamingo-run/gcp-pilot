@@ -21,6 +21,16 @@ class OOBCodeType(Enum):
     SIGNIN = "EMAIL_SIGNIN"
 
 
+class FirebaseProviderType(Enum):
+    GOOGLE = "google"
+    FACEBOOK = "facebook"
+    GITHUB = "github"
+    MICROSOFT = "microsoft"
+    APPLE = "apple"
+    PASSWORD = "password"  # TODO: check if this is correct
+    PASSWORDLESS = "emailLink"
+
+
 def parse_timestamp(timestamp: str | int | float) -> datetime | None:
     if not timestamp:
         return None

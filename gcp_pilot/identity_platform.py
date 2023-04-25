@@ -104,7 +104,10 @@ class FirebaseAuthToken:
         return self._data.get("tenant_id", None)
 
     @property
-    def oauth(self) -> FirebaseOAuth:
+    def oauth(self) -> FirebaseOAuth | None:
+        if "oauth_id_token" not in self._data:
+            return None
+
         return FirebaseOAuth(
             id_token=self._data["oauth_id_token"],
             access_token=self._data["oauth_access_token"],

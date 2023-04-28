@@ -123,5 +123,18 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
         queue_path = self._queue_path(queue=queue_name, project_id=project_id)
         return self.client.get_queue(name=queue_path)
 
+    def get_task(self, queue_name: str, task_name: str, project_id: str | None = None) -> tasks_v2.Task:
+        task_path = self.client.task_path(
+            project=project_id or self.project_id,
+            location=self.location,
+            queue=queue_name,
+            task=task_name,
+        )
+        request = tasks_v2.GetTaskRequest(
+            name=task_path,
+            response_view=tasks_v2.Task.View.FULL,
+        )
+        return self.client.get_task(request=request)
+
 
 __all__ = ("CloudTasks",)

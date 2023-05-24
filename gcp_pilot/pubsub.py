@@ -188,6 +188,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         max_backoff: int | None = 600,
         expiration_ttl: int | None = 31,
         enable_exactly_once_delivery: bool = False,
+        message_filter: str | None = None,
     ) -> Subscription:
         topic_path = self.client.topic_path(
             project=project_id or self.project_id,
@@ -234,6 +235,9 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             )
             extra_config["retry_policy"] = retry_policy
 
+        if message_filter:
+            extra_config["filter"] = message_filter
+
         subscription = Subscription(
             name=subscription_path,
             topic=topic_path,
@@ -269,7 +273,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 raise
             return self.get_subscription(subscription_id=subscription_id, project_id=project_id)
 
-    def update_subscription(
+    def patch_subscription(
         self,
         topic_id: str,
         subscription_id: str,
@@ -351,6 +355,42 @@ class CloudSubscriber(GoogleCloudPilotAPI):
 
             return self.client.update_subscription(request={"subscription": subscription, "update_mask": update_mask})
 
+    def update_subscription(
+        self,
+        topic_id: str,
+        subscription_id: str,
+        project_id: str | None = None,
+        push_to_url: str | None = None,
+        use_oidc_auth: bool = False,
+        dead_letter_topic_id: str | None = None,
+        dead_letter_subscription_id: str | None = None,
+        max_retries: int | None = None,
+        min_backoff: int | None = 10,
+        max_backoff: int | None = 600,
+        expiration_ttl: int | None = 31,
+        message_filter: str | None = None,
+    ) -> Subscription:
+        kwargs = {
+            "topic_id": topic_id,
+            "subscription_id": subscription_id,
+            "project_id": project_id,
+            "push_to_url": push_to_url,
+            "use_oidc_auth": use_oidc_auth,
+            "dead_letter_topic_id": dead_letter_topic_id,
+            "dead_letter_subscription_id": dead_letter_subscription_id,
+            "max_retries": max_retries,
+            "min_backoff": min_backoff,
+            "max_backoff": max_backoff,
+            "expiration_ttl": expiration_ttl,
+        }
+        if message_filter:
+            # Subscription filters cannot be updated, so we need to delete and recreate the subscription (if needed)
+            subscription = self.get_subscription(subscription_id=subscription_id, project_id=project_id)
+            if subscription.filter != message_filter:
+                self.delete_subscription(subscription_id=subscription_id, project_id=project_id)
+                return self.create_subscription(message_filter=message_filter, **kwargs)
+        self.patch_subscription(**kwargs)
+
     def create_or_update_subscription(
         self,
         topic_id: str,
@@ -366,9 +406,10 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         min_backoff: int | None = 10,
         max_backoff: int | None = 600,
         expiration_ttl: int | None = 31,
+        message_filter: str | None = None,
     ) -> Subscription:
         if not subscription_id:
-            raise ValidationError("subscritpion_id is mandatory to create or update a Subscription")
+            raise ValidationError("subscription_id is mandatory to create or update a Subscription")
         try:
             return self.create_subscription(
                 topic_id=topic_id,
@@ -385,6 +426,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 min_backoff=min_backoff,
                 max_backoff=max_backoff,
                 expiration_ttl=expiration_ttl,
+                message_filter=message_filter,
             )
         except AlreadyExists:
             return self.update_subscription(
@@ -399,6 +441,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
                 min_backoff=min_backoff,
                 max_backoff=max_backoff,
                 expiration_ttl=expiration_ttl,
+                message_filter=message_filter,
             )
 
     def subscribe(self, topic_id: str, subscription_id: str, callback: Callable, project_id: str | None = None):

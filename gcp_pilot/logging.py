@@ -1,5 +1,5 @@
 # More Information: <https://cloud.google.com/logging/docs/reference/libraries#client-libraries-install-python>
-from datetime import datetime
+from datetime import UTC, datetime
 from logging import INFO
 
 from google.cloud import logging
@@ -38,7 +38,7 @@ class CloudLogging(GoogleCloudPilotAPI):
         logger = self.client.logger(name=logger_name)
         logger.log_struct(
             message,
-            timestamp=timestamp or datetime.now(),
+            timestamp=timestamp or datetime.now(tz=UTC),
             labels=labels,
             resource=resource,
             severity=severity,

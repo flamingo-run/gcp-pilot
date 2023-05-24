@@ -1,8 +1,8 @@
 # More Information: https://developers.google.com/calendar/v3/reference
 import datetime
+from collections.abc import Generator
 from dataclasses import dataclass
 from enum import Enum
-from typing import Generator
 from uuid import uuid4
 
 import pytz
@@ -13,7 +13,7 @@ from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType
 class ResponseStatus(Enum):
     # Predefined options to attendee response status
     # Refs: <https://developers.google.com/calendar/api/v3/reference/events/update#attendees.responseStatus>
-    # pylint: disable=invalid-name
+
     needs_action = "needsAction"
     declined = "declined"
     tentative = "tentative"
@@ -37,7 +37,7 @@ class Attendee:
 class Color(Enum):
     # Predefined colors.
     # For more color, use the endpoint: <https://developers.google.com/calendar/v3/reference/colors>
-    # pylint: disable=invalid-name
+
     light_blue = ("1", "#a4bdfc")
     light_green = ("2", "#7ae7bf")
     light_purple = ("3", "#dbadff")
@@ -49,13 +49,12 @@ class Color(Enum):
     blue = ("9", "#5484ed")
     green = ("10", "#51b749")
     red = ("11", "#dc2127")
-    # pylint: enable=invalid-name
 
 
 class SendUpdates(Enum):
     # Predefined options to send updates on events.
     # Refs: <https://developers.google.com/calendar/api/v3/reference/events/update#sendUpdates>
-    # pylint: disable=invalid-name
+
     all = "all"
     external_only = "externalOnly"
     none = "none"
@@ -126,7 +125,10 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         if not calendar_id:
             return self.create_calendar(summary=summary, description=description, timezone=timezone)
         return self.update_calendar(
-            calendar_id=calendar_id, summary=summary, description=description, timezone=timezone
+            calendar_id=calendar_id,
+            summary=summary,
+            description=description,
+            timezone=timezone,
         )
 
     def create_calendar(self, summary: str, description: str = "", timezone: str | None = None) -> ResourceType:
@@ -141,7 +143,11 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
     def update_calendar(
-        self, calendar_id: str, summary: str | None = None, description: str | None = None, timezone: str | None = None
+        self,
+        calendar_id: str,
+        summary: str | None = None,
+        description: str | None = None,
+        timezone: str | None = None,
     ) -> ResourceType:
         data = {}
         if summary:

@@ -1,13 +1,16 @@
 # More Information: <https://googleapis.dev/python/dns/latest/index.html>
+import logging
 import time
+from collections.abc import Generator
 from enum import Enum
-from typing import Generator
 
 from google.api_core.exceptions import BadRequest, Conflict
 from google.cloud import dns
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import GoogleCloudPilotAPI
+
+logger = logging.getLogger("gcp-pilot")
 
 
 class RecordType(Enum):
@@ -25,10 +28,7 @@ class RecordType(Enum):
 
     @classmethod
     def build_dns_name(cls, name: str) -> str:
-        if name and not name.endswith("."):
-            dns_name = f"{name}."
-        else:
-            dns_name = name
+        dns_name = f"{name}." if name and not name.endswith(".") else name
         return dns_name
 
 
@@ -120,12 +120,12 @@ class CloudDNS(GoogleCloudPilotAPI):
 
         if wait:
             while changes.status != "done":
-                print("Waiting for changes to complete")
+                logger.info("Waiting for changes to complete")
                 time.sleep(60)
                 changes.reload()
         return record_set
 
-    def add_record(  # pylint: disable=inconsistent-return-statements
+    def add_record(
         self,
         zone_name: str,
         zone_dns: str,
@@ -150,7 +150,6 @@ class CloudDNS(GoogleCloudPilotAPI):
         except exceptions.AlreadyExists:
             if not exists_ok:
                 raise
-            # return  # TODO Fetch current record to return
 
     def delete_record(
         self,

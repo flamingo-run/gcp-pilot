@@ -1,6 +1,6 @@
 # More Information: https://cloud.google.com/service-usage/docs/reference/rest
+from collections.abc import Generator
 from enum import Enum
-from typing import Generator
 
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType
 

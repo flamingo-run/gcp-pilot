@@ -1,8 +1,9 @@
 # More Information: <https://cloud.google.com/iam/docs/reference/rest>
 import base64
 import json
+from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
-from typing import Any, Generator
+from typing import Any
 
 import requests
 from google.auth import jwt
@@ -78,8 +79,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             result_key="accounts",
             params=params,
         )
-        for item in pagination:
-            yield item
+        yield from pagination
 
     def get_policy(self, email: str, project_id: str | None = None) -> PolicyType:
         resource = self._service_account_path(email=email, project_id=project_id)
@@ -192,12 +192,11 @@ class IAMCredentials(GoogleCloudPilotAPI):
     def encode_jwt(self, payload: dict, service_account_email: str | None) -> str:
         max_expiration = 12 * 60 * 60
         if "iat" not in payload:
-            payload["iat"] = datetime.now().timestamp()
+            payload["iat"] = datetime.now(tz=UTC).timestamp()
         if "exp" not in payload:
-            payload["exp"] = datetime.now().timestamp() + max_expiration
-        else:
-            if payload["exp"] - datetime.now().timestamp() > max_expiration:
-                raise ValueError("JWT tokens cannot be valid for more than 12 hours")
+            payload["exp"] = datetime.now(tz=UTC).timestamp() + max_expiration
+        elif payload["exp"] - datetime.now(tz=UTC).timestamp() > max_expiration:
+            raise ValueError("JWT tokens cannot be valid for more than 12 hours")
 
         payload["iam"] = int(payload["iat"])
         payload["exp"] = int(payload["exp"])
@@ -228,7 +227,7 @@ class IAMCredentials(GoogleCloudPilotAPI):
                 certs=certs,
                 audience=audience,
                 verify=verify,
-            )
+            ),
         )
 
     @classmethod

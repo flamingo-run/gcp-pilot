@@ -1,6 +1,6 @@
 import json
 import unittest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from gcp_pilot.factories.identity_platform import FirebaseAuthTokenFactory
@@ -11,7 +11,7 @@ from tests import ClientTestMixin
 
 class TestParseTimestamp(unittest.TestCase):
     def test_parse_timestamp(self):
-        sometime = datetime(2022, 5, 17, 1, 2, 57, tzinfo=timezone.utc)
+        sometime = datetime(2022, 5, 17, 1, 2, 57, tzinfo=UTC)
         sometimestamp = int(sometime.timestamp())
         generated_time = parse_timestamp(sometimestamp)
         self.assertEqual(sometime, generated_time)
@@ -28,7 +28,11 @@ class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
             return token_data, FirebaseAuthToken(jwt_token="potato")
 
     def assert_expected_sample_token(
-        self, expected_data: dict, token: FirebaseAuthToken, is_tenant: bool, is_expired: bool = True
+        self,
+        expected_data: dict,
+        token: FirebaseAuthToken,
+        is_tenant: bool,
+        is_expired: bool = True,
     ):
         self.assertEqual(parse_timestamp(expected_data["exp"]), token.expiration_date)
         self.assertEqual(expected_data["event_type"], token.event_type)
@@ -46,7 +50,8 @@ class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
         self.assertEqual(expected_data["user_record"].get("email_verified"), token.user.verified)
         self.assertEqual(expected_data["user_record"].get("disabled"), token.user.disabled)
         self.assertEqual(
-            parse_timestamp(expected_data["user_record"]["metadata"]["creation_time"]), token.user.created_at
+            parse_timestamp(expected_data["user_record"]["metadata"]["creation_time"]),
+            token.user.created_at,
         )
         self.assertEqual(
             parse_timestamp(expected_data["user_record"]["metadata"]["last_sign_in_time"]),

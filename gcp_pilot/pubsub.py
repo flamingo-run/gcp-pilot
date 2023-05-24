@@ -2,13 +2,14 @@
 import base64
 import json
 import logging
+from collections.abc import Callable, Generator
 from dataclasses import dataclass
-from typing import Any, Callable, Generator
+from typing import Any
 
 from google.api_core.exceptions import AlreadyExists, NotFound
 from google.cloud import pubsub_v1
-from google.protobuf.duration_pb2 import Duration  # pylint: disable=no-name-in-module
-from google.protobuf.field_mask_pb2 import FieldMask  # pylint: disable=no-name-in-module
+from google.protobuf.duration_pb2 import Duration
+from google.protobuf.field_mask_pb2 import FieldMask
 from google.pubsub_v1 import DeadLetterPolicy, ExpirationPolicy, PushConfig, RetryPolicy, Subscription, Topic, types
 
 from gcp_pilot.base import GoogleCloudPilotAPI
@@ -259,7 +260,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             )
             if dead_letter_topic_id:
                 logger.info(
-                    f"Creating dead-letter topic {dead_letter_topic_id} & subscription {dead_letter_subscription_id}"
+                    f"Creating dead-letter topic {dead_letter_topic_id} & subscription {dead_letter_subscription_id}",
                 )
                 self.create_or_update_subscription(
                     topic_id=dead_letter_topic_id,
@@ -346,7 +347,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
             return self.client.update_subscription(request={"subscription": subscription, "update_mask": update_mask})
         except NotFound:
             logger.info(
-                f"Creating dead-letter topic {dead_letter_topic_id} & subscription {dead_letter_subscription_id}"
+                f"Creating dead-letter topic {dead_letter_topic_id} & subscription {dead_letter_subscription_id}",
             )
             self.create_or_update_subscription(
                 topic_id=dead_letter_topic_id,

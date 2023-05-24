@@ -1,6 +1,7 @@
 # More Information: https://cloud.google.com/cloud-build/docs/api
+from collections.abc import Generator
 from dataclasses import dataclass, field
-from typing import Any, Generator
+from typing import Any
 from urllib.parse import urlparse
 
 from google.api_core.exceptions import AlreadyExists
@@ -30,7 +31,7 @@ class _SubstitutionVariable:
     def __str__(self) -> str:
         # When used in a template, $_NAME should work, but it requires to be isolated by blank spaces
         # Thus, we use ${_NAME} by default, because it allows merging with other text.
-        return "${%s}" % self.full_key  # pylint: disable=consider-using-f-string
+        return "${%s}" % self.full_key
 
     @property
     def _escape(self):
@@ -38,7 +39,7 @@ class _SubstitutionVariable:
         return f"^{self.escape_delimiter}^" if self.escape_delimiter else ""
 
     def as_env_var(self, key: str | None = None):
-        return f"{self._escape}{key or self.key}={str(self)}"
+        return f"{self._escape}{key or self.key}={self!s}"
 
 
 @dataclass
@@ -318,8 +319,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             filter=" AND ".join(filters),
             project_id=project_id or self.project_id,
         )
-        for build in all_builds:
-            yield build
+        yield from all_builds
 
     def subscribe(
         self,
@@ -331,7 +331,7 @@ class CloudBuild(GoogleCloudPilotAPI):
         # https://cloud.google.com/cloud-build/docs/subscribe-build-notifications
         try:
             # try to import here to avoid making pubsub a mandatory dependency of CloudBuild
-            from gcp_pilot.pubsub import CloudSubscriber  # pylint: disable=import-outside-toplevel
+            from gcp_pilot.pubsub import CloudSubscriber
         except ImportError as exc:
             raise ImportError("Add `pubsub` extras dependency in order to use CloudBuild notifications") from exc
         subscriber = CloudSubscriber()

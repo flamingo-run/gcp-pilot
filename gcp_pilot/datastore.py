@@ -6,10 +6,11 @@ import itertools
 import json
 import os
 from collections import defaultdict
+from collections.abc import Callable, Generator, Iterable
 from dataclasses import dataclass
 from datetime import date, datetime
 from functools import cached_property
-from typing import Any, Callable, ClassVar, Generator, Iterable, Type
+from typing import Any, ClassVar
 
 from google.cloud import datastore
 from pydantic import BaseModel
@@ -18,7 +19,7 @@ from gcp_pilot import exceptions
 
 DEFAULT_NAMESPACE = os.environ.get("GCP_DATASTORE_NAMESPACE", default=None)
 DEFAULT_PK_FIELD_NAME = "id"
-DEFAULT_PK_FIELD_TYPE = int  # pylint: disable=invalid-name
+DEFAULT_PK_FIELD_TYPE = int
 MAX_ITEMS_PER_OPERATIONS = 500  # Datastore cannot write more than 500 items per call
 
 
@@ -30,13 +31,13 @@ def _chunks(lst, n):
 
 @dataclass
 class DoesNotExist(Exception):
-    cls: Type[EmbeddedDocument]
+    cls: type[EmbeddedDocument]
     filters: dict
 
 
 @dataclass
 class MultipleObjectsFound(Exception):
-    cls: Type[EmbeddedDocument]
+    cls: type[EmbeddedDocument]
     filters: dict
 
 
@@ -59,7 +60,7 @@ class Manager:
         "in": "in",
         "startswith": _starts_with_operator,
     }
-    doc_klass: Type[EmbeddedDocument]
+    doc_klass: type[EmbeddedDocument]
 
     @cached_property
     def client(self) -> datastore.Client:
@@ -103,8 +104,7 @@ class Manager:
             query_iter = query.fetch(start_cursor=cursor, limit=page_size)
 
             page = next(query_iter.pages, [])
-            for item in page:
-                yield item
+            yield from page
             next_cursor = query_iter.next_page_token
             empty = not bool(cursor) or cursor == next_cursor
             cursor = next_cursor
@@ -223,7 +223,7 @@ class Manager:
 
         if len(field_parts) > 1 and field_parts[0] not in self.fields:
             raise exceptions.ValidationError(
-                f"{field_parts[0]} is not a valid field. Excepted one of {' | '.join(self.fields)}"
+                f"{field_parts[0]} is not a valid field. Excepted one of {' | '.join(self.fields)}",
             )
 
         field_name = ".".join(field_parts)
@@ -275,7 +275,7 @@ class EmbeddedDocument(BaseModel, abc.ABC):
             if inspect.isclass(field_info.type_) and issubclass(field_info.type_, EmbeddedDocument):
                 # recursively generate entities
                 field_value = getattr(self, field_name)
-                if isinstance(field_value, (list, tuple)):
+                if isinstance(field_value, list | tuple):
                     value = [item.to_entity() for item in field_value]
                 else:
                     value = field_value.to_entity() if field_value else None

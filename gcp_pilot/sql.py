@@ -1,7 +1,9 @@
 # More Information: https://cloud.google.com/sql/docs/mysql/apis#rest-api
 import json
+import logging
 import time
-from typing import Any, Generator
+from collections.abc import Generator
+from typing import Any
 
 from googleapiclient.errors import HttpError
 
@@ -9,6 +11,9 @@ from gcp_pilot import exceptions
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI
 
 InstanceType = DatabaseType = UserType = dict[str, Any]
+
+
+logger = logging.getLogger("gcp-pilot")
 
 
 class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
@@ -29,8 +34,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             result_key="items",
             params=params,
         )
-        for item in instances:
-            yield item
+        yield from instances
 
     def get_instance(self, name: str, project_id: str | None = None) -> InstanceType:
         return self._execute(
@@ -39,7 +43,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             project=project_id or self.project_id,
         )
 
-    def create_instance(  # pylint: disable=invalid-name
+    def create_instance(
         self,
         name: str,
         version: str,
@@ -80,11 +84,11 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             return sql_instance
 
         while current_state != "RUNNABLE":
-            print(f"Instance {name} is still {current_state}. Waiting until RUNNABLE.")
+            logger.info(f"Instance {name} is still {current_state}. Waiting until RUNNABLE.")
             time.sleep(1)  # TODO: improve this: exp backoff
             sql_instance = self.get_instance(name=name, project_id=project_id)
             current_state = sql_instance["state"]
-        print(f"Instance {name} is {current_state}!")
+        logger.info(f"Instance {name} is {current_state}!")
         return sql_instance
 
     def get_database(self, instance: str, database: str, project_id: str | None = None) -> DatabaseType:
@@ -135,8 +139,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             method=self.client.users().list,
             params=params,
         )
-        for item in users:
-            yield item
+        yield from users
 
     def create_user(self, name: str, password: str, instance: str, project_id: str | None = None) -> UserType:
         body = dict(

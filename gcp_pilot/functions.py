@@ -1,5 +1,6 @@
 # More Information: <https://cloud.google.com/functions/docs/reference/rest>
-from typing import Any, Generator
+from collections.abc import Generator
+from typing import Any
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI, PolicyType
@@ -80,7 +81,7 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
         else:
             repo_name = name
 
-        REPO_SOURCE_URL = "https://source.developers.google.com"  # pylint: disable=invalid-name
+        REPO_SOURCE_URL = "https://source.developers.google.com"
         url = f"{REPO_SOURCE_URL}/projects/{project_id}/repos/{repo_name}/{ref}{path}"
         repo = dict(url=url)
 

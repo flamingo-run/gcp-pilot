@@ -1,6 +1,6 @@
 import unittest
 
-from gcp_pilot.resource import ResourceManager  # pylint: disable=unused-import
+from gcp_pilot.resource import ResourceManager
 from tests import ClientTestMixin
 
 

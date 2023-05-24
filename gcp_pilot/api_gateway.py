@@ -1,8 +1,8 @@
 # More Information: https://cloud.google.com/api-gateway/docs/reference/rest
 import base64
 import time
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator
 
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType
 from gcp_pilot.service_usage import ServiceUsage

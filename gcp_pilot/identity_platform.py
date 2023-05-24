@@ -1,10 +1,10 @@
 # Reference <https://cloud.google.com/identity-platform/docs/apis>
 import json
 import sys
+from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Iterator
 from urllib.parse import parse_qs, urlparse
 
 from google.auth.transport import requests
@@ -36,7 +36,7 @@ def parse_timestamp(timestamp: str | int | float) -> datetime | None:
         return None
     if len(str(timestamp)) > 10:
         timestamp = float(timestamp) / 1000
-    return datetime.fromtimestamp(float(timestamp), tz=timezone.utc)
+    return datetime.fromtimestamp(float(timestamp), tz=UTC)
 
 
 @dataclass
@@ -49,7 +49,7 @@ class JWTInfo:
 
     @property
     def is_expired(self) -> bool:
-        return datetime.utcnow().timestamp() >= self.exp.timestamp()
+        return datetime.now(tz=UTC).timestamp() >= self.exp.timestamp()
 
 
 @dataclass
@@ -273,7 +273,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def generate_email_code(
         self,
-        type: OOBCodeType,  # pylint: disable=redefined-builtin
+        type: OOBCodeType,
         email: str,
         ip_address: str | None = None,
         project_id: str | None = None,

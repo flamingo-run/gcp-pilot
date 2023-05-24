@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 from google.cloud import bigquery
@@ -48,7 +49,7 @@ class BigQuery(GoogleCloudPilotAPI):
         if destination_table_name or destination_dataset_name:
             if not destination_table_name and destination_dataset_name:
                 raise exceptions.ValidationError(
-                    "Both destination_dataset_name and destination_table_name must be provided."
+                    "Both destination_dataset_name and destination_table_name must be provided.",
                 )
             destination_project = destination_project or self.project_id
             destination_dataset = destination_dataset_name
@@ -74,7 +75,7 @@ class BigQuery(GoogleCloudPilotAPI):
         )
         errors = self.client.insert_rows(table=table, rows=rows)
         if errors:
-            raise Exception(f"Bigquery insert error: {errors}")  # pylint: disable=broad-exception-raised
+            raise ValueError(f"Bigquery insert error: {errors}")
 
     def get_table(self, table_name: str, project_id: str | None = None, dataset_name: str | None = None) -> Table:
         dataset_ref = self._dataset_ref(project_id=project_id, dataset_name=dataset_name)
@@ -135,7 +136,7 @@ class BigQuery(GoogleCloudPilotAPI):
                     job_config=job_config,
                 )
             else:
-                with open(filename, "rb") as file:
+                with Path(filename).open("rb") as file:
                     load_job = self.client.load_table_from_file(
                         file_obj=file,
                         destination=target_ref,
@@ -216,7 +217,7 @@ class BigQuery(GoogleCloudPilotAPI):
 class _BigQueryParam:
     @classmethod
     def _get_type(cls, variable: Any) -> str:
-        TYPES = {  # pylint: disable=invalid-name
+        TYPES = {
             "int": "INT64",
             "str": "STRING",
             "datetime": "DATETIME",
@@ -234,7 +235,7 @@ class _BigQueryParam:
 
     @classmethod
     def _get_value(cls, variable: Any) -> Any:
-        TYPES = {  # pylint: disable=invalid-name
+        TYPES = {
             "Decimal": float,
         }
         python_type = type(variable).__name__

@@ -1,7 +1,7 @@
 # More Information: https://cloud.google.com/api-keys/docs/reference/rest
+from collections.abc import Generator
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Generator
+from datetime import UTC, datetime
 
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI
 from gcp_pilot.exceptions import NotAllowed
@@ -34,11 +34,11 @@ class Key:
 
     @property
     def created_at(self) -> datetime:
-        return datetime.strptime(self.raw["createTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        return datetime.strptime(self.raw["createTime"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=UTC)
 
     @property
     def updated_at(self) -> datetime:
-        return datetime.strptime(self.raw["updateTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        return datetime.strptime(self.raw["updateTime"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=UTC)
 
     @property
     def value(self) -> str:
@@ -74,9 +74,9 @@ class APIKey(DiscoveryMixin, GoogleCloudPilotAPI):
                 method=self.client.keys().lookupKey,
                 keyString=key,
             )
-            return True
         except NotAllowed:
             return False
+        return True
 
     def get(self, key_id: str, project_id: str | None = None) -> Key:
         data = self._execute(

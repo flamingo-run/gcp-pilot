@@ -1,7 +1,7 @@
 # More Information: https://googleapis.dev/python/storage/latest/index.html
 import io
-import os
-from typing import Generator
+from collections.abc import Generator
+from pathlib import Path
 
 import requests
 from google.cloud import storage
@@ -55,7 +55,7 @@ class CloudStorage(GoogleCloudPilotAPI):
             if source_file.startswith("http"):
                 file_obj = self._download(url=source_file)
                 blob.upload_from_file(file_obj, content_type=content_type)
-            elif os.path.exists(source_file):
+            elif Path(source_file).exists():
                 blob.upload_from_filename(source_file, content_type=content_type)
             else:
                 content = io.StringIO(source_file)
@@ -118,8 +118,7 @@ class CloudStorage(GoogleCloudPilotAPI):
             bucket_name,
             prefix=prefix,
         )
-        for blob in blobs:
-            yield blob
+        yield from blobs
 
     def get_file(self, uri: str) -> Blob:
         if not uri.startswith("gs://"):

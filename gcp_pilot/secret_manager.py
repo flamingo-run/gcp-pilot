@@ -25,7 +25,7 @@ class SecretManager(GoogleCloudPilotAPI):
                 "parent": parent,
                 "secret_id": key,
                 "secret": {"replication": {"automatic": {}}},
-            }
+            },
         )
 
     def _create_version(self, key: str, value: str, project_id: str | None = None):
@@ -43,7 +43,7 @@ class SecretManager(GoogleCloudPilotAPI):
         secrets = self.client.list_secrets(
             request={
                 "parent": parent,
-            }
+            },
         )
         for secret in secrets:
             name = secret.name.rsplit("secrets/", 1)[-1]
@@ -74,7 +74,7 @@ class SecretManager(GoogleCloudPilotAPI):
 
     def get_secret(self, key: str, version: int | None = None, project_id: str | None = None) -> str:
         response = self.client.access_secret_version(
-            request={"name": self._secret_version_path(key=key, version=version, project_id=project_id)}
+            request={"name": self._secret_version_path(key=key, version=version, project_id=project_id)},
         )
         return response.payload.data.decode()
 

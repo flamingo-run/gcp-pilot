@@ -1,6 +1,6 @@
 # Reference: https://googleapis.dev/python/cloudtasks/latest/tasks_v2/cloud_tasks.html
 import uuid
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from google.api_core.exceptions import FailedPrecondition
 from google.cloud import tasks_v2
@@ -52,7 +52,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             queue=queue_name,
         )
         if unique and task_name:
-            task_name = f"{task_name}-{str(uuid.uuid4())}"
+            task_name = f"{task_name}-{uuid.uuid4()!s}"
 
         task_path = (
             self.client.task_path(
@@ -81,7 +81,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
         )
 
         if delay_in_seconds:
-            target_date = datetime.utcnow() + timedelta(seconds=delay_in_seconds)
+            target_date = datetime.now(tz=UTC) + timedelta(seconds=delay_in_seconds)
             timestamp = timestamp_pb2.Timestamp()
             timestamp.FromDatetime(target_date)
 

@@ -1,6 +1,6 @@
 import json
 import random
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import factory
 from faker import Faker
@@ -24,14 +24,14 @@ class FirebaseUserFactory(factory.Factory):
                 "photo_url": obj.photo_url,
                 "email": obj.email,
                 "uid": obj.uid,
-            }
-        ]
+            },
+        ],
     )
     metadata = factory.LazyAttribute(
         lambda obj: {
             "last_sign_in_time": Faker().unix_time(),
             "creation_time": Faker().unix_time(),
-        }
+        },
     )
     tenant_id = factory.Faker("word")
 
@@ -44,8 +44,9 @@ class FirebaseAuthTokenFactory(factory.Factory):
     aud = factory.Faker("url")
     iat = factory.LazyFunction(
         lambda: Faker().unix_time(
-            start_datetime=datetime.utcnow(), end_datetime=datetime.utcnow() + timedelta(seconds=3600 * 24)
-        )
+            start_datetime=datetime.now(tz=UTC),
+            end_datetime=datetime.now(tz=UTC) + timedelta(seconds=3600 * 24),
+        ),
     )
     exp = factory.LazyAttribute(lambda obj: obj.iat + 3600)
     event_id = factory.Faker("ean")
@@ -64,8 +65,8 @@ class FirebaseAuthTokenFactory(factory.Factory):
                 "hd": obj.user_record["email"].split("@")[-1],
                 "email": obj.user_record["email"],
                 "picture": obj.user_record["photo_url"],
-            }
-        )
+            },
+        ),
     )
     oauth_id_token = factory.Faker("ean")
     oauth_access_token = factory.Faker("ean")

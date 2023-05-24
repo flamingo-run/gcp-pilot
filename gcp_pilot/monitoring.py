@@ -1,5 +1,5 @@
 # More Information <https://cloud.google.com/monitoring/api/ref_v3/rest>
-from typing import Generator
+from collections.abc import Generator
 
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType
 

@@ -31,8 +31,7 @@ class SourceRepository(DiscoveryMixin, GoogleCloudPilotAPI):
             result_key="repos",
             params=params,
         )
-        for item in items:
-            yield item
+        yield from items
 
     def get_repo(self, repo_name: str, project_id: str | None = None) -> RepoType:
         return self._execute(

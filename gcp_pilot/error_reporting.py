@@ -14,7 +14,12 @@ class CloudErrorReporting(GoogleCloudPilotAPI):
     def report(self, message, http_context=None, user=None) -> None:
         self.client.report(message=message, http_context=http_context, user=user)
 
-    def report_with_request(self, request: "WSGIRequest", status_code: int, message: str | None = None) -> None:
+    def report_with_request(
+        self,
+        request: "WSGIRequest",  # noqa: F821
+        status_code: int,
+        message: str | None = None,
+    ) -> None:
         user = str(request.user) if request.user.is_authenticated else None
         http_context = self._wsgi_to_http_context(request=request, status_code=status_code)
 
@@ -30,7 +35,7 @@ class CloudErrorReporting(GoogleCloudPilotAPI):
                 user=user,
             )
 
-    def _wsgi_to_http_context(self, request: "WSGIRequest", status_code: int) -> HTTPContext:
+    def _wsgi_to_http_context(self, request: "WSGIRequest", status_code: int) -> HTTPContext:  # noqa: F821
         return HTTPContext(
             url=request.get_raw_uri(),
             method=request.method,

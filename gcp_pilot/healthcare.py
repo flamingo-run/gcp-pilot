@@ -3,8 +3,9 @@ import abc
 import json
 import logging
 import math
+from collections.abc import Callable, Generator
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Generator, Type
+from typing import Any
 from urllib.parse import parse_qsl, urlsplit
 
 from fhir.resources.domainresource import DomainResource
@@ -119,7 +120,7 @@ def as_json(resource: DomainResource) -> dict[str, Any]:
 class FHIRResultSet:
     method: Callable
     url: str
-    resource_class: Type[DomainResource]
+    resource_class: type[DomainResource]
     query: dict[str, Any] | None = None
     order_by: str | None = None
     limit: int | None = None
@@ -271,7 +272,11 @@ class HealthcareFHIR(HealthcareBase):
         )
 
     def delete_store(
-        self, name: str, dataset_name: str, project_id: str | None = None, location: str | None = None
+        self,
+        name: str,
+        dataset_name: str,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> ResourceType:
         name = self._store_path(name=name, dataset_name=dataset_name, project_id=project_id, location=location)
 
@@ -284,7 +289,7 @@ class HealthcareFHIR(HealthcareBase):
         self,
         store_name: str,
         dataset_name: str,
-        resource_class: Type[DomainResource],
+        resource_class: type[DomainResource],
         project_id: str | None = None,
         location: str | None = None,
         query: dict[str, Any] | None = None,
@@ -357,7 +362,7 @@ class HealthcareFHIR(HealthcareBase):
 
     def get_resource(
         self,
-        resource_class: Type[DomainResource],
+        resource_class: type[DomainResource],
         resource_id: str,
         store_name: str,
         dataset_name: str,
@@ -382,7 +387,7 @@ class HealthcareFHIR(HealthcareBase):
 
     def delete_resource(
         self,
-        resource_class: Type[DomainResource],
+        resource_class: type[DomainResource],
         resource_id: str,
         store_name: str,
         dataset_name: str,
@@ -448,8 +453,8 @@ class HealthcareFHIR(HealthcareBase):
 
     def patch_update(
         self,
-        resource_class: Type[DomainResource],
-        data: Dict,
+        resource_class: type[DomainResource],
+        data: dict,
         resource_id: str,
         store_name: str,
         dataset_name: str,
@@ -513,8 +518,8 @@ class HealthcareFHIR(HealthcareBase):
         except exceptions.OperationError as exc:
             if exc.errors[0]["code"] == "conflict":
                 raise exceptions.FailedPrecondition(
-                    f"{resource.get_resource_type()} with query {query} matches multiple resources at {parent}"
-                )
+                    f"{resource.get_resource_type()} with query {query} matches multiple resources at {parent}",
+                ) from exc
             raise
 
         return resource.__class__(**data)
@@ -554,7 +559,10 @@ class HealthcareFHIR(HealthcareBase):
         location: str | None = None,
     ) -> ResourceType:
         name = self._operation_path(
-            operation_id=operation_id, dataset_name=dataset_name, project_id=project_id, location=location
+            operation_id=operation_id,
+            dataset_name=dataset_name,
+            project_id=project_id,
+            location=location,
         )
         return self._execute(
             method=self.client.projects().locations().datasets().operations().get,
@@ -632,4 +640,4 @@ class HealthcareFHIR(HealthcareBase):
             )
         except exceptions.OperationError as exc:
             errors = [{"fields": error["expression"], "detail": error["diagnostics"]} for error in exc.errors]
-            raise exceptions.ValidationError(errors)
+            raise exceptions.ValidationError(errors) from exc

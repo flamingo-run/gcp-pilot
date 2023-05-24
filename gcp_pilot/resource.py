@@ -1,9 +1,12 @@
 # More Information: <https://cloud.google.com/resource-manager/reference/rest>
-
-from typing import Generator
+import logging
+from collections.abc import Generator
+from pathlib import Path
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI, PolicyType, ResourceType
+
+logger = logging.getLogger("gcp-pilot")
 
 
 class ResourceManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilotAPI):
@@ -305,13 +308,10 @@ class ServiceAgent:
     def _load_from_tsv(cls, filepath: str):
         # Load this <https://cloud.google.com/iam/docs/service-agents> table
         data = {}
-        with open(filepath, "r", encoding="utf-8") as file:
+        with Path(filepath).open(encoding="utf-8") as file:
             for line in file.readlines()[1:]:
                 name, domain, role = line.strip().split("\t")
-                if "roles/" not in role:
-                    role_name = None
-                else:
-                    role_name = role.replace("(", "").replace(")", "")
+                role_name = None if "roles/" not in role else role.replace("(", "").replace(")", "")
                 data[name] = (domain, role_name)
         return data
 
@@ -346,16 +346,16 @@ class ServiceAgent:
 
     @classmethod
     def restore(cls, services: list[str], project_id: str) -> None:
-        rm = ResourceManager()  # pylint: disable=invalid-name
+        rm = ResourceManager()
         for service_name in services:
             email = ServiceAgent.get_email(service_name=service_name, project_id=project_id)
             role = ServiceAgent.get_role(service_name=service_name)
             if role:
                 try:
                     rm.add_member(email=email, role=role)
-                    print(f"[O] {service_name}")
+                    logger.info(f"[O] {service_name}")
                 except exceptions.ValidationError:
-                    print(f"[X] {service_name}")
+                    logger.warning(f"[X] {service_name}")
 
     @classmethod
     def get_compute_service_account(cls, project_id: str) -> str:

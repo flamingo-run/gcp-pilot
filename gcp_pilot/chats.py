@@ -1,6 +1,6 @@
 import json
+from collections.abc import Generator
 from dataclasses import dataclass, field
-from typing import Generator
 
 import requests
 
@@ -50,7 +50,7 @@ class ButtonWidget(Widget):
         self["onClick"] = {
             "openLink": {
                 "url": url,
-            }
+            },
         }
 
 
@@ -257,20 +257,14 @@ class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def _room_path(self, room_id: str) -> str:
         prefix = "spaces/"
-        if not room_id.startswith(prefix):
-            room_path = f"{prefix}{room_id}"
-        else:
-            room_path = room_id
+        room_path = f"{prefix}{room_id}" if not room_id.startswith(prefix) else room_id
         return room_path
 
     def _member_path(self, room_id: str, member_id: str) -> str:
         room_path = self._room_path(room_id=room_id)
 
         prefix = "members/"
-        if not member_id.startswith(prefix):
-            member_path = f"{prefix}{member_id}"
-        else:
-            member_path = member_id
+        member_path = f"{prefix}{member_id}" if not member_id.startswith(prefix) else member_id
 
         return f"{room_path}/{member_path}"
 

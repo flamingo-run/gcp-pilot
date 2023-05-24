@@ -1,6 +1,6 @@
 import unittest
 
-from gcp_pilot.chats import ChatsBot, ChatsHook  # pylint: disable=unused-import
+from gcp_pilot.chats import ChatsBot
 from tests import ClientTestMixin
 
 

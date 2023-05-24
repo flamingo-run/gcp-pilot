@@ -1,5 +1,5 @@
 # More Information <https://cloud.google.com/run/docs/reference/rest>
-from typing import Generator
+from collections.abc import Generator
 
 from google.api_core.client_options import ClientOptions
 from googleapiclient.discovery import Resource
@@ -37,7 +37,10 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
         )
 
     def get_service(
-        self, service_name: str, project_id: str | None = None, location: str | None = None
+        self,
+        service_name: str,
+        project_id: str | None = None,
+        location: str | None = None,
     ) -> ResourceType:
         name = self._service_path(service_name=service_name, project_id=project_id)
         client = self._get_localized_client(project_id=project_id, location=location)
@@ -63,7 +66,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
         client = self._get_localized_client(project_id=project_id, location=location)
 
         service_account = service_account or ServiceAgent.get_compute_service_account(
-            project_id=project_id or self.project_id
+            project_id=project_id or self.project_id,
         )
         labels = {
             "managed-by": "gcp-cloud-build-deploy-cloud-run",
@@ -93,9 +96,9 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
                                 "image": image,
                                 "resources": {"limits": {"cpu": "1000m", "memory": f"{ram}Mi"}},
                                 "ports": [{"containerPort": port}],
-                            }
+                            },
                         ],
-                    }
+                    },
                 },
             },
         }
@@ -204,10 +207,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
     def _get_localized_client(self, project_id: str | None = None, location: str | None = None) -> Resource:
         # Reminder: List methods do not require a localized client
         if not location:
-            if not project_id:
-                location = self.location
-            else:
-                location = self._get_project_default_location(project_id=project_id)
+            location = self.location if not project_id else self._get_project_default_location(project_id=project_id)
         return self._build_client(location=location)
 
     def _build_client(self, location: str | None = None, **kwargs) -> Resource:
@@ -218,7 +218,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
                 version="v1",
                 cache_discovery=False,
                 client_options=options,
-            )
+            ),
         )
         return super()._build_client(**kwargs)
 

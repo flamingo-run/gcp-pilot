@@ -1,5 +1,6 @@
 # More Information: https://developers.google.com/admin-sdk/directory/reference/rest
-from typing import Any, Generator
+from collections.abc import Generator
+from typing import Any
 
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI
 

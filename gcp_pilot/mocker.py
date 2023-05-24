@@ -5,7 +5,7 @@ from unittest.mock import patch
 from google.oauth2.service_account import Credentials
 
 
-class patch_auth:  # pylint: disable=invalid-name
+class patch_auth:
     def __init__(self, project_id: str = "potato-dev", location: str = "moon-dark1", email: str = "chuck@norris.com"):
         # Realistic: actual class to be accepted by clients during validation
         # But fake: with as few attributes as possible, any API call using the credential should fail
@@ -28,7 +28,7 @@ class patch_auth:  # pylint: disable=invalid-name
         return self.stack.__enter__()
 
     def start(self):
-        return self.__enter__()  # pylint: disable=unnecessary-dunder-call
+        return self.__enter__()
 
     def __exit__(self, typ, val, traceback):
         return self.stack.__exit__(typ, val, traceback)

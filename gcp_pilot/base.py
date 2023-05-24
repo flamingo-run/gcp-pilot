@@ -2,7 +2,8 @@ import abc
 import json
 import logging
 import os
-from typing import Any, Callable, Generator
+from collections.abc import Callable, Generator
+from typing import Any
 
 import google.auth.transport._http_client
 from google import auth
@@ -11,7 +12,7 @@ from google.auth.credentials import Credentials
 from google.auth.impersonated_credentials import Credentials as ImpersonatedCredentials
 from google.auth.transport import requests
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
-from google.protobuf.duration_pb2 import Duration  # pylint: disable=no-name-in-module
+from google.protobuf.duration_pb2 import Duration
 from googleapiclient.discovery import Resource, build
 from googleapiclient.errors import HttpError
 from requests import HTTPError, Response
@@ -76,13 +77,15 @@ class GoogleCloudPilotAPI(abc.ABC):
         if self._service_account_email == "default":
             self.credentials.refresh(request=google.auth.transport._http_client.Request())
             self._service_account_email = getattr(
-                self.credentials, "service_account_email", self._service_account_email
+                self.credentials,
+                "service_account_email",
+                self._service_account_email,
             )
         elif self._service_account_email is None:  # SDK local authentication
             self._service_account_email = os.environ.get("GCP_SERVICE_ACCOUNT", None)
             if not self._service_account_email:
                 logger.warning(
-                    "Using local SDK authentication. Set GCP_SERVICE_ACCOUNT or some features might not work."
+                    "Using local SDK authentication. Set GCP_SERVICE_ACCOUNT or some features might not work.",
                 )
         return self._service_account_email
 
@@ -200,9 +203,9 @@ class GoogleCloudPilotAPI(abc.ABC):
         return {"oidc_token": oidc_token}
 
     def set_up_permissions(self, email: str, project_id: str | None = None) -> None:
-        from gcp_pilot.resource import ResourceManager, ServiceAgent  # pylint: disable=import-outside-toplevel
+        from gcp_pilot.resource import ResourceManager, ServiceAgent
 
-        rm = ResourceManager()  # pylint: disable=invalid-name
+        rm = ResourceManager()
         for role in self._iam_roles:
             rm.add_member(
                 email=email,
@@ -222,7 +225,7 @@ class GoogleCloudPilotAPI(abc.ABC):
             )
 
     def _get_project_number(self, project_id: str) -> int:
-        from gcp_pilot.resource import ResourceManager  # pylint: disable=import-outside-toplevel
+        from gcp_pilot.resource import ResourceManager
 
         project = ResourceManager().get_project(project_id=project_id)
         return project["projectNumber"]
@@ -242,13 +245,13 @@ class GoogleCloudPilotAPI(abc.ABC):
         if location:
             return location
 
-        from gcp_pilot.app_engine import AppEngine  # pylint: disable=import-outside-toplevel
+        from gcp_pilot.app_engine import AppEngine
 
         try:
             app_engine = AppEngine.build_from(client=self, project_id=project_id)
-            return app_engine.location
         except exceptions.NotFound:
             return None
+        return app_engine.location
 
     def _project_path(self, project_id: str | None = None) -> str:
         return f"projects/{project_id or self.project_id}"
@@ -332,7 +335,7 @@ class AppEngineBasedService:
         if explicit_location and explicit_location != project_location:
             logger.warning(
                 f"Location {explicit_location} cannot be set in {self.__class__.__name__}. "
-                f"It uses App Engine's default location for your project: {project_location}"
+                f"It uses App Engine's default location for your project: {project_location}",
             )
         return project_location
 
@@ -386,7 +389,7 @@ def friendly_http_error(func):
 
             if exception_klass:
                 raise exception_klass(details) from exc
-            raise exc
+            raise
 
     return inner_function
 
@@ -412,8 +415,7 @@ class DiscoveryMixin:
             method=method,
             **params,
         )
-        for item in results.get(result_key, []):
-            yield item
+        yield from results.get(result_key, [])
 
     def _paginate(
         self,
@@ -445,8 +447,7 @@ class DiscoveryMixin:
                 method=method,
                 **call_kwargs,
             )
-            for item in results.get(result_key, []):
-                yield item
+            yield from results.get(result_key, [])
 
             page_token = results.get(next_pagination_key)
             if not page_token:

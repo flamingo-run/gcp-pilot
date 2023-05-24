@@ -18,14 +18,13 @@ check:
 
 lint:
 	@echo "Checking code style ..."
-	@poetry run pylint gcp_pilot
-	@poetry run black --check .
-	@poetry run isort --check .
+	poetry run black --check .
+	poetry run ruff check .
 
 style:
 	@echo "Applying code style ..."
 	poetry run black .
-	poetry run isort .
+	poetry run ruff . --fix
 
 unit:
 	@echo "Running unit tests ..."

@@ -448,14 +448,19 @@ class IdentityPlatformAdmin(DiscoveryMixin, GoogleCloudPilotAPI):
 
     def add_authorized_domains(self, domains: list[str], project_id: str | None = None) -> dict:
         config = self.get_config(project_id=project_id)
-        all_domains = config.get("authorizedDomains", [])
-        all_domains.extend(domains)
-        return self.set_authorized_domains(domains=all_domains, project_id=project_id)
+        existing_domains = set(config.get("authorizedDomains", []))
+        all_domains = existing_domains.union(set(domains))
+        if all_domains != existing_domains:  # only if there's new domains
+            return self.set_authorized_domains(domains=list(all_domains), project_id=project_id)
+        return config
 
     def remove_authorized_domains(self, domains: list[str], project_id: str | None = None) -> dict:
         config = self.get_config(project_id=project_id)
-        all_domains = list(set(config.get("authorizedDomains", [])) - set(domains))
-        return self.set_authorized_domains(domains=all_domains, project_id=project_id)
+        existing_domains = set(config.get("authorizedDomains", []))
+        all_domains = existing_domains - set(domains)
+        if all_domains != existing_domains:  # only if there's domains to remove
+            return self.set_authorized_domains(domains=list(all_domains), project_id=project_id)
+        return config
 
     def set_authorized_domains(self, domains: list[str], project_id: str | None = None) -> dict:
         config_path = self._config_path(project_id=project_id)

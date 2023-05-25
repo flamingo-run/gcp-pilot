@@ -127,6 +127,8 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
   - sign up users
   - reset password flow
   - verify email flow
+  - generate authentication magic links (OOB tokens)
+  - manage authorized domains
 - Credentials
   - manage API Keys
 - Resource Manager

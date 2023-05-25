@@ -419,3 +419,51 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
             data["customAttributes"] = json.dumps(attributes)
         response = self._execute(method=self.client.accounts().update, body=data)
         return response
+
+
+class IdentityPlatformAdmin(DiscoveryMixin, GoogleCloudPilotAPI):
+    _scopes = ["https://www.googleapis.com/auth/identitytoolkit"]
+
+    def __init__(self, tenant_id: str | None = None, **kwargs):
+        super().__init__(
+            serviceName="identitytoolkit",
+            version="v2",
+            cache_discovery=False,
+            static_discovery=False,
+            **kwargs,
+        )
+        self.tenant_id = tenant_id
+
+    def _config_path(self, project_id: str | None = None) -> str:
+        project_path = self._project_path(project_id=project_id)
+        return f"{project_path}/config"
+
+    def get_config(self, project_id: str | None = None) -> dict:
+        config_path = self._config_path(project_id=project_id)
+        response = self._execute(
+            method=self.client.projects().getConfig,
+            name=config_path,
+        )
+        return response
+
+    def add_authorized_domains(self, domains: list[str], project_id: str | None = None) -> dict:
+        config = self.get_config(project_id=project_id)
+        all_domains = config.get("authorizedDomains", [])
+        all_domains.extend(domains)
+        return self.set_authorized_domains(domains=all_domains, project_id=project_id)
+
+    def remove_authorized_domains(self, domains: list[str], project_id: str | None = None) -> dict:
+        config = self.get_config(project_id=project_id)
+        all_domains = list(set(config.get("authorizedDomains", [])) - set(domains))
+        return self.set_authorized_domains(domains=all_domains, project_id=project_id)
+
+    def set_authorized_domains(self, domains: list[str], project_id: str | None = None) -> dict:
+        config_path = self._config_path(project_id=project_id)
+
+        response = self._execute(
+            method=self.client.projects().updateConfig,
+            name=config_path,
+            updateMask="authorizedDomains",
+            body={"authorizedDomains": domains},
+        )
+        return response

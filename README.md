@@ -198,3 +198,7 @@ By using `CloudBuild.subscribe`, the `gcp-pilot` creates a subscription (and the
   - Manage datasets
   - Manage stores
   - Manage FHIR resources: _powered by [fhir-resources](https://github.com/nazrulworld/fhir.resources)_
+- Datastream
+  - Read/Delete streams
+  - Read Stream's Objects
+  - Start/Stop object backfill

@@ -253,10 +253,10 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         except NotFound:
             if not auto_create_topic:
                 raise
+
             CloudPublisher().create_topic(
                 topic_id=topic_id,
                 project_id=project_id,
-                exists_ok=False,
             )
             if dead_letter_topic_id:
                 logger.info(

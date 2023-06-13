@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from collections.abc import Callable, Generator
+from functools import cached_property
 from typing import Any
 
 import google.auth.transport._http_client
@@ -72,7 +73,7 @@ class GoogleCloudPilotAPI(abc.ABC):
 
         self._location = location or DEFAULT_LOCATION
 
-    @property
+    @cached_property
     def service_account_email(self) -> str:
         if self._service_account_email == "default":
             self.credentials.refresh(request=google.auth.transport._http_client.Request())
@@ -82,7 +83,7 @@ class GoogleCloudPilotAPI(abc.ABC):
                 self._service_account_email,
             )
         elif self._service_account_email is None:  # SDK local authentication
-            self._service_account_email = os.environ.get("GCP_SERVICE_ACCOUNT", None)
+            self._service_account_email = DEFAULT_SERVICE_ACCOUNT
             if not self._service_account_email:
                 logger.warning(
                     "Using local SDK authentication. Set GCP_SERVICE_ACCOUNT or some features might not work.",
@@ -178,6 +179,8 @@ class GoogleCloudPilotAPI(abc.ABC):
 
         if current_account == "default":  # common when inside GCP
             current_account = DEFAULT_SERVICE_ACCOUNT
+        elif current_account is None:  # common when local SDK authentication
+            impersonate_account = DEFAULT_SERVICE_ACCOUNT
 
         if impersonate_account and impersonate_account != current_account:
             credentials, impersonated_project_id = cls._impersonate_account(

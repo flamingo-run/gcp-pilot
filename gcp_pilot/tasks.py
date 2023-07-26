@@ -24,7 +24,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             queue=queue,
         )
 
-    def _task_path(self, task: str, queue: str, project_id: str = None) -> str:
+    def _task_path(self, task: str, queue: str, project_id: str | None = None) -> str:
         return self.client.task_path(
             project=project_id or self.project_id,
             location=self.location,

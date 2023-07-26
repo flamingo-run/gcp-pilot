@@ -262,7 +262,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         response = self._execute(method=self.client.accounts().signInWithEmailLink, body=data)
         return response
 
-    def list_users(self, tenant_id: str = None, project_id: str | None = None):
+    def list_users(self, tenant_id: str | None = None, project_id: str | None = None):
         params = {
             "targetProjectId": project_id or self.project_id,
             "tenantId": tenant_id or self.tenant_id,
@@ -303,9 +303,9 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         email: str,
         new_password: str,
-        old_password: str = None,
-        oob_code: str = None,
-        tenant_id: str = None,
+        old_password: str | None = None,
+        oob_code: str | None = None,
+        tenant_id: str | None = None,
     ):
         data = {
             "newPassword": new_password,
@@ -342,7 +342,7 @@ class IdentityPlatform(DiscoveryMixin, GoogleCloudPilotAPI):
         response = self._execute(method=self.client.accounts().update, body=data)
         return response
 
-    def enable_user(self, user_id: str, project_id: str | None = None, tenant_id: str = None):
+    def enable_user(self, user_id: str, project_id: str | None = None, tenant_id: str | None = None):
         data = {
             "localId": user_id,
             "disableUser": False,

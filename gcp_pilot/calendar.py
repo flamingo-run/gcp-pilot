@@ -322,7 +322,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         starts_at: datetime,
         ends_at: datetime,
-        timezone: str = None,
+        timezone: str | None = None,
         calendar_ids: list[str] | None = None,
         calendar_id: str = "primary",
     ) -> ResourceType:

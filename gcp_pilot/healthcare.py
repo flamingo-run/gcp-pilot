@@ -590,15 +590,16 @@ class HealthcareFHIR(HealthcareBase):
 
     def get_resource_history(
         self,
-        resource: DomainResource,
+        resource_class: type[DomainResource],
+        resource_id: str,
         store_name: str,
         dataset_name: str,
         project_id: str | None = None,
         location: str | None = None,
-    ) -> ResourceType:
+    ) -> tuple[str, ResourceType | None]:
         name = self._resource_path(
-            resource_type=resource.get_resource_type(),
-            resource_id=resource.id,
+            resource_type=resource_class.get_resource_type(),
+            resource_id=resource_id,
             store_name=store_name,
             dataset_name=dataset_name,
             project_id=project_id,
@@ -614,7 +615,9 @@ class HealthcareFHIR(HealthcareBase):
         )
 
         for entry in entries:
-            yield resource.__class__(**entry["resource"])
+            method = entry["request"]["method"]
+            version = resource_class(**entry["resource"]) if "resource" in entry else None
+            yield method, version
 
     def validate_resource(
         self,

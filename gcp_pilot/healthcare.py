@@ -346,7 +346,7 @@ class HealthcareFHIR(HealthcareBase):
                 "bigqueryDestination": {
                     "datasetUri": f"bq://{export_to_bigquery_dataset}",
                     "schemaConfig": {
-                        "schemaType": "ANALYTICS",
+                        "schemaType": "ANALYTICS_V2",
                         "recursiveStructureDepth": 5,  # max depth
                     },
                     "writeDisposition": "WRITE_TRUNCATE",

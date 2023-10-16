@@ -336,11 +336,16 @@ class HealthcareFHIR(HealthcareBase):
         }
 
         if notify_pubsub_topic:
+            if "/" not in notify_pubsub_topic:
+                notify_pubsub_topic = f"projects/{(project_id or self.project_id)}/topics/{notify_pubsub_topic}"
             body["notification_config"] = {
                 "pubsubTopic": notify_pubsub_topic,
             }
 
         if export_to_bigquery_dataset:
+            if "." not in export_to_bigquery_dataset:
+                export_to_bigquery_dataset = f"{(project_id or self.project_id)}.{export_to_bigquery_dataset}"
+
             body["streamConfigs"] = {
                 "resourceTypes": [],  # empty means all
                 "bigqueryDestination": {

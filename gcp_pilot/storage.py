@@ -1,6 +1,7 @@
 # More Information: https://googleapis.dev/python/storage/latest/index.html
 import io
 from collections.abc import Generator
+from datetime import timedelta
 from pathlib import Path
 
 import requests
@@ -139,6 +140,21 @@ class CloudStorage(GoogleCloudPilotAPI):
 
     def get_uri(self, blob: Blob) -> str:
         return f"gs://{blob.bucket.name}/{blob.name}"
+
+    def get_download_url(
+        self,
+        bucket_name: str,
+        blob_name: str,
+        expiration: timedelta = timedelta(minutes=5),
+        version: str = "v4",
+    ):
+        bucket = self.client.bucket(bucket_name)
+        blob = bucket.blob(blob_name)
+        return blob.generate_signed_url(
+            version=version,
+            expiration=expiration,
+            method="GET",
+        )
 
 
 __all__ = ("CloudStorage",)

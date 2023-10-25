@@ -375,6 +375,66 @@ class HealthcareFHIR(HealthcareBase):
             fhirStoreId=name,
         )
 
+    def update_store(
+        self,
+        name: str,
+        dataset_name: str,
+        labels: dict[str, str] | None = None,
+        notify_pubsub_topic: str | None = None,
+        notify_pubsub_full_resource: bool = False,
+        notify_pubsub_deletion: bool = True,
+        export_to_bigquery_dataset: str | None = None,
+        project_id: str | None = None,
+        location: str | None = None,
+    ) -> ResourceType:
+        name = self._store_path(name=name, dataset_name=dataset_name, project_id=project_id, location=location)
+        update_fields = []
+        body = {}
+
+        if labels:
+            update_fields.append("labels")
+            body["labels"] = labels
+
+        if notify_pubsub_topic:
+            update_fields.append("notificationConfigs")
+            if "/" not in notify_pubsub_topic:
+                notify_pubsub_topic = f"projects/{(project_id or self.project_id)}/topics/{notify_pubsub_topic}"
+            body["notificationConfigs"] = [
+                {
+                    {
+                        "pubsubTopic": notify_pubsub_topic,
+                        "sendFullResource": notify_pubsub_full_resource,
+                        "sendPreviousResourceOnDelete": notify_pubsub_deletion,
+                    },
+                },
+            ]
+
+        if export_to_bigquery_dataset:
+            update_fields.append("streamConfigs")
+            if "." not in export_to_bigquery_dataset:
+                export_to_bigquery_dataset = f"{(project_id or self.project_id)}.{export_to_bigquery_dataset}"
+
+            body["streamConfigs"] = [
+                {
+                    "resourceTypes": [],  # empty means all
+                    "bigqueryDestination": {
+                        "datasetUri": f"bq://{export_to_bigquery_dataset}",
+                        "schemaConfig": {
+                            "schemaType": "ANALYTICS_V2",
+                            "recursiveStructureDepth": 5,  # max depth
+                        },
+                        "writeDisposition": "WRITE_TRUNCATE",
+                    },
+                },
+            ]
+
+        return self._execute(
+            method=self.client.projects().locations().datasets().fhirStores().patch,
+            name=name,
+            updateMask=", ".join(update_fields),
+            body=body,
+        )
+
     def get_resource(
         self,
         resource_class: type[DomainResource],

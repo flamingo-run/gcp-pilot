@@ -73,10 +73,13 @@ class GoogleCloudPilotAPI(abc.ABC):
 
         self._location = location or DEFAULT_LOCATION
 
+    def _refresh_credentials(self):
+        self.credentials.refresh(request=google.auth.transport.requests.Request())
+
     @cached_property
     def service_account_email(self) -> str:
         if self._service_account_email == "default":
-            self.credentials.refresh(request=google.auth.transport._http_client.Request())
+            self._refresh_credentials()
             self._service_account_email = getattr(
                 self.credentials,
                 "service_account_email",
@@ -89,6 +92,12 @@ class GoogleCloudPilotAPI(abc.ABC):
                     "Using local SDK authentication. Set GCP_SERVICE_ACCOUNT or some features might not work.",
                 )
         return self._service_account_email
+
+    @property
+    def token(self) -> str:
+        if not self.credentials.token:
+            self._refresh_credentials()
+        return self.credentials.token
 
     def _get_client_extra_kwargs(self):
         return {}

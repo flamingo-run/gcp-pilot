@@ -150,7 +150,7 @@ class CloudBuild(GoogleCloudPilotAPI):
             for key, klass in valid_events.items():
                 if isinstance(event, klass):
                     return key
-            raise exceptions.ValidationError(f"Unsupported event type {event.__class__.__name__,}")
+            raise exceptions.ValidationError(f"Unsupported event type {event.__class__.__name__}")
 
         params = {_get_event_param(): event}
 

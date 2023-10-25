@@ -154,6 +154,8 @@ class CloudStorage(GoogleCloudPilotAPI):
             version=version,
             expiration=expiration,
             method="GET",
+            service_account_email=self.service_account_email,
+            access_token=self.token,
         )
 
 

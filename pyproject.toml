@@ -51,7 +51,6 @@ iam = ["google-cloud-iam"]
 
 
 [tool.poetry.dev-dependencies]
-black = "*"
 ruff = "*"
 pyjwt = "*"
 pytest-cov = "*"
@@ -61,14 +60,10 @@ pytest-sugar = "*"
 pytest-random-order = "*"
 pytest-timeout = "*"
 
-[tool.black]
-line-length = 120
-target-version = ['py311']
-
 
 [tool.ruff]
 select = ["RUF", "I", "PL", "F", "COM", "UP", "DJ", "T10", "T20", "DTZ", "SIM", "TID", "PTH", "ERA", "TRY"]
-ignore = ["PLR2004", "PLR0911", "PLR0912", "PLR0913", "PLR0915", "DJ001", "DJ001", "DJ008", "TRY003", "RUF012"]
+ignore = ["COM812","COM819", "PLR2004", "PLR0911", "PLR0912", "PLR0913", "PLR0915", "DJ001", "DJ001", "DJ008", "TRY003", "RUF012"]
 line-length = 120
 target-version = "py311"
 

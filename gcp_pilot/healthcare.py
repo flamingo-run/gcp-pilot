@@ -647,5 +647,5 @@ class HealthcareFHIR(HealthcareBase):
                 body=as_json(resource),
             )
         except exceptions.OperationError as exc:
-            errors = [{"fields": error["expression"], "detail": error["diagnostics"]} for error in exc.errors]
+            errors = [{"fields": error.get("expression", None), "detail": error["diagnostics"]} for error in exc.errors]
             raise exceptions.ValidationError(errors) from exc

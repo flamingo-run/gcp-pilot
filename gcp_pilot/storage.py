@@ -5,6 +5,8 @@ from datetime import timedelta
 from pathlib import Path
 
 import requests
+from google import auth
+from google.auth.transport import requests as google_requests
 from google.cloud import storage
 from google.cloud.exceptions import Conflict
 from google.cloud.storage import Blob, Bucket
@@ -148,9 +150,15 @@ class CloudStorage(GoogleCloudPilotAPI):
         expiration: timedelta = timedelta(minutes=5),
         version: str = "v4",
     ):
+        credentials, _ = auth.default()
+        if credentials.token is None:
+            credentials.refresh(google_requests.Request())
+
         bucket = self.client.bucket(bucket_name)
         blob = bucket.blob(blob_name)
         return blob.generate_signed_url(
+            service_account_email=credentials.service_account_email,
+            access_token=credentials.token,
             version=version,
             expiration=expiration,
             method="GET",

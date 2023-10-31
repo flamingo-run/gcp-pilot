@@ -95,7 +95,7 @@ class GoogleCloudPilotAPI(abc.ABC):
 
     @property
     def token(self) -> str:
-        if not self.credentials.token:
+        if not self.credentials.valid:
             self._refresh_credentials()
         return self.credentials.token
 

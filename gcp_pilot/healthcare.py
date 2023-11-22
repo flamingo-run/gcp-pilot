@@ -401,11 +401,9 @@ class HealthcareFHIR(HealthcareBase):
                 notify_pubsub_topic = f"projects/{(project_id or self.project_id)}/topics/{notify_pubsub_topic}"
             body["notificationConfigs"] = [
                 {
-                    {
-                        "pubsubTopic": notify_pubsub_topic,
-                        "sendFullResource": notify_pubsub_full_resource,
-                        "sendPreviousResourceOnDelete": notify_pubsub_deletion,
-                    },
+                    "pubsubTopic": notify_pubsub_topic,
+                    "sendFullResource": notify_pubsub_full_resource,
+                    "sendPreviousResourceOnDelete": notify_pubsub_deletion,
                 },
             ]
 

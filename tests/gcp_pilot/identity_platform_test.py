@@ -92,7 +92,8 @@ class TestIdentityPlatform(ClientTestMixin, unittest.TestCase):
         self.assert_expected_sample_token(expected_data=token_data, token=token, is_tenant=False)
 
     def test_parse_firebase_factory_token(self):
-        token_data = FirebaseAuthTokenFactory.create()
+        iat = int(datetime.now(tz=UTC).timestamp())
+        token_data = FirebaseAuthTokenFactory.create(iat=iat)
         with patch_firebase_token(return_value=token_data):
             token = FirebaseAuthToken(jwt_token="potato")
 

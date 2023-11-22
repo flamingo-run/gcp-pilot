@@ -44,11 +44,11 @@ class FirebaseAuthTokenFactory(factory.Factory):
     aud = factory.Faker("url")
     iat = factory.LazyFunction(
         lambda: Faker().unix_time(
-            start_datetime=datetime.now(tz=UTC),
-            end_datetime=datetime.now(tz=UTC) + timedelta(seconds=3600 * 24),
+            start_datetime=datetime.now(tz=UTC) - timedelta(seconds=60),
+            end_datetime=datetime.now(tz=UTC),
         ),
     )
-    exp = factory.LazyAttribute(lambda obj: obj.iat + 3600)
+    exp = factory.LazyAttribute(lambda obj: obj.iat + obj.oauth_expires_in)
     event_id = factory.Faker("ean")
     event_type = factory.Iterator(["beforeSignUp", "beforeSignIn"])
     sign_in_method = factory.Iterator(["google.com", "github.com", "password"])

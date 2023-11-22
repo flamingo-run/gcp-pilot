@@ -28,7 +28,7 @@ google-cloud-pubsub = { version = "^2", optional = true}
 google-cloud-datastore = { version = "^2", optional = true}
 google-cloud-iam = { version = "*", optional = true}
 pydantic = { version = "*", optional = true}
-google-cloud-dns = { version = "^0", optional = true}
+google-cloud-dns = { version = "^0", optional = true, python = "<3.12"}
 google-cloud-logging = { version = "^3", optional = true}
 google-cloud-error-reporting = { version = "*", optional = true}
 google-cloud-secret-manager = { version = "*", optional = true}
@@ -51,6 +51,7 @@ iam = ["google-cloud-iam"]
 
 
 [tool.poetry.dev-dependencies]
+"fhir.resources" = { version = ">=7.0.2"}
 ruff = "*"
 pyjwt = "*"
 pytest-cov = "*"

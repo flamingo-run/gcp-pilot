@@ -6,7 +6,7 @@ from pathlib import Path
 
 import requests
 from google.cloud import storage
-from google.cloud.exceptions import Conflict
+from google.cloud.exceptions import Conflict, NotFound
 from google.cloud.storage import Blob, Bucket
 
 from gcp_pilot import exceptions
@@ -79,11 +79,23 @@ class CloudStorage(GoogleCloudPilotAPI):
         target_file_name: str | None = None,
         project_id: str | None = None,
         region: str | None = None,
+        auto_create_bucket: bool = False,
     ) -> Blob:
-        source_bucket = self.check_bucket(name=source_bucket_name)
+        try:
+            source_bucket = self.check_bucket(name=source_bucket_name)
+        except NotFound:
+            if not auto_create_bucket:
+                raise
+            source_bucket = self.create_bucket(name=source_bucket_name, region=region, project_id=project_id)
+
         source_blob = source_bucket.blob(source_file_name)
 
-        target_bucket = self.create_bucket(name=target_bucket_name, region=region, project_id=project_id)
+        try:
+            target_bucket = self.check_bucket(name=target_bucket_name)
+        except NotFound:
+            if not auto_create_bucket:
+                raise
+            target_bucket = self.create_bucket(name=target_bucket_name, region=region, project_id=project_id)
         target_file_name = target_file_name or str(source_file_name).rsplit("/", maxsplit=1)[-1]
 
         obj = source_bucket.copy_blob(source_blob, target_bucket, target_file_name)

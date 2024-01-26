@@ -1,8 +1,9 @@
 # Reference: https://googleapis.dev/python/cloudtasks/latest/tasks_v2/cloud_tasks.html
 import uuid
+from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
 
-from google.api_core.exceptions import FailedPrecondition
+from google.api_core.exceptions import FailedPrecondition, NotFound
 from google.cloud import tasks_v2
 from google.protobuf import timestamp_pb2
 
@@ -135,6 +136,36 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             response_view=tasks_v2.Task.View.FULL,
         )
         return self.client.get_task(request=request)
+
+    def delete_task(
+        self,
+        queue_name: str,
+        task_name: str,
+        project_id: str | None = None,
+        not_found_ok: bool = True,
+    ) -> tasks_v2.Task:
+        task_path = self.client.task_path(
+            project=project_id or self.project_id,
+            location=self.location,
+            queue=queue_name,
+            task=task_name,
+        )
+        request = tasks_v2.DeleteTaskRequest(
+            name=task_path,
+        )
+
+        try:
+            self.client.delete_task(request=request)
+        except NotFound:
+            if not not_found_ok:
+                raise
+
+    def list_tasks(self, queue_name: str, project_id: str | None = None) -> Generator[tasks_v2.Task, None, None]:
+        queue_path = self._queue_path(queue=queue_name, project_id=project_id)
+        request = tasks_v2.ListTasksRequest(
+            parent=queue_path,
+        )
+        yield from self.client.list_tasks(request=request)
 
 
 __all__ = ("CloudTasks",)

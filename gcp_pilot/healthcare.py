@@ -241,6 +241,15 @@ class HealthcareFHIR(HealthcareBase):
         dataset_path = self._dataset_path(name=dataset_name, project_id=project_id, location=location)
         return f"{dataset_path}/operations/{operation_id}"
 
+    def _service_path(
+        self,
+        name: str,
+        project_id: str | None = None,
+        location: str | None = None,
+    ) -> str:
+        location_path = self._location_path(project_id=project_id, location=location)
+        return f"{location_path}/services/{name}"
+
     def list_stores(
         self,
         dataset_name: str,
@@ -715,3 +724,39 @@ class HealthcareFHIR(HealthcareBase):
         except exceptions.OperationError as exc:
             errors = [{"fields": error.get("expression", None), "detail": error["diagnostics"]} for error in exc.errors]
             raise exceptions.ValidationError(errors) from exc
+
+    # Reference: https://cloud.google.com/healthcare-api/docs/reference/rest/v1/projects.locations.services.nlp/analyzeEntities
+    def analyze_entities(
+        self,
+        content: str,
+        use_idc10: bool = False,
+        use_snomed: bool = False,
+        location: str | None = None,
+        project_id: str | None = None,
+        fhir_output: bool = True,
+    ):
+        service_path = self._service_path(
+            name="nlp",
+            project_id=project_id,
+            location=location,
+        )
+        vocabularies = []
+        if use_idc10:
+            vocabularies.append("ICD10CM")
+        if use_snomed:
+            vocabularies.append("SNOMEDCT_US")
+
+        output_format = "FHIR_BUNDLE" if fhir_output else "ALTERNATIVE_OUTPUT_FORMAT_UNSPECIFIED"
+
+        body = {
+            "documentContent": content,
+            "licensedVocabularies": vocabularies,
+            "alternativeOutputFormat": output_format,
+        }
+
+        output = self._execute(
+            method=self.client.projects().locations().services().nlp().analyzeEntities,
+            nlpService=service_path,
+            body=body,
+        )
+        return output

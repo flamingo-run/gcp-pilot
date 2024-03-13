@@ -7,7 +7,7 @@ from google.cloud import scheduler
 
 from gcp_pilot.base import AppEngineBasedService, GoogleCloudPilotAPI
 
-DEFAULT_TIMEZONE = os.environ.get("TIMEZONE", None)  # UTC
+DEFAULT_TIMEZONE = os.environ.get("TIMEZONE", "Etc/UTC")  # UTC
 MAX_TIMEOUT = 30 * 60  # max allowed to HTTP endpoints is 30 minutes
 
 
@@ -32,7 +32,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         url: str,
         payload: str,
         cron: str,
-        timezone: str | None = None,
+        timezone: str = DEFAULT_TIMEZONE,
         method: int = DEFAULT_METHOD,
         headers: dict[str, str] | None = None,
         project_id: str | None = None,
@@ -64,7 +64,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         url: str,
         payload: str,
         cron: str,
-        timezone: str | None = None,
+        timezone: str | None = DEFAULT_TIMEZONE,
         method: int = DEFAULT_METHOD,
         headers: dict[str, str] | None = None,
         project_id: str | None = None,
@@ -115,7 +115,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         url: str,
         payload: str,
         cron: str,
-        timezone: str | None = None,
+        timezone: str = DEFAULT_TIMEZONE,
         method: int = DEFAULT_METHOD,
         headers: dict[str, str] | None = None,
         project_id: str | None = None,

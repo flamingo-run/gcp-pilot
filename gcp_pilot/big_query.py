@@ -228,7 +228,7 @@ class _BigQueryParam:
         }
 
         python_type = type(variable).__name__
-        param_type = TYPES.get(python_type, None)
+        param_type = TYPES.get(python_type)
         if param_type is None:
             raise exceptions.ValidationError(f"Parameter with type {param_type} not supported")
         return param_type
@@ -239,7 +239,7 @@ class _BigQueryParam:
             "Decimal": float,
         }
         python_type = type(variable).__name__
-        param_type = TYPES.get(python_type, None)
+        param_type = TYPES.get(python_type)
         if param_type is not None:
             return param_type(variable)
         return variable

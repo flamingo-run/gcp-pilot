@@ -389,7 +389,7 @@ def friendly_http_error(func):
 
             if "errors" in errors:
                 main_error = errors["errors"][0]["reason"]
-                exception_klass = _reasons.get(main_error, None)
+                exception_klass = _reasons.get(main_error)
                 details = errors.get("message", "")
 
             if not exception_klass and "message" in errors:

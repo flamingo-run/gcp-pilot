@@ -38,6 +38,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         project_id: str | None = None,
         use_oidc_auth: bool = True,
         timeout_in_seconds: int = MAX_TIMEOUT,
+        retry_count: int = 0,
     ) -> scheduler.Job:
         parent = self._parent_path(project_id=project_id)
         job_name = self._job_path(job=name, project_id=project_id)
@@ -52,6 +53,9 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
                 body=payload.encode(),
                 headers=headers or {},
                 **(self.get_oidc_token(audience=url) if use_oidc_auth else {}),
+            ),
+            retry_config=scheduler.RetryConfig(
+                retry_count=retry_count,
             ),
         )
 
@@ -70,6 +74,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         project_id: str | None = None,
         use_oidc_auth: bool = True,
         timeout_in_seconds: int = MAX_TIMEOUT,
+        retry_count: int = 0,
     ) -> scheduler.Job:
         job_name = self._job_path(job=name, project_id=project_id)
         job = scheduler.Job(
@@ -83,6 +88,9 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
                 body=payload.encode(),
                 headers=headers or {},
                 **(self.get_oidc_token(audience=url) if use_oidc_auth else {}),
+            ),
+            retry_config=scheduler.RetryConfig(
+                retry_count=retry_count,
             ),
         )
 
@@ -121,6 +129,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         project_id: str | None = None,
         use_oidc_auth: bool = True,
         timeout_in_seconds: int = MAX_TIMEOUT,
+        retry_count: int = 0,
     ) -> scheduler.Job:
         try:
             response = self.update(
@@ -134,6 +143,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
                 project_id=project_id,
                 use_oidc_auth=use_oidc_auth,
                 timeout_in_seconds=timeout_in_seconds,
+                retry_count=retry_count,
             )
         except NotFound:
             response = self.create(
@@ -147,6 +157,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
                 project_id=project_id,
                 use_oidc_auth=use_oidc_auth,
                 timeout_in_seconds=timeout_in_seconds,
+                retry_count=retry_count,
             )
         return response
 

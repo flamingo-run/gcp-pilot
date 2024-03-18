@@ -2,6 +2,7 @@
 import json
 import logging
 import time
+import uuid
 from collections.abc import Generator
 from typing import Any
 
@@ -22,7 +23,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
     def __init__(self, **kwargs):
         super().__init__(
             serviceName="sqladmin",
-            version="v1beta4",
+            version="v1",
             cache_discovery=False,
             **kwargs,
         )
@@ -152,6 +153,42 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             project=project_id or self.project_id,
             body=body,
         )
+
+    def create_ssl_cert(self, instance: str, project_id: str | None = None, ssl_name: str | None = None,) -> UserType:
+        body = dict(
+            commonName=ssl_name or uuid.uuid4().hex,
+        )
+        return self._execute(
+            method=self.client.sslCerts().insert,
+            instance=instance,
+            project=project_id or self.project_id,
+            body=body,
+        )
+
+    def list_ssl_certs(self, instance: str, project_id: str | None = None) -> Generator[dict, None, None]:
+        params = dict(
+            instance=instance,
+            project=project_id or self.project_id,
+        )
+        certs = self._paginate(
+            method=self.client.sslCerts().list,
+            params=params,
+        )
+        yield from certs
+
+    def delete_ssl_cert(self, instance: str, ssl_name: str, project_id: str | None = None, not_found_ok: bool = True) -> dict:
+        for cert in self.list_ssl_certs(instance=instance, project_id=project_id):
+            if cert["commonName"] != ssl_name:
+                continue
+            sha1_fingerprint = cert["sha1Fingerprint"]
+            return self._execute(
+                method=self.client.sslCerts().delete,
+                instance=instance,
+                sha1Fingerprint=sha1_fingerprint,
+                project=project_id or self.project_id,
+            )
+        if not not_found_ok:
+            raise exceptions.NotFound()
 
 
 __all__ = ("CloudSQL",)

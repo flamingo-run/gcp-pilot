@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gcp-pilot"
-version = "1.24.0"
+version = "1.25.0"
 description = "Google Cloud Platform Friendly Pilot"
 authors = ["Joao Daher <joao@daher.dev>"]
 repository = "https://github.com/flamingo-run/gcp-pilot"
@@ -23,7 +23,7 @@ google-cloud-storage = { version = "^2", optional = true}
 google-cloud-build = { version = "^3", optional = true}
 google-cloud-bigquery = {version = "^3", optional = true, extras = ["storage"]}
 google-cloud-speech = { version = "^2", optional = true}
-gspread = { version = "^5", optional = true}
+gspread = { version = "^6", optional = true}
 google-cloud-pubsub = { version = "^2", optional = true}
 google-cloud-datastore = { version = "^2", optional = true}
 google-cloud-iam = { version = "*", optional = true}

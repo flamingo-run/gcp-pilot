@@ -154,7 +154,12 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             body=body,
         )
 
-    def create_ssl_cert(self, instance: str, project_id: str | None = None, ssl_name: str | None = None,) -> UserType:
+    def create_ssl_cert(
+        self,
+        instance: str,
+        project_id: str | None = None,
+        ssl_name: str | None = None,
+    ) -> UserType:
         body = dict(
             commonName=ssl_name or uuid.uuid4().hex,
         )
@@ -176,7 +181,9 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
         )
         yield from certs
 
-    def delete_ssl_cert(self, instance: str, ssl_name: str, project_id: str | None = None, not_found_ok: bool = True) -> dict:
+    def delete_ssl_cert(
+        self, instance: str, ssl_name: str, project_id: str | None = None, not_found_ok: bool = True
+    ) -> dict:
         for cert in self.list_ssl_certs(instance=instance, project_id=project_id):
             if cert["commonName"] != ssl_name:
                 continue

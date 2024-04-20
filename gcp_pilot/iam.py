@@ -1,6 +1,7 @@
 # More Information: <https://cloud.google.com/iam/docs/reference/rest>
 import base64
 import json
+import uuid
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -241,8 +242,8 @@ class IAMCredentials(GoogleCloudPilotAPI):
 
     def generate_custom_token(
         self,
-        uid: str,
-        expires_in_seconds: int,
+        uid: str | None = None,
+        expires_in_seconds: int = 12 * 60 * 60,  # max 12 hours
         tenant_id: str | None = None,
         auth_email: str | None = None,
         claims: dict | None = None,
@@ -255,7 +256,7 @@ class IAMCredentials(GoogleCloudPilotAPI):
             "iss": authenticator_email,
             "sub": authenticator_email,
             "email": authenticator_email,
-            "uid": uid,
+            "uid": uid or uuid.uuid4().hex,
             "tenant_id": tenant_id,
             "claims": claims or {},
         }

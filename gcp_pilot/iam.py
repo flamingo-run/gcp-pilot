@@ -8,7 +8,7 @@ from typing import Any
 
 import requests
 from google.auth import jwt
-from google.auth.transport import Request
+from google.auth.transport.requests import Request
 from google.cloud import iam_credentials_v1
 from google.oauth2 import id_token
 

@@ -8,6 +8,7 @@ from typing import Any
 
 import requests
 from google.auth import jwt
+from google.auth.transport import Request
 from google.cloud import iam_credentials_v1
 from google.oauth2 import id_token
 
@@ -223,7 +224,7 @@ class IAMCredentials(GoogleCloudPilotAPI):
 
     @classmethod
     def decode_id_token(cls, token: str, audience: str | list[str] | None = None) -> dict[str, Any]:
-        return id_token.verify_token(id_token=token, request=requests.Request(), audience=audience)
+        return id_token.verify_token(id_token=token, request=Request(), audience=audience)
 
     @classmethod
     def decode_jwt(cls, token: str, issuer_email: str, audience: str | None, verify: bool = True) -> dict[str, Any]:

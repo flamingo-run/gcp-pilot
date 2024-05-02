@@ -212,9 +212,15 @@ class IAMCredentials(GoogleCloudPilotAPI):
 
     @friendly_http_error
     def generate_id_token(self, audience: str, service_account_email: str | None = None) -> str:
+        email = service_account_email or self.service_account_email
+        if not email:
+            raise ValueError(
+                "You must either provide service_account_email or set GCP_SERVICE_ACCOUNT for impersonation."
+            )
+
         response = self.client.generate_id_token(
             name=self.client.service_account_path(
-                service_account=service_account_email or self.service_account_email,
+                service_account=email,
                 project="-",
             ),
             audience=audience,

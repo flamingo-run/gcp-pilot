@@ -31,7 +31,7 @@ class _SubstitutionVariable:
     def __str__(self) -> str:
         # When used in a template, $_NAME should work, but it requires to be isolated by blank spaces
         # Thus, we use ${_NAME} by default, because it allows merging with other text.
-        return "${%s}" % self.full_key
+        return "${%s}" % self.full_key  # noqa: UP031
 
     @property
     def _escape(self):

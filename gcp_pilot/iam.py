@@ -7,6 +7,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import requests
+from cachetools import TTLCache, cached
 from google.auth import jwt
 from google.auth.transport.requests import Request
 from google.cloud import iam_credentials_v1
@@ -233,14 +234,26 @@ class IAMCredentials(GoogleCloudPilotAPI):
         return id_token.verify_token(id_token=token, request=Request(), audience=audience)
 
     @classmethod
-    def decode_jwt(cls, token: str, issuer_email: str, audience: str | None, verify: bool = True) -> dict[str, Any]:
-        certs = cls._fetch_public_certs(email=issuer_email)
+    def decode_jwt(
+        cls,
+        token: str,
+        issuer_email: str,
+        audience: str | None,
+        verify: bool = True,
+        cache_certs: bool = False,
+        clock_skew_in_seconds: int = 0,
+    ) -> dict[str, Any]:
+        if cache_certs:
+            certs = cls._fetch_cached_public_certs(email=issuer_email)
+        else:
+            certs = cls._fetch_public_certs(email=issuer_email)
         return dict(
             jwt.decode(
                 token=token,
                 certs=certs,
                 audience=audience,
                 verify=verify,
+                clock_skew_in_seconds=clock_skew_in_seconds,
             ),
         )
 
@@ -278,6 +291,11 @@ class IAMCredentials(GoogleCloudPilotAPI):
             audience=IDP_JWT_AUDIENCE,
             verify=verify,
         )
+
+    @classmethod
+    @cached(cache=TTLCache(maxsize=10, ttl=60 * 60))  # 1 hour certificate cache
+    def _fetch_cached_public_certs(cls, email: str) -> dict:
+        return cls._fetch_public_certs(email=email)
 
     @classmethod
     def _fetch_public_certs(cls, email: str) -> dict:

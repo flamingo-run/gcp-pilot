@@ -760,3 +760,24 @@ class HealthcareFHIR(HealthcareBase):
             body=body,
         )
         return output
+
+    def configure_search(
+        self,
+        canonical_urls: list[str],
+        store_name: str,
+        dataset_name: str,
+        validate_only: bool = False,
+        project_id: str | None = None,
+        location: str | None = None,
+    ):
+        name = self._store_path(name=store_name, dataset_name=dataset_name, project_id=project_id, location=location)
+        body = {
+            "canonicalUrls": canonical_urls,
+            "validateOnly": validate_only,
+        }
+        output = self._execute(
+            method=self.client.projects().locations().datasets().fhirStores().configureSearch,
+            name=name,
+            body=body,
+        )
+        return output

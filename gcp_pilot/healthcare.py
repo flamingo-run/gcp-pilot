@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Any
 from urllib.parse import parse_qsl, urlsplit
 
+from fhir.resources import get_fhir_model_class
 from fhir.resources.domainresource import DomainResource
 from fhir.resources.identifier import Identifier
 
@@ -174,7 +175,8 @@ class FHIRResultSet:
             return
 
         for entry in self.response["entry"]:
-            yield self.resource_class(**entry["resource"])
+            resource_class = get_fhir_model_class(entry["resource"]["resourceType"])
+            yield resource_class(**entry["resource"])
 
     @property
     def next_cursor(self) -> str | None:

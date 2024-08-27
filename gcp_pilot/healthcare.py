@@ -560,6 +560,32 @@ class HealthcareFHIR(HealthcareBase):
         )
         return resource_class(**data)
 
+    def conditional_patch_resource(
+        self,
+        resource_class: type[DomainResource],
+        query: dict,
+        json_patch: list[dict],
+        store_name: str,
+        dataset_name: str,
+        project_id: str | None = None,
+        location: str | None = None,
+    ):
+        parent = self._store_path(
+            name=store_name,
+            dataset_name=dataset_name,
+            project_id=project_id,
+            location=location,
+        )
+        url = f"{self._base_url}/{parent}/fhir/{resource_class.get_resource_type()}"
+        response = self._execute(
+            method=self._session.patch,
+            url=url,
+            headers={"Content-Type": "application/json-patch+json"},
+            json=json_patch,
+            params=query,
+        )
+        return resource_class(**response)
+
     def create_or_update_resource(
         self,
         resource: DomainResource,

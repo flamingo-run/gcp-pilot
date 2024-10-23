@@ -37,7 +37,7 @@ class BigQuery(GoogleCloudPilotAPI):
 
     @friendly_http_error
     def delete_table(self, table: Table):
-        return self.client.delete_table(table=table)
+        return self.client.delete_table(table=table, not_found_ok=True)
 
     def execute(
         self,

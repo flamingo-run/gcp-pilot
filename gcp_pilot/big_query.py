@@ -13,6 +13,9 @@ from gcp_pilot.storage import CloudStorage
 class BigQuery(GoogleCloudPilotAPI):
     _client_class = bigquery.Client
 
+    def _get_client_extra_kwargs(self):
+        return {"project": self.project_id}
+
     def _get_project_default_location(self, project_id: str | None = None) -> str | None:
         return "us"
 

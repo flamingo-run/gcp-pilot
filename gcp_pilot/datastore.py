@@ -314,8 +314,8 @@ class Document(EmbeddedDocument, abc.ABC):
 
 
 __all__ = (
-    "DoesNotExist",
-    "MultipleObjectsFound",
-    "EmbeddedDocument",
     "Document",
+    "DoesNotExist",
+    "EmbeddedDocument",
+    "MultipleObjectsFound",
 )

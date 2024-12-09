@@ -343,8 +343,8 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
 
 
 __all__ = (
-    "Calendar",
     "Attendee",
+    "Calendar",
     "Color",
     "ResponseStatus",
     "SendUpdates",

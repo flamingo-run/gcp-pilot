@@ -319,9 +319,9 @@ class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):
 
 
 __all__ = (
-    "Text",
-    "Section",
     "Card",
     "ChatsBot",
     "ChatsHook",
+    "Section",
+    "Text",
 )

@@ -12,15 +12,11 @@ jobs:
   linter:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Install poetry
-        run: pipx install poetry
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12.x'
-          cache: poetry
-
+        run: uv python install
       - name: Install Python dependencies
         run: make dependencies
       - name: Lint with pylint
@@ -31,37 +27,29 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.11.x', '3.12.x' ]
+        python-version: [ '3.11', '3.12' ]
     steps:
-      - uses: actions/checkout@v3
-      - name: Install poetry
-        run: pipx install poetry
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: poetry
-
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
       - name: Install Python dependencies
         run: make dependencies
       - name: Install as a package
-        run: poetry build
+        run: uv build
 
   security:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.11.x', '3.12.x' ]
+        python-version: [ '3.11', '3.12' ]
     steps:
-      - uses: actions/checkout@v3
-      - name: Install poetry
-        run: pipx install poetry
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: poetry
-
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
       - name: Install Python dependencies
         run: make dependencies
       - name: Verify security vulnerabilities
@@ -71,17 +59,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.11.x', '3.12.x' ]
+        python-version: [ '3.11', '3.12' ]
     steps:
-      - uses: actions/checkout@v3
-      - name: Install poetry
-        run: pipx install poetry
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: poetry
-
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
       - name: Install Python dependencies
         run: make dependencies
       - name: Unit test

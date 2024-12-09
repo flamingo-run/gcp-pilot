@@ -126,7 +126,7 @@ class CloudStorage(GoogleCloudPilotAPI):
         blob = bucket.blob(file_name)
         return blob.delete()
 
-    def list_files(self, bucket_name: str, prefix: str | None = None) -> Generator[Blob, None, None]:
+    def list_files(self, bucket_name: str, prefix: str | None = None) -> Generator[Blob]:
         blobs = self.client.list_blobs(
             bucket_name,
             prefix=prefix,

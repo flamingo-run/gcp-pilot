@@ -58,7 +58,7 @@ class People(DiscoveryMixin, GoogleCloudPilotAPI):
     def _get_project_default_location(self, project_id: str | None = None) -> str | None:
         return None
 
-    def get_people(self, query: str | None = None, fields: list[str] | None = None) -> Generator[UserType, None, None]:
+    def get_people(self, query: str | None = None, fields: list[str] | None = None) -> Generator[UserType]:
         params = {
             "readMask": ",".join(fields or USER_FIELDS),
             "sources": ["DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE", "DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT"],

@@ -306,7 +306,7 @@ class CloudBuild(GoogleCloudPilotAPI):
         trigger_id: str | None = None,
         project_id: str | None = None,
         status: str | None = None,
-    ) -> Generator[cloudbuild_v1.Build, None, None]:
+    ) -> Generator[cloudbuild_v1.Build]:
         # https://cloud.google.com/cloud-build/docs/view-build-results#filtering_build_results_using_queries
         filters = []
         if trigger_id:

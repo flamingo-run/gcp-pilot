@@ -160,7 +160,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             if not not_found_ok:
                 raise
 
-    def list_tasks(self, queue_name: str, project_id: str | None = None) -> Generator[tasks_v2.Task, None, None]:
+    def list_tasks(self, queue_name: str, project_id: str | None = None) -> Generator[tasks_v2.Task]:
         queue_path = self._queue_path(queue=queue_name, project_id=project_id)
         request = tasks_v2.ListTasksRequest(
             parent=queue_path,

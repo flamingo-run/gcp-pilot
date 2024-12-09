@@ -32,7 +32,7 @@ class CloudFunctions(DiscoveryMixin, AccountManagerMixin, GoogleCloudPilotAPI):
         self,
         project_id: str | None = None,
         location: str | None = None,
-    ) -> Generator[FunctionType, None, None]:
+    ) -> Generator[FunctionType]:
         params = dict(
             parent=self._parent_path(project_id=project_id, location=location),
         )

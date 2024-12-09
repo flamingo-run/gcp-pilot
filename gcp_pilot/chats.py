@@ -274,7 +274,7 @@ class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):
             name=self._room_path(room_id=room_id),
         )
 
-    def get_rooms(self) -> Generator[ResourceType, None, None]:
+    def get_rooms(self) -> Generator[ResourceType]:
         yield from self._paginate(
             method=self.client.spaces().list,
             result_key="spaces",
@@ -287,7 +287,7 @@ class ChatsBot(DiscoveryMixin, GoogleCloudPilotAPI):
             name=name,
         )
 
-    def get_members(self, room_id: str) -> Generator[ResourceType, None, None]:
+    def get_members(self, room_id: str) -> Generator[ResourceType]:
         yield from self._paginate(
             method=self.client.spaces().members().list,
             result_key="memberships",

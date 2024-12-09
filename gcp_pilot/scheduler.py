@@ -99,7 +99,7 @@ class CloudScheduler(AppEngineBasedService, GoogleCloudPilotAPI):
         )
         return response
 
-    def list(self, prefix: str = "", project_id: str | None = None) -> Generator[scheduler.Job, None, None]:
+    def list(self, prefix: str = "", project_id: str | None = None) -> Generator[scheduler.Job]:
         parent = self._parent_path(project_id=project_id)
         for job in self.client.list_jobs(parent=parent):
             if job.name.split("/jobs/")[-1].startswith(prefix):

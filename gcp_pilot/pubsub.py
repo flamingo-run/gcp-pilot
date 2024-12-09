@@ -92,7 +92,7 @@ class CloudPublisher(GoogleCloudPilotAPI):
         prefix: str = "",
         suffix: str = "",
         project_id: str | None = None,
-    ) -> Generator[Topic, None, None]:
+    ) -> Generator[Topic]:
         project_path = self._project_path(project_id=project_id)
         topics = self.client.list_topics(
             project=project_path,
@@ -143,7 +143,7 @@ class CloudSubscriber(GoogleCloudPilotAPI):
         prefix: str = "",
         suffix: str = "",
         project_id: str | None = None,
-    ) -> Generator[Subscription, None, None]:
+    ) -> Generator[Subscription]:
         all_subscriptions = self.client.list_subscriptions(
             project=f"projects/{project_id or self.project_id}",
         )

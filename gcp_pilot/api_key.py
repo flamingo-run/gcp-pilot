@@ -118,7 +118,7 @@ class APIKey(DiscoveryMixin, GoogleCloudPilotAPI):
             name=self._key_path(key_id=key_id, project_id=project_id),
         )
 
-    def list(self, project_id: str | None = None) -> Generator[Key, None, None]:
+    def list(self, project_id: str | None = None) -> Generator[Key]:
         params = dict(parent=self._location_path(project_id=project_id))
         data = self._paginate(
             method=self.client.projects().locations().keys().list,

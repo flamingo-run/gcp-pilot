@@ -74,7 +74,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
             service_account = self.get_service_account(name=name, project_id=project_id)
         return service_account
 
-    def list_service_accounts(self, project_id: str | None = None) -> Generator[AccountType, None, None]:
+    def list_service_accounts(self, project_id: str | None = None) -> Generator[AccountType]:
         params = dict(
             name=self._project_path(project_id=project_id),
         )
@@ -162,7 +162,7 @@ class IdentityAccessManager(AccountManagerMixin, DiscoveryMixin, GoogleCloudPilo
         )
         return self._format_key(data=account_key)
 
-    def list_keys(self, service_account_name: str, project_id: str | None = None) -> Generator[KeyType, None, None]:
+    def list_keys(self, service_account_name: str, project_id: str | None = None) -> Generator[KeyType]:
         parent = self._service_account_path(
             email=self._build_service_account_email(name=service_account_name, project_id=project_id),
             project_id=project_id,

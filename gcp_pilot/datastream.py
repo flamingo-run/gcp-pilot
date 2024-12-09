@@ -30,7 +30,7 @@ class Datastream(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         location: str | None = None,
         project_id: str | None = None,
-    ) -> Generator[ResourceType, None, None]:
+    ) -> Generator[ResourceType]:
         location_path = self._location_path(location=location, project_id=project_id)
         params = {"parent": location_path}
         yield from self._paginate(
@@ -58,7 +58,7 @@ class Datastream(DiscoveryMixin, GoogleCloudPilotAPI):
         stream_name: str,
         location: str | None = None,
         project_id: str | None = None,
-    ) -> Generator[ResourceType, None, None]:
+    ) -> Generator[ResourceType]:
         stream_path = self._stream_path(stream_name=stream_name, location=location, project_id=project_id)
         params = {"parent": stream_path}
         yield from self._paginate(

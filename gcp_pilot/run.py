@@ -26,7 +26,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
         parent = self._namespace_path(project_id=project_id)
         return f"{parent}/domainmappings/{domain}"
 
-    def list_services(self, project_id: str | None = None) -> Generator[ResourceType, None, None]:
+    def list_services(self, project_id: str | None = None) -> Generator[ResourceType]:
         params = dict(
             parent=self._namespace_path(project_id=project_id),
         )
@@ -108,7 +108,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             body=body,
         )
 
-    def list_locations(self, project_id: str | None = None) -> Generator[ResourceType, None, None]:
+    def list_locations(self, project_id: str | None = None) -> Generator[ResourceType]:
         params = dict(
             name=self._project_path(project_id=project_id),
         )
@@ -122,7 +122,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         service_name: str | None = None,
         project_id: str | None = None,
-    ) -> Generator[ResourceType, None, None]:
+    ) -> Generator[ResourceType]:
         params = dict(
             parent=self._namespace_path(project_id=project_id),
         )
@@ -135,7 +135,7 @@ class CloudRun(DiscoveryMixin, GoogleCloudPilotAPI):
             if not service_name or item["metadata"]["labels"]["serving.knative.dev/service"] == service_name:
                 yield item
 
-    def list_domain_mappings(self, project_id: str | None = None) -> Generator[ResourceType, None, None]:
+    def list_domain_mappings(self, project_id: str | None = None) -> Generator[ResourceType]:
         params = dict(
             parent=self._namespace_path(project_id=project_id),
         )

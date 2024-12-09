@@ -33,7 +33,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         project_id: str | None = None,
         location: str | None = "global",
-    ) -> Generator[ResourceType, None, None]:
+    ) -> Generator[ResourceType]:
         params = dict(
             parent=self._location_path(project_id=project_id, location=location),
         )
@@ -94,7 +94,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         api_name: str,
         project_id: str | None = None,
-    ) -> Generator[ResourceType, None, None]:
+    ) -> Generator[ResourceType]:
         params = dict(
             parent=self._api_path(api_name=api_name, project_id=project_id),
         )
@@ -164,7 +164,7 @@ class APIGateway(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         project_id: str | None = None,
         location: str | None = None,
-    ) -> Generator[ResourceType, None, None]:
+    ) -> Generator[ResourceType]:
         params = dict(
             parent=self._location_path(project_id=project_id, location=location),
         )

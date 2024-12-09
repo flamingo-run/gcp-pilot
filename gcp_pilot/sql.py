@@ -28,7 +28,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             **kwargs,
         )
 
-    def list_instances(self, project_id: str | None = None) -> Generator[InstanceType, None, None]:
+    def list_instances(self, project_id: str | None = None) -> Generator[InstanceType]:
         params = dict(project=project_id or self.project_id)
         instances = self._paginate(
             method=self.client.instances().list,
@@ -131,7 +131,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
                 return self.get_database(instance=instance, database=name, project_id=project_id)
             raise
 
-    def list_users(self, instance: str, project_id: str | None = None) -> Generator[UserType, None, None]:
+    def list_users(self, instance: str, project_id: str | None = None) -> Generator[UserType]:
         params = dict(
             instance=instance,
             project=project_id or self.project_id,
@@ -170,7 +170,7 @@ class CloudSQL(DiscoveryMixin, GoogleCloudPilotAPI):
             body=body,
         )
 
-    def list_ssl_certs(self, instance: str, project_id: str | None = None) -> Generator[dict, None, None]:
+    def list_ssl_certs(self, instance: str, project_id: str | None = None) -> Generator[dict]:
         params = dict(
             instance=instance,
             project=project_id or self.project_id,

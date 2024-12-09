@@ -422,7 +422,7 @@ class DiscoveryMixin:
         method: Callable,
         result_key: str = "items",
         params: dict[str, Any] | None = None,
-    ) -> Generator[ResourceType, None, None]:
+    ) -> Generator[ResourceType]:
         results = self._execute(
             method=method,
             **params,
@@ -438,7 +438,7 @@ class DiscoveryMixin:
         params: dict[str, Any] | None = None,
         order_by: str | None = None,
         limit: int | None = None,
-    ) -> Generator[ResourceType, None, None]:
+    ) -> Generator[ResourceType]:
         page_token = None
         params = params or {}
 

@@ -155,7 +155,7 @@ class Manager:
                         yield item
                         found.add(item.id)
 
-    def filter(self, **kwargs) -> Generator[Document, None, None]:
+    def filter(self, **kwargs) -> Generator[Document]:
         for entity in self.query(**kwargs):
             yield self.doc_klass.from_entity(entity=entity)
 

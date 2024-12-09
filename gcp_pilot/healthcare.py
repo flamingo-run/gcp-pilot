@@ -68,7 +68,7 @@ class HealthcareBase(DiscoveryMixin, GoogleCloudPilotAPI, abc.ABC):
         self,
         project_id: str | None = None,
         location: str | None = None,
-    ) -> Generator[ResourceType, None, None]:
+    ) -> Generator[ResourceType]:
         params = dict(
             parent=self._location_path(project_id=project_id, location=location),
         )
@@ -156,7 +156,7 @@ class FHIRResultSet:
         request.raise_for_status()
         self.response = request.json()
 
-    def __iter__(self) -> Generator[dict, None, None]:
+    def __iter__(self) -> Generator[dict]:
         while True:
             yield from self.get_page_resources()
             self.cursor = self.next_cursor
@@ -170,7 +170,7 @@ class FHIRResultSet:
         except StopIteration as exc:
             raise exceptions.NotFound() from exc
 
-    def get_page_resources(self) -> Generator[DomainResource, None, None]:
+    def get_page_resources(self) -> Generator[DomainResource]:
         if self.total == 0:
             return
 
@@ -257,7 +257,7 @@ class HealthcareFHIR(HealthcareBase):
         dataset_name: str,
         project_id: str | None = None,
         location: str | None = None,
-    ) -> Generator[ResourceType, None, None]:
+    ) -> Generator[ResourceType]:
         params = dict(
             parent=self._dataset_path(name=dataset_name, project_id=project_id, location=location),
         )

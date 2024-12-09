@@ -19,7 +19,7 @@ class Monitoring(DiscoveryMixin, GoogleCloudPilotAPI):
         parent = self._project_path(project_id=project_id)
         return f"{parent}/services/{service_id}"
 
-    def list_services(self, project_id: str | None = None) -> Generator[ResourceType, None, None]:
+    def list_services(self, project_id: str | None = None) -> Generator[ResourceType]:
         parent = self._project_path(project_id=project_id)
 
         params = dict(

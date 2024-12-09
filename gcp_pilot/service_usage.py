@@ -27,7 +27,7 @@ class ServiceUsage(DiscoveryMixin, GoogleCloudPilotAPI):
         self,
         project_id: str | None = None,
         status: ServiceStatus = ServiceStatus.ENABLED,
-    ) -> Generator[ResourceType, None, None]:
+    ) -> Generator[ResourceType]:
         params = dict(
             parent=self._project_path(project_id=project_id),
         )

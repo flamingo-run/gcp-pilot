@@ -297,7 +297,7 @@ class ServiceAgent:
     _suffixes = ["Service Agent", "Agent", "Service Account"]
 
     @classmethod
-    def get_available_agents(cls) -> Generator[str, None, None]:
+    def get_available_agents(cls) -> Generator[str]:
         for agent in cls.agents:
             name = agent
             for suffix in cls._suffixes:

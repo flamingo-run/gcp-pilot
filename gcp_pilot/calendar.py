@@ -85,7 +85,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
 
         return dt.strftime(fmt)
 
-    def get_calendars(self) -> Generator[ResourceType, None, None]:
+    def get_calendars(self) -> Generator[ResourceType]:
         params = {}
         yield from self._paginate(
             method=self.client.calendarList().list,
@@ -249,7 +249,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
         calendar_id: str = "primary",
         starts_at: datetime.date | None = None,
         ends_at: datetime.date | None = None,
-    ) -> Generator[ResourceType, None, None]:
+    ) -> Generator[ResourceType]:
         min_date = self._date_to_str(starts_at) if starts_at else None
         max_date = self._date_to_str(ends_at) if ends_at else None
 
@@ -283,7 +283,7 @@ class Calendar(DiscoveryMixin, GoogleCloudPilotAPI):
             eventId=event_id,
         )
 
-    def get_recurrent_events(self, event_id: str, calendar_id: str = "primary") -> Generator[ResourceType, None, None]:
+    def get_recurrent_events(self, event_id: str, calendar_id: str = "primary") -> Generator[ResourceType]:
         page_size = 100
         params = dict(
             calendarId=calendar_id,

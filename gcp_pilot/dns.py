@@ -40,7 +40,7 @@ class CloudDNS(GoogleCloudPilotAPI):
             "project": self.project_id,
         }
 
-    def list_zones(self) -> Generator[dns.ManagedZone, None, None]:
+    def list_zones(self) -> Generator[dns.ManagedZone]:
         yield from self.client.list_zones()
 
     def _build_zone(self, name: str, dns_name: str, description: str | None = None) -> dns.ManagedZone:
@@ -70,7 +70,7 @@ class CloudDNS(GoogleCloudPilotAPI):
             raise exceptions.NotFound()
         return zone.delete()
 
-    def list_records(self, zone_name: str, zone_dns: str) -> Generator[dns.ResourceRecordSet, None, None]:
+    def list_records(self, zone_name: str, zone_dns: str) -> Generator[dns.ResourceRecordSet]:
         zone = self._build_zone(name=zone_name, dns_name=zone_dns)
 
         yield from zone.list_resource_record_sets()  # TODO Why paging does not work like docs?

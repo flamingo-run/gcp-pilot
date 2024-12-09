@@ -1,74 +1,90 @@
-[tool.poetry]
+[project]
 name = "gcp-pilot"
-version = "1.29.1"
+version = "1.30.0"
 description = "Google Cloud Platform Friendly Pilot"
-authors = ["Joao Daher <joao@daher.dev>"]
-repository = "https://github.com/flamingo-run/gcp-pilot"
+authors = [
+    {name = "Joao Daher", email = "joao@daher.dev"},
+]
+maintainers = [
+    {name = "Rodolfo Stangherlin"},
+    {name = "Diego Freire"},
+    {name = "Guilherme Araujo"},
+    {name = "Lucas Gomide"},
+]
 readme = "README.md"
 keywords = ["gcp", "google cloud python", "datastore orm"]
-packages = [
-    { include = "gcp_pilot" },
+requires-python = ">=3.12.2"
+dependencies = [
+    "factory-boy>=3.3.1",
+    "google-api-python-client>=2.154.0",
+    "pytz>=2024.2",
+    "tenacity>=9.0.0",
 ]
 
+[project.optional-dependencies]
+tasks = [
+    "google-cloud-scheduler>=2.14.1",
+    "google-cloud-tasks>=2.17.1",
+]
+build = [
+    "google-cloud-build>=3.27.1",
+]
+storage = [
+    "google-cloud-storage>=2.19.0",
+]
+bigquery = [
+    "google-cloud-bigquery>=3.27.0",
+    "google-cloud-storage>=2.19.0",
+]
+speech = [
+    "google-cloud-speech>=2.28.1",
+]
+sheets = [
+    "gspread>=6.1.4",
+]
+pubsub = [
+    "google-cloud-pubsub>=2.27.1",
+]
+datastore = [
+    "google-cloud-datastore>=2.20.1",
+    "pydantic>=2.10.3",
+]
+dns = [
+    "google-cloud-dns>=0.35.0",
+]
+secret = [
+    "google-cloud-secret-manager>=2.21.1",
+]
+monitoring = [
+    "google-cloud-error-reporting>=1.11.1",
+    "google-cloud-logging>=3.11.3",
+]
+healthcare = [
+    "fhir-resources>=7.1.0",
+]
+iam = [
+    "google-cloud-iam>=2.16.1",
+]
 
-[tool.poetry.dependencies]
-python = "~3.11||~3.12"
-pytz = "*"
-tenacity = "*"
-factory_boy = "*"
-google-api-python-client = "*"
-google-cloud-tasks = { version = "^2", optional = true}
-google-cloud-scheduler = { version = "^2", optional = true}
-google-cloud-storage = { version = "^2", optional = true}
-google-cloud-build = { version = "^3", optional = true}
-google-cloud-bigquery = {version = "^3", optional = true, extras = ["storage"]}
-google-cloud-speech = { version = "^2", optional = true}
-gspread = { version = "^6", optional = true}
-google-cloud-pubsub = { version = "^2", optional = true}
-google-cloud-datastore = { version = "^2", optional = true}
-google-cloud-iam = { version = "*", optional = true}
-pydantic = { version = "*", optional = true}
-google-cloud-dns = { version = "^0", optional = true, python = "<3.12"}
-google-cloud-logging = { version = "^3", optional = true}
-google-cloud-error-reporting = { version = "*", optional = true}
-google-cloud-secret-manager = { version = "*", optional = true}
-"fhir.resources" = { version = "*", optional = true}
-
-[tool.poetry.extras]
-tasks = ["google-cloud-tasks", "google-cloud-scheduler"]
-build = ["google-cloud-build"]
-storage = ["google-cloud-storage"]
-bigquery = ["google-cloud-bigquery", "google-cloud-storage"]
-speech = ["google-cloud-speech"]
-sheets = ["gspread"]
-pubsub = ["google-cloud-pubsub"]
-datastore = ["google-cloud-datastore", "pydantic"]
-dns = ["google-cloud-dns"]
-secret = ["google-cloud-secret-manager"]
-monitoring = ["google-cloud-logging", "google-cloud-error-reporting"]
-healthcare = ["fhir.resources"]
-iam = ["google-cloud-iam"]
-
-
-[tool.poetry.dev-dependencies]
-"fhir.resources" = { version = ">=7.0.2"}
-ruff = "*"
-pyjwt = "*"
-pytest-cov = "*"
-pytest-rerunfailures = "*"
-pytest-xdist = "*"
-pytest-sugar = "*"
-pytest-random-order = "*"
-pytest-timeout = "*"
-
+[dependency-groups]
+dev = [
+    "pyjwt>=2.10.1",
+    "pytest-cov>=6.0.0",
+    "pytest-random-order>=1.1.1",
+    "pytest-rerunfailures>=15.0",
+    "pytest-sugar>=1.0.0",
+    "pytest-timeout>=2.3.1",
+    "pytest-xdist>=3.6.1",
+    "ruff>=0.8.2",
+]
 
 [tool.ruff]
 line-length = 120
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["RUF", "I", "PL", "F", "COM", "UP", "DJ", "T10", "T20", "DTZ", "SIM", "TID", "PTH", "ERA", "TRY"]
-ignore = ["COM812","COM819", "PLR2004", "PLR0911", "PLR0912", "PLR0913", "PLR0915", "DJ001", "DJ001", "DJ008", "TRY003", "RUF012"]
+select = ["RUF", "I", "PL", "F", "COM", "UP", "T10", "T20", "DTZ", "SIM", "TID", "PTH", "ERA", "TRY"]
+ignore = ["COM812","COM819", "PLR2004", "PLR0911", "PLR0912", "PLR0913", "PLR0915", "TRY003", "RUF012"]
 
 
 [tool.pytest.ini_options]
@@ -82,5 +98,8 @@ source = ["gcp_pilot"]
 
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+package = false

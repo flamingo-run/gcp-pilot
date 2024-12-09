@@ -105,6 +105,6 @@ class CloudErrorExplorer(DiscoveryMixin, GoogleCloudPilotAPI):
 
 
 __all__ = (
-    "CloudErrorReporting",
     "CloudErrorExplorer",
+    "CloudErrorReporting",
 )

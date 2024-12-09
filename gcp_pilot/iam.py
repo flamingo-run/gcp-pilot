@@ -305,6 +305,6 @@ class IAMCredentials(GoogleCloudPilotAPI):
 
 
 __all__ = (
-    "IdentityAccessManager",
     "IAMCredentials",
+    "IdentityAccessManager",
 )

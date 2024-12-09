@@ -98,8 +98,8 @@ source = ["gcp_pilot"]
 
 
 [build-system]
-requires = ["setuptools>=75"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.uv]
 package = false

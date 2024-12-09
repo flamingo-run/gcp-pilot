@@ -8,6 +8,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - name: Install uv
@@ -41,8 +44,9 @@ jobs:
         if: ${{ steps.versioning.outputs.should_release == 'true' }}
         run: gh release create ${{ steps.versioning.outputs.package_version }} --generate-notes
         env:
-          GITHUB_TOKEN: ${{ secrets.gh_token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build & Publish package
         if: ${{ steps.versioning.outputs.should_release == 'true' }}
         run: |
           uv build
+          uv publish

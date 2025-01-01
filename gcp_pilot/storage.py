@@ -159,15 +159,20 @@ class CloudStorage(GoogleCloudPilotAPI):
         blob_name: str,
         expiration: timedelta = timedelta(minutes=5),
         version: str = "v4",
+        method: str = "GET",
+        **kwargs,
     ):
         bucket = self.client.bucket(bucket_name)
         blob = bucket.blob(blob_name)
+        kwargs = kwargs | {
+            "service_account_email": self.service_account_email,
+            "access_token": self.token,
+        }
         return blob.generate_signed_url(
             version=version,
             expiration=expiration,
-            method="GET",
-            service_account_email=self.service_account_email,
-            access_token=self.token,
+            method=method,
+            **kwargs,
         )
 
 

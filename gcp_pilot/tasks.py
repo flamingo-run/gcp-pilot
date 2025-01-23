@@ -46,6 +46,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
         use_oidc_auth: bool = True,
         content_type: str | None = None,
         headers: dict[str, str] | None = None,
+        task_timeout: timedelta | None = None,
     ) -> tasks_v2.Task:
         queue_path = self.client.queue_path(
             project=project_id or self.project_id,
@@ -81,6 +82,9 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             ),
         )
 
+        if task_timeout is not None:
+            task.dispatch_deadline = self.timedelta_to_duration(task_timeout)
+
         if delay_in_seconds:
             target_date = datetime.now(tz=UTC) + timedelta(seconds=delay_in_seconds)
             timestamp = timestamp_pb2.Timestamp()
@@ -115,6 +119,9 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             parent=parent,
             queue=queue,
         )
+
+    def timedelta_to_duration(delta: timedelta) -> str:
+        return f"{int(delta.total_seconds())}s"
 
     def get_queue(
         self,

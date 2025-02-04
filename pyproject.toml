@@ -60,7 +60,7 @@ monitoring = [
     "google-cloud-logging>=3.11.3",
 ]
 healthcare = [
-    "fhir-resources>=7.1.0",
+    "fhir-resources<7",
 ]
 iam = [
     "google-cloud-iam>=2.16.1",

@@ -218,19 +218,19 @@ wheels = [
 
 [[package]]
 name = "fhir-resources"
-version = "7.1.0"
+version = "6.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic", extra = ["email"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2f/cf/3ce9e45ec0b5bddade9d06dfafc91108d6841649ec70057bda785556c1d5/fhir.resources-7.1.0.tar.gz", hash = "sha256:fae2d43c03dacf85a9f9fbce3b62148f3166fe297471cd43b74d91abbf69f818", size = 1916569 }
+sdist = { url = "https://files.pythonhosted.org/packages/43/18/90d418f71abdee269b767af5935790dc79973cc88323be36cc14adf7d664/fhir.resources-6.5.0.tar.gz", hash = "sha256:1d02ff2547e5b6323543c8ce9916e0c9e5536847b3b2171acb1f51a86efba16e", size = 1160597 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/15/58/00b50d32c9669acfeaac2c60989a9b49e7bde79c1a8d31801be61ee558e1/fhir.resources-7.1.0-py2.py3-none-any.whl", hash = "sha256:4d37c3aadb3afbabad28ca7701b87323680468a13f6a6426bb6c282d4efd5c62", size = 3121497 },
+    { url = "https://files.pythonhosted.org/packages/c4/b7/b9a1a9134aa30658a7c9c85afa244682134a9321c19f180b8fcafae120d5/fhir.resources-6.5.0-py2.py3-none-any.whl", hash = "sha256:515a6cb3eadc61597fec0cb273b1ff943f76f44d2c8efefa5218f001087a95d3", size = 1777244 },
 ]
 
 [[package]]
 name = "gcp-pilot"
-version = "1.31.0"
+version = "1.32.0"
 source = { virtual = "." }
 dependencies = [
     { name = "factory-boy" },
@@ -299,7 +299,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "factory-boy", specifier = ">=3.3.1" },
-    { name = "fhir-resources", marker = "extra == 'healthcare'", specifier = ">=7.1.0" },
+    { name = "fhir-resources", marker = "extra == 'healthcare'", specifier = "<7" },
     { name = "google-api-python-client", specifier = ">=2.154.0" },
     { name = "google-cloud-bigquery", marker = "extra == 'bigquery'", specifier = ">=3.27.0" },
     { name = "google-cloud-build", marker = "extra == 'build'", specifier = ">=3.27.1" },

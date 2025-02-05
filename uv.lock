@@ -221,7 +221,7 @@ wheels = [
 
 [[package]]
 name = "gcp-pilot"
-version = "1.32.1"
+version = "1.32.2"
 source = { virtual = "." }
 dependencies = [
     { name = "factory-boy" },

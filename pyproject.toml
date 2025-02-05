@@ -47,7 +47,7 @@ pubsub = [
 ]
 datastore = [
     "google-cloud-datastore>=2.20.1",
-    "pydantic>=2.10.3",
+    "pydantic<2",
 ]
 dns = [
     "google-cloud-dns>=0.35.0",
@@ -61,6 +61,7 @@ monitoring = [
 ]
 healthcare = [
     "fhir-resources<7",
+    "pydantic<2"
 ]
 iam = [
     "google-cloud-iam>=2.16.1",

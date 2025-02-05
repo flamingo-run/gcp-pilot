@@ -1,6 +1,6 @@
 [project]
 name = "gcp-pilot"
-version = "1.32.1"
+version = "1.32.2"
 description = "Google Cloud Platform Friendly Pilot"
 authors = [
     {name = "Joao Daher", email = "joao@daher.dev"},

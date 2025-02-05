@@ -120,7 +120,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             queue=queue,
         )
 
-    def timedelta_to_duration(delta: timedelta) -> str:
+    def timedelta_to_duration(self, delta: timedelta) -> str:
         return f"{int(delta.total_seconds())}s"
 
     def get_queue(

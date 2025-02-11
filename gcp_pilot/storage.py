@@ -33,10 +33,7 @@ class CloudStorage(GoogleCloudPilotAPI):
         except Conflict:
             if not exists_ok:
                 raise
-            return self.check_bucket(name=name)
-
-    def check_bucket(self, name: str) -> Bucket:
-        return self.client.get_bucket(bucket_or_name=name)
+            return self.get_bucket(name=name)
 
     def upload(
         self,
@@ -47,7 +44,7 @@ class CloudStorage(GoogleCloudPilotAPI):
         is_public: bool = False,
         content_type: str | None = None,
     ) -> Blob:
-        target_bucket = self.check_bucket(name=bucket_name)
+        target_bucket = self.get_bucket(name=bucket_name)
 
         target_file_name = target_file_name or str(source_file).rsplit("/", maxsplit=1)[-1]
         blob = target_bucket.blob(target_file_name, chunk_size=chunk_size)
@@ -71,6 +68,21 @@ class CloudStorage(GoogleCloudPilotAPI):
 
         return blob
 
+    def get_bucket(
+        self,
+        name: str,
+        auto_create_bucket: bool = False,
+        region: str | None = None,
+        project_id: str | None = None,
+    ) -> Bucket:
+        if auto_create_bucket:
+            try:
+                return self.client.get_bucket(bucket_or_name=name)
+            except NotFound:
+                return self.create_bucket(name=name, region=region, project_id=project_id, exists_ok=True)
+        else:
+            return self.client.bucket(name)
+
     def copy(
         self,
         source_file_name,
@@ -81,21 +93,14 @@ class CloudStorage(GoogleCloudPilotAPI):
         region: str | None = None,
         auto_create_bucket: bool = False,
     ) -> Blob:
-        try:
-            source_bucket = self.check_bucket(name=source_bucket_name)
-        except NotFound:
-            if not auto_create_bucket:
-                raise
-            source_bucket = self.create_bucket(name=source_bucket_name, region=region, project_id=project_id)
-
+        source_bucket = self.get_bucket(
+            name=source_bucket_name, auto_create_bucket=auto_create_bucket, region=region, project_id=project_id
+        )
         source_blob = source_bucket.blob(source_file_name)
 
-        try:
-            target_bucket = self.check_bucket(name=target_bucket_name)
-        except NotFound:
-            if not auto_create_bucket:
-                raise
-            target_bucket = self.create_bucket(name=target_bucket_name, region=region, project_id=project_id)
+        target_bucket = self.get_bucket(
+            name=target_bucket_name, auto_create_bucket=auto_create_bucket, region=region, project_id=project_id
+        )
         target_file_name = target_file_name or str(source_file_name).rsplit("/", maxsplit=1)[-1]
 
         obj = source_bucket.copy_blob(source_blob, target_bucket, target_file_name)
@@ -122,7 +127,7 @@ class CloudStorage(GoogleCloudPilotAPI):
         return data
 
     def delete(self, file_name: str, bucket_name: str | None = None) -> None:
-        bucket = self.check_bucket(name=bucket_name)
+        bucket = self.get_bucket(name=bucket_name)
         blob = bucket.blob(file_name)
         return blob.delete()
 

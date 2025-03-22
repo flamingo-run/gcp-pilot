@@ -17,6 +17,8 @@ class patch_auth:
         )
         managers = [
             patch("google.auth.default", return_value=(credentials, project_id)),
+            patch("google.oauth2.service_account.Credentials.before_request", return_value=None),
+            patch("google.oauth2.service_account.Credentials.refresh", return_value=None),
             patch("gcp_pilot.base.GoogleCloudPilotAPI._set_location", return_value=location),
             patch("gcp_pilot.base.AppEngineBasedService._set_location", return_value=location),
         ]

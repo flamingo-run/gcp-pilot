@@ -100,4 +100,16 @@ class GoogleDrivePermissions(DiscoveryMixin, BaseDrive):
         return self._execute(self._resource.get, fileId=file_id, permissionId=permission_id, **kwargs)
 
 
-__all__ = ("GoogleDrivePermissions",)
+class GoogleDriveFiles(DiscoveryMixin, BaseDrive):
+    @property
+    def _resource(self):
+        return self.client.files()
+
+    def list(self, **kwargs):
+        return self._paginate(self._resource.list, result_key="files", **kwargs)
+
+
+__all__ = (
+    "GoogleDriveFiles",
+    "GoogleDrivePermissions",
+)

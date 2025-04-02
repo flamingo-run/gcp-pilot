@@ -3,6 +3,7 @@ import uuid
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
 
+from google.api_core import gapic_v1, retry
 from google.api_core.exceptions import FailedPrecondition, NotFound
 from google.cloud import tasks_v2
 from google.protobuf import timestamp_pb2
@@ -47,6 +48,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
         content_type: str | None = None,
         headers: dict[str, str] | None = None,
         task_timeout: timedelta | None = None,
+        retry: retry.Retry | gapic_v1.method._MethodDefault = gapic_v1.method.DEFAULT,
     ) -> tasks_v2.Task:
         queue_path = self.client.queue_path(
             project=project_id or self.project_id,
@@ -93,7 +95,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
             task.schedule_time = timestamp
 
         try:
-            response = self.client.create_task(parent=queue_path, task=task)
+            response = self.client.create_task(parent=queue_path, task=task, retry=retry)
         except FailedPrecondition as exc:
             if "a queue with this name existed recently" in exc.message:
                 raise exceptions.DeletedRecently(resource=f"Queue {queue_name}") from exc
@@ -101,7 +103,7 @@ class CloudTasks(AppEngineBasedService, GoogleCloudPilotAPI):
                 raise
 
             self.create_queue(queue_name=queue_name, project_id=project_id)
-            response = self.client.create_task(parent=queue_path, task=task)
+            response = self.client.create_task(parent=queue_path, task=task, retry=retry)
         return response
 
     def create_queue(

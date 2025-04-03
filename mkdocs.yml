@@ -1,0 +1,76 @@
+site_name: Google Cloud Pilot
+site_description: A Python library that simplifies interaction with Google Cloud Platform services
+site_url: https://gcp-pilot.flamingo.codes
+repo_url: https://github.com/flamingo-run/gcp-pilot
+repo_name: flamingo-run/gcp-pilot
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    primary: blue
+    accent: blue
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.expand
+    - navigation.indexes
+    - content.code.copy
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed
+  - pymdownx.emoji
+  - admonition
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Authentication: authentication.md
+  - Services:
+    - Overview: services/index.md
+    - Core Services:
+      - IAM: services/iam.md
+      - Identity Platform: services/identity_platform.md
+      - Resource Manager: services/resource.md
+      - Secret Manager: services/secret_manager.md
+      - Identity Aware Proxy: services/iap.md
+      - Service Usage: services/service_usage.md
+    - Storage and Databases:
+      - Cloud Storage: services/storage.md
+      - Cloud SQL: services/sql.md
+      - Datastore: services/datastore.md
+      - BigQuery: services/big_query.md
+    - Compute and Serverless:
+      - Cloud Functions: services/functions.md
+      - Cloud Run: services/run.md
+      - App Engine: services/app_engine.md
+    - Messaging and Integration:
+      - Pub/Sub: services/pubsub.md
+      - Cloud Tasks: services/tasks.md
+      - Cloud Scheduler: services/scheduler.md
+    - DevOps and CI/CD:
+      - Cloud Build: services/build.md
+      - Source Repositories: services/source.md
+    - Networking:
+      - Cloud DNS: services/dns.md
+      - API Gateway: services/api_gateway.md
+    - Monitoring and Logging:
+      - Error Reporting: services/error_reporting.md
+      - Logging: services/logging.md
+      - Monitoring: services/monitoring.md
+    - Specialized Services:
+      - Healthcare: services/healthcare.md
+      - Speech: services/speech.md
+      - Datastream: services/datastream.md
+    - Google Workspace Integration:
+      - Directory: services/directory.md
+      - Calendar: services/calendar.md
+      - Sheets: services/sheets.md
+      - People: services/people.md
+      - Chats: services/chats.md
+    - Development Tools:
+      - Testing Utilities: services/mocker.md

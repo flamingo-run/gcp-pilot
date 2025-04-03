@@ -8,7 +8,7 @@ Google Cloud Pilot (gcp-pilot) is a Python library that simplifies interaction w
 
 ## Documentation
 
-For full documentation, visit the [documentation site](https://github.com/flamingo-run/gcp-pilot/tree/main/docs).
+**Full documentation is available at [gcp-pilot.flamingo.codes](https://gcp-pilot.flamingo.codes)**
 
 ## Installation
 

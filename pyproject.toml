@@ -62,6 +62,9 @@ monitoring = [
 healthcare = [
     "fhir-resources>=7.1.0",
 ]
+legacy_healthcare = [
+    "fhir-resources<7",
+]
 iam = [
     "google-cloud-iam>=2.16.1",
 ]

@@ -175,7 +175,7 @@ class FHIRResultSet:
             return
 
         for entry in self.response["entry"]:
-            resource_class = get_fhir_model_class(entry["resource"]["resourceType"])
+            resource_class = self.resource_class or get_fhir_model_class(entry["resource"]["resourceType"])
             yield resource_class(**entry["resource"])
 
     @property

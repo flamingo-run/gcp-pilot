@@ -8,9 +8,9 @@ from dataclasses import dataclass
 from typing import Any
 from urllib.parse import parse_qsl, urlsplit
 
-from fhir.resources import get_fhir_model_class
-from fhir.resources.domainresource import DomainResource
-from fhir.resources.identifier import Identifier
+from fhir.resources.R4B import get_fhir_model_class
+from fhir.resources.R4B.domainresource import DomainResource
+from fhir.resources.R4B.identifier import Identifier
 
 from gcp_pilot import exceptions
 from gcp_pilot.base import DiscoveryMixin, GoogleCloudPilotAPI, ResourceType, friendly_http_error

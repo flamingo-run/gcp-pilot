@@ -74,8 +74,8 @@ jobs:
           LOG_LEVEL: ERROR
 
       - name: Report Coverage
-        run: |
-          pip3 install --upgrade coveralls coverage[toml]
-          coveralls --service=github
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: uv run coverage lcov
+      - uses: qltysh/qlty-action/coverage@v1
+        with:
+          token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+          files: coverage.lcov

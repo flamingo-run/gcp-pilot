@@ -1,5 +1,12 @@
+![PyPI - Downloads](https://img.shields.io/pypi/dm/gcp-pilot)
+
 ![Github CI](https://github.com/flamingo-run/gcp-pilot/workflows/Github%20CI/badge.svg)
+[![Maintainability](https://qlty.sh/badges/e65aa986-7aeb-436c-9340-9aa19ef3edaa/maintainability.svg)](https://qlty.sh/gh/flamingo-run/projects/gcp-pilot)
+[![Code Coverage](https://qlty.sh/badges/e65aa986-7aeb-436c-9340-9aa19ef3edaa/test_coverage.svg)](https://qlty.sh/gh/flamingo-run/projects/gcp-pilot)
+
 [![Coverage Status](https://coveralls.io/repos/github/flamingo-run/gcp-pilot/badge.svg)](https://coveralls.io/github/flamingo-run/gcp-pilot)
+
+
 [![python](https://img.shields.io/badge/python-3.11-blue.svg)]() [![python](https://img.shields.io/badge/python-3.12-blue.svg)]() [![python](https://img.shields.io/badge/python-3.13-blue.svg)]()
 
 # Google Cloud Pilot

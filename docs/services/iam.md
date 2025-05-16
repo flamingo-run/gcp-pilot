@@ -6,7 +6,7 @@ IAM (Identity and Access Management) is a service that allows you to manage acce
 
 To use the IAM functionality, you need to install gcp-pilot with the iam extra:
 
-```bash
+```bash title="Install IAM extra"
 pip install gcp-pilot[iam]
 ```
 
@@ -18,121 +18,136 @@ The `IdentityAccessManager` class allows you to manage service accounts and thei
 
 #### Initialization
 
-```python
+```python title="Initialize IdentityAccessManager"
 from gcp_pilot.iam import IdentityAccessManager
 
-# Initialize with default credentials
-iam = IdentityAccessManager()
-
-# Initialize with specific project
-iam = IdentityAccessManager(project_id="my-project")
-
-# Initialize with service account impersonation
-iam = IdentityAccessManager(impersonate_account="service-account@project-id.iam.gserviceaccount.com")
+iam = IdentityAccessManager() # (1)!
+iam = IdentityAccessManager(project_id="my-project") # (2)!
+iam = IdentityAccessManager(impersonate_account="service-account@project-id.iam.gserviceaccount.com") # (3)!
 ```
+
+1.  Initialize with default credentials
+2.  Initialize with specific project
+3.  Initialize with service account impersonation
 
 #### Managing Service Accounts
 
-```python
-# Create a service account
-service_account = iam.create_service_account(
+```python title="Manage Service Accounts"
+service_account = iam.create_service_account( # (1)!
     name="my-service-account",
     display_name="My Service Account",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
-    exists_ok=True,  # Optional: if True, returns the existing service account if it already exists
+    project_id="my-project",  # (2)!
+    exists_ok=True,  # (3)!
 )
 print(f"Service Account: {service_account['email']}")
 
-# Get a service account
-service_account = iam.get_service_account(
+service_account = iam.get_service_account( # (4)!
     name="my-service-account",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+    project_id="my-project",  # (5)!
 )
 print(f"Service Account: {service_account['email']}")
 
-# List all service accounts in a project
-service_accounts = iam.list_service_accounts(
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+service_accounts = iam.list_service_accounts( # (6)!
+    project_id="my-project",  # (7)!
 )
 for account in service_accounts:
     print(f"Service Account: {account['email']}")
 ```
 
+1.  Create a service account
+2.  Optional: defaults to the project associated with credentials
+3.  Optional: if True, returns the existing service account if it already exists
+4.  Get a service account
+5.  Optional: defaults to the project associated with credentials
+6.  List all service accounts in a project
+7.  Optional: defaults to the project associated with credentials
+
 #### Managing Service Account Keys
 
-```python
-# Create a key for a service account
-key = iam.create_key(
+```python title="Manage Service Account Keys"
+key = iam.create_key( # (1)!
     service_account_name="my-service-account",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+    project_id="my-project",  # (2)!
 )
 print(f"Key ID: {key['id']}")
 print(f"Private Key JSON: {key['json']}")
 
-# List keys for a service account
-keys = iam.list_keys(
+keys = iam.list_keys( # (3)!
     service_account_name="my-service-account",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+    project_id="my-project",  # (4)!
 )
-for key in keys:
-    print(f"Key ID: {key['id']}")
-    print(f"Valid After: {key['validAfterTime']}")
-    print(f"Valid Before: {key['validBeforeTime']}")
+for key_item in keys: # Renamed key to key_item to avoid conflict with variable 'key' later
+    print(f"Key ID: {key_item['id']}")
+    print(f"Valid After: {key_item['validAfterTime']}")
+    print(f"Valid Before: {key_item['validBeforeTime']}")
 
-# Get a specific key
-key = iam.get_key(
+key = iam.get_key( # (5)!
     key_id="key-id",
     service_account_name="my-service-account",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+    project_id="my-project",  # (6)!
 )
 print(f"Key ID: {key['id']}")
 print(f"Valid After: {key['validAfterTime']}")
 print(f"Valid Before: {key['validBeforeTime']}")
 
-# Delete a key
-iam.delete_key(
+iam.delete_key( # (7)!
     key_id="key-id",
     service_account_name="my-service-account",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+    project_id="my-project",  # (8)!
 )
 ```
+
+1.  Create a key for a service account
+2.  Optional: defaults to the project associated with credentials
+3.  List keys for a service account
+4.  Optional: defaults to the project associated with credentials
+5.  Get a specific key
+6.  Optional: defaults to the project associated with credentials
+7.  Delete a key
+8.  Optional: defaults to the project associated with credentials
 
 #### Managing IAM Policies
 
-```python
-# Get the IAM policy for a service account
-policy = iam.get_policy(
+```python title="Manage IAM Policies"
+policy = iam.get_policy( # (1)!
     email="my-service-account@my-project.iam.gserviceaccount.com",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+    project_id="my-project",  # (2)!
 )
 print(f"Policy: {policy}")
 
-# Bind a member to a role for a service account
-policy = iam.bind_member(
+policy = iam.bind_member( # (3)!
     target_email="my-service-account@my-project.iam.gserviceaccount.com",
     member_email="user@example.com",
     role="roles/iam.serviceAccountUser",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+    project_id="my-project",  # (4)!
 )
 print(f"Updated Policy: {policy}")
 
-# Remove a member from a role for a service account
-policy = iam.remove_member(
+policy = iam.remove_member( # (5)!
     target_email="my-service-account@my-project.iam.gserviceaccount.com",
     member_email="user@example.com",
     role="roles/iam.serviceAccountUser",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+    project_id="my-project",  # (6)!
 )
 print(f"Updated Policy: {policy}")
 
-# Set a custom policy for a service account
-policy = iam.set_policy(
+policy = iam.set_policy( # (7)!
     email="my-service-account@my-project.iam.gserviceaccount.com",
-    policy=custom_policy,  # A policy object
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+    policy=custom_policy,  # (8)!
+    project_id="my-project",  # (9)!
 )
 print(f"Updated Policy: {policy}")
 ```
+
+1.  Get the IAM policy for a service account
+2.  Optional: defaults to the project associated with credentials
+3.  Bind a member to a role for a service account
+4.  Optional: defaults to the project associated with credentials
+5.  Remove a member from a role for a service account
+6.  Optional: defaults to the project associated with credentials
+7.  Set a custom policy for a service account
+8.  A policy object
+9.  Optional: defaults to the project associated with credentials
 
 ### IAMCredentials
 
@@ -140,20 +155,20 @@ The `IAMCredentials` class allows you to work with IAM credentials, including JW
 
 #### Initialization
 
-```python
+```python title="Initialize IAMCredentials"
 from gcp_pilot.iam import IAMCredentials
 
-# Initialize with default credentials
-iam_credentials = IAMCredentials()
-
-# Initialize with service account impersonation
-iam_credentials = IAMCredentials(impersonate_account="service-account@project-id.iam.gserviceaccount.com")
+iam_credentials = IAMCredentials() # (1)!
+iam_credentials = IAMCredentials(impersonate_account="service-account@project-id.iam.gserviceaccount.com") # (2)!
 ```
+
+1.  Initialize with default credentials
+2.  Initialize with service account impersonation
 
 #### Working with JWT Tokens
 
-```python
-# Encode a JWT token
+```python title="Work with JWT Tokens"
+# Encode a JWT token (1)!
 payload = {
     "sub": "user@example.com",
     "aud": "https://example.com",
@@ -167,63 +182,78 @@ jwt_token = iam_credentials.encode_jwt(
 )
 print(f"JWT Token: {jwt_token}")
 
-# Decode a JWT token
-decoded_token = IAMCredentials.decode_jwt(
+decoded_token = IAMCredentials.decode_jwt( # (2)!
     token=jwt_token,
     issuer_email="service-account@project-id.iam.gserviceaccount.com",
     audience="https://example.com",
-    verify=True,  # Optional: if True, verifies the token signature
-    cache_certs=True,  # Optional: if True, caches the public certificates
-    clock_skew_in_seconds=0,  # Optional: allows for clock skew
+    verify=True,  # (3)!
+    cache_certs=True,  # (4)!
+    clock_skew_in_seconds=0,  # (5)!
 )
 print(f"Decoded Token: {decoded_token}")
 ```
+
+1.  Encode a JWT token
+2.  Decode a JWT token
+3.  Optional: if True, verifies the token signature
+4.  Optional: if True, caches the public certificates
+5.  Optional: allows for clock skew
 
 #### Working with ID Tokens
 
-```python
-# Generate an ID token
-id_token = iam_credentials.generate_id_token(
+```python title="Work with ID Tokens"
+id_token = iam_credentials.generate_id_token( # (1)!
     audience="https://example.com",
-    service_account_email="service-account@project-id.iam.gserviceaccount.com",  # Optional: defaults to the impersonated account
+    service_account_email="service-account@project-id.iam.gserviceaccount.com",  # (2)!
 )
 print(f"ID Token: {id_token}")
 
-# Decode an ID token
-decoded_token = IAMCredentials.decode_id_token(
+decoded_token = IAMCredentials.decode_id_token( # (3)!
     token=id_token,
-    audience="https://example.com",  # Optional: if provided, verifies the audience
+    audience="https://example.com",  # (4)!
 )
 print(f"Decoded Token: {decoded_token}")
 ```
+
+1.  Generate an ID token
+2.  Optional: defaults to the impersonated account
+3.  Decode an ID token
+4.  Optional: if provided, verifies the audience
 
 #### Working with Custom Tokens
 
-```python
-# Generate a custom token for Firebase Authentication
-custom_token = iam_credentials.generate_custom_token(
-    uid="user123",  # Optional: defaults to a random UUID
-    expires_in_seconds=3600,  # Optional: defaults to 12 hours
-    tenant_id="tenant123",  # Optional: for multi-tenancy
-    auth_email="service-account@project-id.iam.gserviceaccount.com",  # Optional: defaults to the impersonated account
-    claims={"premium_account": True},  # Optional: custom claims
+```python title="Work with Custom Tokens"
+custom_token = iam_credentials.generate_custom_token( # (1)!
+    uid="user123",  # (2)!
+    expires_in_seconds=3600,  # (3)!
+    tenant_id="tenant123",  # (4)!
+    auth_email="service-account@project-id.iam.gserviceaccount.com",  # (5)!
+    claims={"premium_account": True},  # (6)!
 )
 print(f"Custom Token: {custom_token}")
 
-# Decode a custom token
-decoded_token = IAMCredentials.decode_custom_token(
+decoded_token = IAMCredentials.decode_custom_token( # (7)!
     token=custom_token,
     issuer_email="service-account@project-id.iam.gserviceaccount.com",
-    verify=True,  # Optional: if True, verifies the token signature
+    verify=True,  # (8)!
 )
 print(f"Decoded Token: {decoded_token}")
 ```
+
+1.  Generate a custom token for Firebase Authentication
+2.  Optional: defaults to a random UUID
+3.  Optional: defaults to 12 hours
+4.  Optional: for multi-tenancy
+5.  Optional: defaults to the impersonated account
+6.  Optional: custom claims
+7.  Decode a custom token
+8.  Optional: if True, verifies the token signature
 
 ## Error Handling
 
 The IAM classes handle common errors and convert them to more specific exceptions:
 
-```python
+```python title="Error Handling Examples"
 from gcp_pilot import exceptions
 
 try:
@@ -246,13 +276,13 @@ except ValueError:
 
 Service account impersonation allows you to act as a service account without having its key file. This is a more secure approach than downloading and storing service account keys.
 
-```python
-# Initialize with service account impersonation
-iam = IdentityAccessManager(impersonate_account="service-account@project-id.iam.gserviceaccount.com")
-
-# Now all operations will be performed as the impersonated service account
-service_account = iam.get_service_account(name="another-service-account")
+```python title="Using Impersonated Credentials"
+iam = IdentityAccessManager(impersonate_account="service-account@project-id.iam.gserviceaccount.com") # (1)!
+service_account = iam.get_service_account(name="another-service-account") # (2)!
 ```
+
+1.  Initialize with service account impersonation
+2.  Now all operations will be performed as the impersonated service account
 
 For more information on service account impersonation, see the [Authentication](../authentication.md) documentation.
 
@@ -267,11 +297,12 @@ Here are some common IAM roles that you might use with service accounts:
 
 You can use these roles when binding members to service accounts:
 
-```python
-# Grant the serviceAccountUser role to a user
-policy = iam.bind_member(
+```python title="Granting an IAM Role"
+policy = iam.bind_member( # (1)!
     target_email="my-service-account@my-project.iam.gserviceaccount.com",
     member_email="user@example.com",
     role="roles/iam.serviceAccountUser",
 )
 ```
+
+1.  Grant the serviceAccountUser role to a user

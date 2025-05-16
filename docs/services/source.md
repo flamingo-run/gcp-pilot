@@ -6,7 +6,7 @@ Source Repositories is a service that provides Git version control to support co
 
 To use the Source Repositories functionality, you need to install gcp-pilot:
 
-```bash
+```bash title="Install gcp-pilot"
 pip install gcp-pilot
 ```
 
@@ -14,25 +14,23 @@ pip install gcp-pilot
 
 ### Initialization
 
-```python
+```python title="Initialize SourceRepository Client"
 from gcp_pilot.source import SourceRepository
 
-# Initialize with default credentials
-source_repo = SourceRepository()
-
-# Initialize with specific project
-source_repo = SourceRepository(project_id="my-project")
-
-# Initialize with service account impersonation
-source_repo = SourceRepository(impersonate_account="service-account@project-id.iam.gserviceaccount.com")
+source_repo = SourceRepository() # (1)!
+source_repo = SourceRepository(project_id="my-project") # (2)!
+source_repo = SourceRepository(impersonate_account="service-account@project-id.iam.gserviceaccount.com") # (3)!
 ```
+
+1.  Initialize with default credentials
+2.  Initialize with specific project
+3.  Initialize with service account impersonation
 
 ### Listing Repositories
 
-```python
-# List all repositories in a project
-repos = source_repo.list_repos(
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+```python title="List Source Repositories"
+repos = source_repo.list_repos( # (1)!
+    project_id="my-project",  # (2)!
 )
 for repo in repos:
     print(f"Repository: {repo['name']}")
@@ -40,106 +38,109 @@ for repo in repos:
     print(f"Size: {repo.get('size', 'Unknown')}")
 ```
 
+1.  List all repositories in a project
+2.  Optional: defaults to the project associated with credentials
+
 ### Getting a Repository
 
-```python
-# Get information about a specific repository
-repo = source_repo.get_repo(
-    repo_name="my-repo",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+```python title="Get a Source Repository"
+repo = source_repo.get_repo( # (1)!
+    name="my-repo",
+    project_id="my-project",  # (2)!
 )
 print(f"Repository: {repo['name']}")
 print(f"URL: {repo['url']}")
-print(f"Size: {repo.get('size', 'Unknown')}")
 ```
+
+1.  Get information about a specific repository
+2.  Optional: defaults to the project associated with credentials
 
 ### Creating a Repository
 
-```python
-# Create a new repository
-repo = source_repo.create_repo(
-    repo_name="my-new-repo",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
-    exists_ok=True,  # Optional: if True, returns the existing repository if it already exists
+```python title="Create a Source Repository"
+repo = source_repo.create_repo( # (1)!
+    name="my-new-repo",
+    project_id="my-project",  # (2)!
+    exists_ok=True,  # (3)!
 )
 print(f"Repository created: {repo['name']}")
-print(f"URL: {repo['url']}")
 ```
 
-## Working with Repositories
+1.  Create a new repository
+2.  Optional: defaults to the project associated with credentials
+3.  Optional: if True, returns the existing repository if it already exists
 
-After creating a repository, you can clone it and work with it using standard Git commands:
+### Deleting a Repository
 
-```bash
-# Clone the repository
+```python title="Delete a Source Repository"
+source_repo.delete_repo( # (1)!
+    name="my-repo-to-delete",
+    project_id="my-project",  # (2)!
+)
+```
+
+1.  Delete a repository
+2.  Optional: defaults to the project associated with credentials
+
+## Common Git Commands with Source Repositories
+
+```bash title="Common Git Operations"
+# Clone a repository (1)!
 git clone https://source.developers.google.com/p/my-project/r/my-repo
 
-# Add files
-git add .
+# Add a remote for Source Repositories (2)!
+git remote add google https://source.developers.google.com/p/my-project/r/my-repo
 
-# Commit changes
-git commit -m "Initial commit"
+# Push to Source Repositories (3)!
+git push google master
 
-# Push to the repository
-git push origin master
+# Pull from Source Repositories (4)!
+git pull google master
 ```
 
-## Authentication
+1.  Clone a repository
+2.  Add a remote for Source Repositories
+3.  Push to Source Repositories
+4.  Pull from Source Repositories
 
-When working with Source Repositories from the command line, you can authenticate using the Google Cloud SDK:
+## Authenticate for Source Repositories CLI Access
 
-```bash
-# Authenticate with Google Cloud
+```bash title="Authenticate for CLI Access"
+# Authenticate using gcloud (1)!
 gcloud auth login
+gcloud auth application-default login
 
-# Configure Git to use gcloud as a credential helper
-git config --global credential.https://source.developers.google.com.helper gcloud.sh
+# Configure Git to use the gcloud credential helper (2)!
+git config --global credential.helper gcloud.sh
 ```
 
-## Error Handling
-
-The SourceRepository class handles common errors and converts them to more specific exceptions:
-
-```python
-from gcp_pilot import exceptions
-
-try:
-    source_repo.get_repo(repo_name="non-existent-repo")
-except exceptions.NotFound:
-    print("Repository not found")
-
-try:
-    source_repo.create_repo(repo_name="existing-repo", exists_ok=False)
-except exceptions.AlreadyExists:
-    print("Repository already exists")
-```
+1.  Authenticate using gcloud
+2.  Configure Git to use the gcloud credential helper
 
 ## Working with Service Account Impersonation
 
 Service account impersonation allows you to act as a service account without having its key file. This is a more secure approach than downloading and storing service account keys.
 
-```python
-# Initialize with service account impersonation
-source_repo = SourceRepository(impersonate_account="service-account@project-id.iam.gserviceaccount.com")
-
-# Now all operations will be performed as the impersonated service account
-repos = source_repo.list_repos()
+```python title="Using Impersonated Credentials for Source Repositories"
+source_repo = SourceRepository(impersonate_account="service-account@project-id.iam.gserviceaccount.com") # (1)!
+repos = source_repo.list_repos() # (2)!
 ```
+
+1.  Initialize with service account impersonation
+2.  Now all operations will be performed as the impersonated service account
 
 For more information on service account impersonation, see the [Authentication](../authentication.md) documentation.
 
-## Integration with Cloud Build
+!!! info "Integration with Cloud Build"
+    Source Repositories can be integrated with Cloud Build to automatically build and deploy your code when changes are pushed to the repository. For more information, see the [Cloud Build](build.md) documentation.
 
-Source Repositories can be integrated with Cloud Build to automatically build and deploy your code when changes are pushed to the repository. For more information, see the [Cloud Build](build.md) documentation.
+!!! tip "Best Practices for Source Repositories"
+    Here are some best practices for working with Source Repositories:
 
-## Best Practices
-
-Here are some best practices for working with Source Repositories:
-
-1. **Use descriptive repository names**: Choose repository names that clearly indicate their purpose and content.
-2. **Set up branch protection**: Configure branch protection rules to prevent direct pushes to important branches.
-3. **Use meaningful commit messages**: Write clear and descriptive commit messages to make it easier to understand changes.
-4. **Implement a branching strategy**: Use a consistent branching strategy like Git Flow or GitHub Flow.
-5. **Regularly clean up old branches**: Delete branches that are no longer needed to keep the repository clean.
-6. **Set up code reviews**: Use pull requests and code reviews to maintain code quality.
-7. **Integrate with CI/CD**: Set up continuous integration and continuous deployment pipelines to automate testing and deployment.
+    1. **Use descriptive repository names**: Choose repository names that clearly indicate their purpose and content.
+    2. **Set up branch protection**: Configure branch protection rules to prevent direct pushes to important branches.
+    3. **Use meaningful commit messages**: Write clear and descriptive commit messages to make it easier to understand changes.
+    4. **Implement a branching strategy**: Use a consistent branching strategy like Git Flow or GitHub Flow.
+    5. **Regularly clean up old branches**: Delete branches that are no longer needed to keep the repository clean.
+    6. **Set up code reviews**: Use pull requests and code reviews to maintain code quality.
+    7. **Integrate with CI/CD**: Set up continuous integration and continuous deployment pipelines to automate testing and deployment.

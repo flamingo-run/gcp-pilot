@@ -202,7 +202,7 @@ class FHIRResultSet:
 
     @property
     def num_pages(self) -> int:
-        return int(math.ceil(self.total / self.limit))
+        return math.ceil(self.total / self.limit)
 
 
 class HealthcareFHIR(HealthcareBase):

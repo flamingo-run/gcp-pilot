@@ -6,9 +6,9 @@ Authentication is a critical aspect of interacting with Google Cloud Platform se
 
 By default, gcp-pilot uses [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/production#automatically) to detect credentials. This means that you must have one of the following setups:
 
-- Environment variable `GOOGLE_APPLICATION_CREDENTIALS` pointing to the JSON file with the credentials
-- Run inside GCP (Compute Engine, Cloud Run, GKE, AppEngine), so the machine's credentials will be used
-- Run locally after authenticating with `gcloud auth application-default login`
+1. Environment variable `GOOGLE_APPLICATION_CREDENTIALS` pointing to the JSON file with the credentials
+2. Run inside GCP (Compute Engine, Cloud Run, GKE, AppEngine), so the machine's credentials will be used
+3. Run locally after authenticating with `gcloud auth application-default login`
 
 This approach allows your application to run seamlessly in different environments without code changes.
 
@@ -24,12 +24,13 @@ To use impersonation, you need to:
 1. Ensure the original service account has the `roles/iam.serviceAccountTokenCreator` role on the target service account
 2. Pass the target service account email to the client using the `impersonate_account` parameter
 
-```python
+```python title="Service Account Impersonation Example"
 from gcp_pilot.storage import CloudStorage
 
-# Impersonate a service account
-storage = CloudStorage(impersonate_account="target-sa@project-id.iam.gserviceaccount.com")
+storage = CloudStorage(impersonate_account="target-sa@project-id.iam.gserviceaccount.com") # (1)!
 ```
+
+1. Impersonate a service account
 
 ## Delegation
 
@@ -37,12 +38,13 @@ Some services (like Google Workspace) require specific subjects to be delegated.
 
 To use delegation, you can pass the subject to the client:
 
-```python
+```python title="Delegation Example"
 from gcp_pilot.directory import Directory
 
-# Use delegation for a specific user
-directory = Directory(subject="user@example.com")
+directory = Directory(subject="user@example.com") # (1)!
 ```
+
+1. Use delegation for a specific user
 
 ## Default Project
 
@@ -50,8 +52,9 @@ When creating a client, a default project is defined by using the project that t
 
 Clients that support managing resources from other projects can be overwritten per call.
 
-> Example: you create a `BigQuery` client using credentials from `project_a`.
-> All calls will query datasets from `project_a`, unless another project is passed as parameter when performing the call.
+!!! example "Project Specificity Example"
+    You create a `BigQuery` client using credentials from `project_a`.
+    All calls will query datasets from `project_a`, unless another project is passed as parameter when performing the call.
 
 You can also globally set a project using the environment variable `DEFAULT_PROJECT`.
 
@@ -65,21 +68,23 @@ You can also globally set a location using the environment variable `DEFAULT_LOC
 
 ## Auto-Authorization
 
-Some services require specific authorizations that should be set up prior to their usage, for example:
-- [Pub/Sub] subscribe to a topic with authenticated push
-- [Cloud Scheduler] schedule a job to trigger a Cloud Run service
-- [Cloud Tasks] queue a task to trigger a Cloud Run service
+Some services require specific authorizations that should be set up prior to their usage. 
 
-In these cases, gcp-pilot tries its best to ensure that the required permissions are properly set up before the actual request is made.
+!!! example "Auto-Authorization Scenarios"
+    gcp-pilot tries its best to ensure that the required permissions are properly set up before the actual request is made in cases like:
+    - [Pub/Sub] subscribe to a topic with authenticated push
+    - [Cloud Scheduler] schedule a job to trigger a Cloud Run service
+    - [Cloud Tasks] queue a task to trigger a Cloud Run service
 
 ## OIDC Authorization
 
 Identity-Aware Proxy (IAP) and other services that require OIDC tokens are automatically handled by gcp-pilot. The library generates the necessary OIDC tokens for services that require authentication.
 
-```python
+```python title="OIDC Token Generation Example"
 from gcp_pilot.iap import IdentityAwareProxy
 
-# Generate an OIDC token for a Cloud Run service
 iap = IdentityAwareProxy()
-token = iap.get_token(url="https://my-service.run.app")
+token = iap.get_token(url="https://my-service.run.app") # (1)!
 ```
+
+1. Generate an OIDC token for a Cloud Run service

@@ -7,25 +7,33 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
-  palette:
-    primary: blue
-    accent: blue
   features:
-    - navigation.instant
-    - navigation.tracking
-    - navigation.expand
-    - navigation.indexes
+    - content.code.annotate
     - content.code.copy
-
+    - navigation.instant
+    - navigation.sections
+    - toc.integrate
+    - content.action.edit
 markdown_extensions:
-  - pymdownx.highlight
-  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
   - pymdownx.inlinehilite
-  - pymdownx.tabbed
-  - pymdownx.emoji
-  - admonition
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - admonition # Useful for notes, warnings etc.
+  - pymdownx.details # For collapsible admonitions and other features
   - toc:
-      permalink: true
+      permalink: true # Adds anchor links to headings
+  - attr_list # Required for custom attributes on icons/emojis
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg 
 
 nav:
   - Home: index.md

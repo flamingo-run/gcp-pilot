@@ -14,152 +14,155 @@ pip install gcp-pilot[build]
 
 ### Initialization
 
-```python
+```python title="Initialize CloudBuild Client"
 from gcp_pilot.build import CloudBuild
 
-# Initialize with default credentials
-build = CloudBuild()
-
-# Initialize with specific project
-build = CloudBuild(project_id="my-project")
-
-# Initialize with service account impersonation
-build = CloudBuild(impersonate_account="service-account@project-id.iam.gserviceaccount.com")
+build = CloudBuild() # (1)!
+build = CloudBuild(project_id="my-project") # (2)!
+build = CloudBuild(impersonate_account="service-account@project-id.iam.gserviceaccount.com") # (3)!
 ```
+
+1.  Initialize with default credentials
+2.  Initialize with specific project
+3.  Initialize with service account impersonation
 
 ### Creating Build Steps
 
 Build steps define the actions that Cloud Build will execute during a build. Each step runs a Docker container.
 
-```python
+```python title="Create Build Steps"
 from gcp_pilot.build import CloudBuild
 from google.cloud.devtools import cloudbuild_v1
 
 build = CloudBuild()
 
-# Create a simple build step
-step = build.make_build_step(
+step = build.make_build_step( # (1)!
     name="gcr.io/cloud-builders/docker",
     args=["build", "-t", "gcr.io/my-project/my-image", "."],
 )
 
-# Create a build step with an identifier
-step = build.make_build_step(
+step = build.make_build_step( # (2)!
     name="gcr.io/cloud-builders/docker",
     identifier="build-docker-image",
     args=["build", "-t", "gcr.io/my-project/my-image", "."],
 )
 
-# Create a build step with environment variables
-step = build.make_build_step(
+step = build.make_build_step( # (3)!
     name="gcr.io/cloud-builders/docker",
     args=["build", "-t", "gcr.io/my-project/my-image", "."],
     env=["ENV_VAR=value"],
 )
 
-# Create a build step with a custom entrypoint
-step = build.make_build_step(
+step = build.make_build_step( # (4)!
     name="gcr.io/cloud-builders/docker",
     args=["build", "-t", "gcr.io/my-project/my-image", "."],
     entrypoint="bash",
 )
 
-# Create a build step with a timeout
-step = build.make_build_step(
+step = build.make_build_step( # (5)!
     name="gcr.io/cloud-builders/docker",
     args=["build", "-t", "gcr.io/my-project/my-image", "."],
-    timeout=300,  # 5 minutes
+    timeout=300,  # (6)!
 )
 ```
+
+1.  Create a simple build step
+2.  Create a build step with an identifier
+3.  Create a build step with environment variables
+4.  Create a build step with a custom entrypoint
+5.  Create a build step with a timeout
+6.  5 minutes
 
 ### Creating Source Repository Events
 
 Source repository events define when a build trigger should run based on changes to a Cloud Source Repository.
 
-```python
-# Create a source repository event for the master branch
-event = build.make_source_repo_event(
+```python title="Create Source Repository Events"
+event = build.make_source_repo_event( # (1)!
     repo_name="my-repo",
 )
 
-# Create a source repository event for a specific branch
-event = build.make_source_repo_event(
+event = build.make_source_repo_event( # (2)!
     repo_name="my-repo",
     branch_name="develop",
 )
 
-# Create a source repository event for a specific tag
-event = build.make_source_repo_event(
+event = build.make_source_repo_event( # (3)!
     repo_name="my-repo",
     tag_name="v1.0.0",
 )
 
-# Create a source repository event for a specific project
-event = build.make_source_repo_event(
+event = build.make_source_repo_event( # (4)!
     repo_name="my-repo",
     branch_name="develop",
     project_id="my-project",
 )
 ```
 
+1.  Create a source repository event for the master branch
+2.  Create a source repository event for a specific branch
+3.  Create a source repository event for a specific tag
+4.  Create a source repository event for a specific project
+
 ### Creating GitHub Events
 
 GitHub events define when a build trigger should run based on changes to a GitHub repository.
 
-```python
-# Create a GitHub event for the master branch
-event = build.make_github_event(
+```python title="Create GitHub Events"
+event = build.make_github_event( # (1)!
     url="https://github.com/owner/repo",
 )
 
-# Create a GitHub event for a specific branch
-event = build.make_github_event(
+event = build.make_github_event( # (2)!
     url="https://github.com/owner/repo",
     branch_name="develop",
 )
 
-# Create a GitHub event for a specific tag
-event = build.make_github_event(
+event = build.make_github_event( # (3)!
     url="https://github.com/owner/repo",
     tag_name="v1.0.0",
 )
 ```
 
+1.  Create a GitHub event for the master branch
+2.  Create a GitHub event for a specific branch
+3.  Create a GitHub event for a specific tag
+
 ### Working with Substitutions
 
 Substitutions allow you to parameterize your build configurations.
 
-```python
+```python title="Work with Substitutions"
 from gcp_pilot.build import CloudBuild, Substitutions
 
-# Create a substitutions object
-substitutions = Substitutions()
+substitutions = Substitutions() # (1)!
 
-# Add substitution variables
-substitutions.add(
+substitutions.add( # (2)!
     image_name="my-image",
     tag="latest",
     env="production",
 )
 
-# Access substitution variables
-print(substitutions.IMAGE_NAME)  # Outputs: ${_IMAGE_NAME}
+print(substitutions.IMAGE_NAME)  # (3)!
 
-# Use substitution variables in a build step
 build = CloudBuild()
-step = build.make_build_step(
+step = build.make_build_step( # (4)!
     name="gcr.io/cloud-builders/docker",
     args=["build", "-t", f"gcr.io/my-project/{substitutions.IMAGE_NAME}:{substitutions.TAG}", "."],
 )
 ```
 
+1.  Create a substitutions object
+2.  Add substitution variables
+3.  Access substitution variables (Outputs: ${_IMAGE_NAME})
+4.  Use substitution variables in a build step
+
 ### Creating Build Triggers
 
 Build triggers automatically start a build when changes are pushed to a repository.
 
-```python
-# Create a build trigger for a Cloud Source Repository
-trigger = build.create_trigger(
+```python title="Create Build Triggers"
+trigger = build.create_trigger( # (1)!
     name="my-trigger",
     description="Build and deploy on push to master",
     event=build.make_source_repo_event(repo_name="my-repo"),
@@ -172,12 +175,11 @@ trigger = build.create_trigger(
     tags=["deploy", "production"],
     images=["gcr.io/my-project/my-image"],
     substitutions=substitutions,
-    timeout=600,  # 10 minutes
+    timeout=600,  # (2)!
     machine_type=cloudbuild_v1.BuildOptions.MachineType.N1_HIGHCPU_8,
 )
 
-# Create a build trigger for a GitHub repository
-trigger = build.create_trigger(
+trigger = build.create_trigger( # (3)!
     name="my-github-trigger",
     description="Build and deploy on push to master",
     event=build.make_github_event(url="https://github.com/owner/repo"),
@@ -191,11 +193,14 @@ trigger = build.create_trigger(
 )
 ```
 
+1.  Create a build trigger for a Cloud Source Repository
+2.  10 minutes
+3.  Create a build trigger for a GitHub repository
+
 ### Updating Build Triggers
 
-```python
-# Update an existing build trigger
-trigger = build.update_trigger(
+```python title="Update a Build Trigger"
+trigger = build.update_trigger( # (1)!
     name="my-trigger",
     description="Updated description",
     event=build.make_source_repo_event(repo_name="my-repo"),
@@ -209,11 +214,12 @@ trigger = build.update_trigger(
 )
 ```
 
+1.  Update an existing build trigger
+
 ### Creating or Updating Build Triggers
 
-```python
-# Create a trigger if it doesn't exist, or update it if it does
-trigger = build.create_or_update_trigger(
+```python title="Create or Update a Build Trigger"
+trigger = build.create_or_update_trigger( # (1)!
     name="my-trigger",
     description="Build and deploy on push to master",
     event=build.make_source_repo_event(repo_name="my-repo"),
@@ -227,84 +233,157 @@ trigger = build.create_or_update_trigger(
 )
 ```
 
+1.  Create a trigger if it doesn't exist, or update it if it does
+
 ### Getting and Deleting Build Triggers
 
-```python
-# Get a build trigger
-trigger = build.get_trigger(
+```python title="Get and Delete Build Triggers"
+trigger = build.get_trigger( # (1)!
     trigger_id="my-trigger",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+    project_id="my-project",  # (2)!
 )
 
-# Delete a build trigger
-build.delete_trigger(
+build.delete_trigger( # (3)!
     trigger_id="my-trigger",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+    project_id="my-project",  # (4)!
 )
 ```
+
+1.  Get a build trigger
+2.  Optional: defaults to the project associated with credentials
+3.  Delete a build trigger
+4.  Optional: defaults to the project associated with credentials
 
 ### Running Build Triggers
 
-```python
-# Run a build trigger for a specific branch
-build.run_trigger(
-    name="my-trigger",
-    branch_name="master",
-)
-
-# Run a build trigger for a specific tag
-build.run_trigger(
-    name="my-trigger",
-    tag_name="v1.0.0",
-)
-
-# Run a build trigger for a specific commit
-build.run_trigger(
-    name="my-trigger",
-    commit_sha="abc123",
+```python title="Run a Build Trigger"
+build.run_trigger( # (1)!
+    trigger_id="my-trigger",
+    branch_name="feature-branch",  # (2)!
+    project_id="my-project",  # (3)!
 )
 ```
 
-### Getting Builds
+1.  Run a build trigger for a specific branch
+2.  Optional: defaults to the default branch of the trigger
+3.  Optional: defaults to the project associated with credentials
 
-```python
-# Get all builds
-for build_obj in build.get_builds():
-    print(f"Build: {build_obj.id}")
+### Managing Builds
 
-# Get builds for a specific trigger
-for build_obj in build.get_builds(trigger_id="my-trigger"):
-    print(f"Build: {build_obj.id}")
+#### Listing Builds
 
-# Get builds with a specific status
-for build_obj in build.get_builds(status="SUCCESS"):
-    print(f"Build: {build_obj.id}")
+```python title="List Builds"
+builds = build.list_builds( # (1)!
+    project_id="my-project",  # (2)!
+    limit=10,  # (3)!
+    query="status=\"SUCCESS\"",  # (4)!
+)
+for b in builds:
+    print(f"Build ID: {b.id}, Status: {b.status}")
 ```
 
-### Subscribing to Build Notifications
+1.  List builds in a project
+2.  Optional: defaults to the project associated with credentials
+3.  Optional: maximum number of builds to return
+4.  Optional: filter builds using a query string
+
+#### Getting a Build
+
+```python title="Get a Build"
+build_info = build.get_build( # (1)!
+    build_id="build-id",
+    project_id="my-project",  # (2)!
+)
+print(f"Build ID: {build_info.id}, Status: {build_info.status}")
+```
+
+1.  Get information about a specific build
+2.  Optional: defaults to the project associated with credentials
+
+#### Approving a Build
+
+```python title="Approve a Build"
+build.approve_build( # (1)!
+    build_id="build-id",
+    project_id="my-project",  # (2)!
+)
+```
+
+1.  Approve a pending build
+2.  Optional: defaults to the project associated with credentials
+
+#### Canceling a Build
+
+```python title="Cancel a Build"
+build.cancel_build( # (1)!
+    build_id="build-id",
+    project_id="my-project",  # (2)!
+)
+```
+
+1.  Cancel a running build
+2.  Optional: defaults to the project associated with credentials
+
+#### Retrying a Build
+
+```python title="Retry a Build"
+build.retry_build( # (1)!
+    build_id="build-id",
+    project_id="my-project",  # (2)!
+)
+```
+
+1.  Retry a failed build
+2.  Optional: defaults to the project associated with credentials
+
+## Subscribing to Build Notifications
 
 Cloud Build can publish build status notifications to Pub/Sub. gcp-pilot makes it easy to subscribe to these notifications.
 
-```python
-# Subscribe to build notifications
-build.subscribe(
-    subscription_id="my-build-notifications",
-    project_id="my-project",  # Optional: defaults to the project associated with credentials
+```python title="Subscribe to Build Notifications"
+from gcp_pilot.build import CloudBuild
+from gcp_pilot.pubsub import PubSub
+
+build = CloudBuild()
+
+# Create a Pub/Sub topic for build notifications (1)!
+build.enable_build_notifications(topic_name="my-build-notifications")
+
+# Subscribe to the topic and process messages (2)!
+subscriber = PubSub()
+subscription = subscriber.subscribe(
+    topic_name="my-build-notifications",
+    subscription_name="my-build-subscription",
+    ack_deadline=60,  # (3)!
 )
 
-# Subscribe to build notifications with a push endpoint
-build.subscribe(
-    subscription_id="my-build-notifications",
-    push_to_url="https://example.com/build-webhook",
-    use_oidc_auth=True,  # Use OIDC authentication for the push endpoint
-)
+def callback(message):
+    print(f"Received build notification: {message.data}")
+    message.ack()
+
+subscriber.pull(subscription_name=subscription.name, callback=callback) # (4)!
 ```
 
-Note: To use the `subscribe` method, you need to install gcp-pilot with the pubsub extra:
+1.  Ensure a Pub/Sub topic exists for build notifications
+2.  Subscribe to the topic
+3.  Optional: acknowledgement deadline in seconds
+4.  Start pulling messages (this is a blocking call)
 
-```bash
-pip install gcp-pilot[build,pubsub]
+## Working with Service Account Impersonation
+
+Service account impersonation allows you to act as a service account without having its key file. This is a more secure approach than downloading and storing service account keys.
+
+```python title="Using Impersonated Credentials for Cloud Build"
+build = CloudBuild(impersonate_account="service-account@project-id.iam.gserviceaccount.com") # (1)!
+builds = build.list_builds() # (2)!
 ```
+
+1.  Initialize with service account impersonation
+2.  Now all operations will be performed as the impersonated service account
+
+For more information on service account impersonation, see the [Authentication](../authentication.md) documentation.
+
+!!! warning "Permissions"
 
 ## Error Handling
 

@@ -77,6 +77,10 @@ dev = [
     "pytest-xdist>=3.6.1",
     "ruff>=0.8.2",
 ]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.14",
+]
 
 [tool.ruff]
 line-length = 120

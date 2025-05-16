@@ -17,13 +17,14 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12
-          cache: pip
+          python-version: 3.13
+
+      - name: Install uv
+        run: pip install uv
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install mkdocs-material pymdown-extensions
+          uv sync --group docs
 
       - name: Check docs directory exists
         run: |
@@ -35,7 +36,7 @@ jobs:
       - name: Validate MkDocs
         run: |
           echo "Validating MkDocs configuration and building documentation..."
-          if ! mkdocs build --strict; then
+          if ! uv run mkdocs build --strict; then
             echo "Error: MkDocs validation failed! Please check:"
             echo "  1. All referenced files in mkdocs.yml exist"
             echo "  2. All internal links are valid"

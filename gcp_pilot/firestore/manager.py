@@ -8,7 +8,9 @@ from google.cloud.firestore_v1.async_client import AsyncClient
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 from google.cloud.firestore_v1.async_query import AsyncQuery
 from google.cloud.firestore_v1.base_query import FieldFilter
+from pydantic import BaseModel
 
+from gcp_pilot.firestore.atomic import _active_batch
 from gcp_pilot.firestore.exceptions import DoesNotExist, MultipleObjectsFound
 
 if TYPE_CHECKING:
@@ -42,9 +44,7 @@ class Manager:
     @property
     def client(self) -> AsyncClient:
         if not self.__class__._client:
-            # Using class-level client to have a single instance
             self.__class__._client = firestore.AsyncClient()
-        assert self.__class__._client
         return self.__class__._client
 
     @property
@@ -84,17 +84,31 @@ class Manager:
 
     async def create(self, data: dict[str, Any]) -> Document:
         doc_ref = self.collection.document()
-        await doc_ref.set(data)
-        data["id"] = doc_ref.id
-        return self._to_document(data)
+        document = self._to_document({"id": doc_ref.id, **data})
+
+        batch = _active_batch.get()
+        if batch is not None:
+            batch.set(doc_ref, data)
+        else:
+            await doc_ref.set(data)
+
+        return document
 
     async def update(self, pk: str, data: dict[str, Any]) -> None:
         doc_ref = self.collection.document(pk)
-        await doc_ref.update(data)
+        batch = _active_batch.get()
+        if batch is not None:
+            batch.update(doc_ref, data)
+        else:
+            await doc_ref.update(data)
 
     async def delete(self, pk: str) -> None:
         doc_ref = self.collection.document(pk)
-        await doc_ref.delete()
+        batch = _active_batch.get()
+        if batch is not None:
+            batch.delete(doc_ref)
+        else:
+            await doc_ref.delete()
 
     async def filter(self, *, order_by: list[str] | None = None, **kwargs) -> AsyncGenerator[Document]:
         query: Any = self.collection

@@ -78,7 +78,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Start Firebase Emulator
-        uses: invertase/firebase-emulator-action@v1
+        uses: invertase/firebase-emulator-action@v1.0.1
         with:
           emulators: firestore
       - name: Unit test

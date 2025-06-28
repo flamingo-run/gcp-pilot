@@ -64,11 +64,31 @@ class TestFirestoreFiltering:
         for item in results:
             assert "a" in item.list_of_strings
 
-    async def test_filter_array_contains_any(self, populated_db):
-        results = [item async for item in AllDataTypes.objects.filter(list_of_strings__contains_any=["b", "c"])]
+    async def test_filter_array_contains_any(self):
+        obj1 = await AllDataTypesFactory.create_async(list_of_strings=["a", "b"])
+        obj2 = await AllDataTypesFactory.create_async(list_of_strings=["c", "d"])
+        await AllDataTypesFactory.create_async(list_of_strings=["e", "f"])
+
+        results = [item async for item in AllDataTypes.objects.filter(list_of_strings__contains_any=["a", "d"])]
         assert len(results) == 2
-        for item in results:
-            assert "b" in item.list_of_strings or "c" in item.list_of_strings
+        assert {r.pk for r in results} == {obj1.pk, obj2.pk}
+
+    async def test_filter_in_list_nested(self):
+        obj1 = await AllDataTypesFactory.create_async(nested_model={"name": "test1", "value": 1})
+        obj2 = await AllDataTypesFactory.create_async(nested_model={"name": "test2", "value": 2})
+        await AllDataTypesFactory.create_async(nested_model={"name": "test3", "value": 3})
+
+        results = [item async for item in AllDataTypes.objects.filter(nested_model__name__in=["test1", "test2"])]
+        assert len(results) == 2
+        assert {r.pk for r in results} == {obj1.pk, obj2.pk}
+
+    async def test_filter_not_in_list(self):
+        obj1 = await AllDataTypesFactory.create_async()
+        await AllDataTypesFactory.create_batch_async(2, integer_field=obj1.integer_field)
+        await AllDataTypesFactory.create_batch_async(3, integer_field=obj1.integer_field + 1)
+
+        results = [item async for item in AllDataTypes.objects.filter(integer_field__not_in=[obj1.integer_field])]
+        assert len(results) == 3
 
     async def test_filter_nested_field(self):
         obj = await AllDataTypesFactory.create_async(nested_model={"name": "test", "value": 1})

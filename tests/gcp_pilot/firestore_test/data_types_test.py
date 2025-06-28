@@ -7,19 +7,21 @@ from tests.gcp_pilot.firestore_test.conftest import AllDataTypes, AllDataTypesFa
 class TestFirestoreDataTypes:
     async def test_all_data_types_with_factory(self):
         instance = AllDataTypesFactory.build()
-        await instance.save()
+        instance.id = None
+        saved_instance = await instance.save()
 
-        retrieved = await AllDataTypes.objects.get(pk=instance.pk)
-        assert retrieved.pk == instance.pk
-        assert retrieved.string_field == instance.string_field
-        assert retrieved.integer_field == instance.integer_field
-        assert retrieved.float_field == instance.float_field
-        assert retrieved.boolean_field == instance.boolean_field
-        assert retrieved.datetime_field == instance.datetime_field
-        assert retrieved.date_field == instance.date_field
-        assert retrieved.enum_field == instance.enum_field
-        assert retrieved.list_of_strings == instance.list_of_strings
-        assert retrieved.dict_field == instance.dict_field
-        assert retrieved.nested_model.name == instance.nested_model.name
-        assert retrieved.nested_model.value == instance.nested_model.value
-        assert len(retrieved.list_of_models) == len(instance.list_of_models)
+        retrieved_instance = await AllDataTypes.objects.get(pk=saved_instance.pk)
+
+        # Compare saved and retrieved data
+        assert saved_instance.pk == retrieved_instance.pk
+        assert saved_instance.string_field == retrieved_instance.string_field
+        assert saved_instance.integer_field == retrieved_instance.integer_field
+        assert saved_instance.float_field == retrieved_instance.float_field
+        assert saved_instance.boolean_field == retrieved_instance.boolean_field
+        assert saved_instance.datetime_field == retrieved_instance.datetime_field
+        assert saved_instance.date_field == retrieved_instance.date_field
+        assert saved_instance.enum_field == retrieved_instance.enum_field
+        assert saved_instance.list_of_strings == retrieved_instance.list_of_strings
+        assert saved_instance.dict_field == retrieved_instance.dict_field
+        assert saved_instance.nested_model == retrieved_instance.nested_model
+        assert saved_instance.list_of_models == retrieved_instance.list_of_models

@@ -24,7 +24,7 @@ lint:
 style:
 	@echo "Applying code style ..."
 	uv run ruff format .
-	uv run ruff check . --fix
+	uv run ruff check . --fix --unsafe-fixes
 
 unit:
 	@echo "Running unit tests ..."

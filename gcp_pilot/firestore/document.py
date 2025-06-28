@@ -41,7 +41,7 @@ class Document(BaseModel, abc.ABC):
         _meta: ClassVar[Options]
 
     def __init_subclass__(cls, *args, **kwargs):
-        from gcp_pilot.firestore.manager import Manager
+        from gcp_pilot.firestore.manager import Manager  # noqa: PLC0415
 
         super().__init_subclass__(*args, **kwargs)
         cls.objects = Manager(doc_klass=cls)

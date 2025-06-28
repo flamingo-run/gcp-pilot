@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, AsyncGenerator, ClassVar
+from collections.abc import AsyncGenerator
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from google.cloud import firestore
 from google.cloud.firestore_v1.async_client import AsyncClient
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 from google.cloud.firestore_v1.async_query import AsyncQuery
 from google.cloud.firestore_v1.base_query import FieldFilter
-from google.cloud.firestore_v1.field_path import FieldPath
 
 from gcp_pilot.firestore.exceptions import DoesNotExist, MultipleObjectsFound
 
@@ -37,7 +37,7 @@ class Manager:
     def client(self) -> AsyncClient:
         if not self.__class__._client:
             # Using class-level client to have a single instance
-            self.__class__._client = firestore.AsyncClient()  # type: ignore
+            self.__class__._client = firestore.AsyncClient()
         return self.__class__._client
 
     @property
@@ -83,7 +83,7 @@ class Manager:
         doc_ref = self.collection.document(pk)
         await doc_ref.delete()
 
-    async def filter(self, *, order_by: list[str] | None = None, **kwargs) -> AsyncGenerator[Document, None]:
+    async def filter(self, *, order_by: list[str] | None = None, **kwargs) -> AsyncGenerator[Document]:
         query: Any = self.collection
         for key, value in kwargs.items():
             parts = key.split("__")
@@ -99,11 +99,16 @@ class Manager:
 
         if order_by:
             for field in order_by:
-                direction = AsyncQuery.ASCENDING
                 if field.startswith("-"):
-                    field = field[1:]
+                    field_name = field[1:]
                     direction = AsyncQuery.DESCENDING
-                query = query.order_by(field, direction=direction)
+                elif field.startswith("+"):
+                    field_name = field[1:]
+                    direction = AsyncQuery.ASCENDING
+                else:
+                    field_name = field
+                    direction = AsyncQuery.ASCENDING
+                query = query.order_by(field_name, direction=direction)
 
         stream = query.stream()
         async for doc_snapshot in stream:

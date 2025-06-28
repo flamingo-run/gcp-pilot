@@ -17,3 +17,7 @@ class DoesNotExist(Exception):
 class MultipleObjectsFound(Exception):
     cls: type[Document]
     filters: dict
+
+
+class InvalidCursor(TypeError):
+    pass

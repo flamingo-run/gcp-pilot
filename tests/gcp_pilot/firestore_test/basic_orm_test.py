@@ -28,7 +28,7 @@ class TestBasicFirestoreORM:
         saved_product.name = new_name
         await saved_product.save()
 
-        updated_product = await Product.objects.get(pk=saved_product.pk)
+        updated_product = await Product.objects.filter(name__eq=new_name).get()
         assert updated_product.name == new_name
 
     async def test_document_delete(self, saved_product):

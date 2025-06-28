@@ -1,35 +1,20 @@
 from __future__ import annotations
 
-from collections.abc import AsyncGenerator
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any
 
 from google.cloud import firestore
 from google.cloud.firestore_v1.async_client import AsyncClient
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
-from google.cloud.firestore_v1.async_query import AsyncQuery
-from google.cloud.firestore_v1.base_query import FieldFilter
-from pydantic import BaseModel
 
 from gcp_pilot.firestore.atomic import _active_batch
-from gcp_pilot.firestore.exceptions import DoesNotExist, InvalidCursor, MultipleObjectsFound
+from gcp_pilot.firestore.exceptions import DoesNotExist
+from gcp_pilot.firestore.query import Query
 
 if TYPE_CHECKING:
     from gcp_pilot.firestore.document import Document
 
 
 class Manager:
-    LOOKUP_OPERATORS: ClassVar[dict[str, str]] = {
-        "eq": "==",
-        "ne": "!=",
-        "gt": ">",
-        "gte": ">=",
-        "lt": "<",
-        "lte": "<=",
-        "in": "in",
-        "not_in": "not-in",
-        "contains": "array_contains",
-        "contains_any": "array_contains_any",
-    }
     _client: AsyncClient | None = None
 
     def __init__(self, doc_klass: type[Document], parent: Document | None = None):
@@ -45,7 +30,7 @@ class Manager:
     def client(self) -> AsyncClient:
         if not self.__class__._client:
             self.__class__._client = firestore.AsyncClient()
-        return self.__class__._client
+        return self.__class__._client  # type: ignore
 
     @property
     def collection_name(self) -> str:
@@ -61,6 +46,9 @@ class Manager:
 
         return self.parent.objects.collection.document(self.parent.pk).collection(self.collection_name)
 
+    def _get_query(self) -> Query:
+        return Query(manager=self)
+
     async def get(self, pk: str | None = None, **kwargs) -> Document:
         if pk and kwargs:
             raise ValueError("Cannot use pk and kwargs together.")
@@ -75,12 +63,7 @@ class Manager:
             data["id"] = doc_snapshot.id
             return self._to_document(data)
 
-        results = [obj async for obj in self.filter(**kwargs)]
-        if not results:
-            raise DoesNotExist(self.doc_klass, filters=kwargs)
-        if len(results) > 1:
-            raise MultipleObjectsFound(self.doc_klass, filters=kwargs)
-        return results[0]
+        return await self.filter(**kwargs).get()
 
     async def create(self, data: dict[str, Any]) -> Document:
         doc_ref = self.collection.document()
@@ -110,62 +93,8 @@ class Manager:
         else:
             await doc_ref.delete()
 
-    async def filter(
-        self,
-        *,
-        order_by: list[str] | None = None,
-        limit: int | None = None,
-        start_after: Document | dict[str, Any] | None = None,
-        start_at: Document | dict[str, Any] | None = None,
-        **kwargs,
-    ) -> AsyncGenerator[Document]:
-        query: Any = self.collection
-        for key, value in kwargs.items():
-            parts = key.split("__")
-            if len(parts) > 1 and parts[-1] in self.LOOKUP_OPERATORS:
-                operator = self.LOOKUP_OPERATORS[parts[-1]]
-                field_path = ".".join(parts[:-1])
-            else:
-                operator = "=="
-                field_path = ".".join(parts)
+    def all(self) -> Query:
+        return self._get_query()
 
-            field_filter = FieldFilter(field_path, operator, value)
-            query = query.where(filter=field_filter)
-
-        if order_by:
-            for field in order_by:
-                if field.startswith("-"):
-                    field_name = field[1:]
-                    direction = AsyncQuery.DESCENDING
-                else:
-                    field_name = field.lstrip("+")
-                    direction = AsyncQuery.ASCENDING
-                query = query.order_by(field_name, direction=direction)
-
-        if not order_by and (start_after or start_at):
-            raise ValueError("`order_by` is required when using `start_after` or `start_at`.")
-
-        if start_after:
-            if isinstance(start_after, dict | BaseModel):
-                dumped_cursor = start_after if isinstance(start_after, dict) else start_after.model_dump()
-                query = query.start_after(dumped_cursor)
-            else:
-                raise InvalidCursor("Cursor must be a dictionary or a Pydantic model.")
-
-        if start_at:
-            if not order_by:
-                raise ValueError("`order_by` is required when using `start_at`.")
-            if isinstance(start_at, dict | BaseModel):
-                dumped_cursor = start_at if isinstance(start_at, dict) else start_at.model_dump()
-                query = query.start_at(dumped_cursor)
-            else:
-                raise InvalidCursor("Cursor must be a dictionary or a Pydantic model.")
-
-        if limit:
-            query = query.limit(limit)
-
-        stream = query.stream()
-        async for doc_snapshot in stream:
-            data = doc_snapshot.to_dict() or {}
-            data["id"] = doc_snapshot.id
-            yield self._to_document(data)
+    def filter(self, **kwargs) -> Query:
+        return self._get_query().filter(**kwargs)

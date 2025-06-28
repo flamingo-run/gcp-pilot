@@ -66,7 +66,6 @@ class Document(BaseModel, abc.ABC):
 
     async def save(self) -> Document:
         data = self.model_dump(mode="json", by_alias=True, exclude={self._meta.pk_field_name})
-        data.pop("id", None)  # Remove id from data, as it's the document key
 
         if not self.pk:
             created = await self.manager.create(data=data)
@@ -76,6 +75,19 @@ class Document(BaseModel, abc.ABC):
 
         await self.manager.update(pk=self.pk, data=data)
         return self
+
+    async def update(self, **kwargs: Any) -> None:
+        if not self.pk:
+            raise ValueError("Cannot update a document without a primary key.")
+        await self.manager.update(pk=self.pk, data=kwargs)
+
+    async def refresh(self) -> None:
+        if not self.pk:
+            raise ValueError("Cannot refresh a document without a primary key.")
+        refreshed_doc = await self.manager.get(pk=self.pk)
+        object_attributes = refreshed_doc.model_dump()
+        for key, value in object_attributes.items():
+            setattr(self, key, value)
 
     async def delete(self) -> None:
         if not self.pk:

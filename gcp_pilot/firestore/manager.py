@@ -65,8 +65,8 @@ class Manager:
 
         return await self.filter(**kwargs).get()
 
-    async def create(self, data: dict[str, Any]) -> Document:
-        doc_ref = self.collection.document()
+    async def create(self, data: dict[str, Any], pk: str | None = None) -> Document:
+        doc_ref = self.collection.document(pk)
         document = self._to_document({"id": doc_ref.id, **data})
 
         batch = _active_batch.get()
@@ -93,8 +93,5 @@ class Manager:
         else:
             await doc_ref.delete()
 
-    def all(self) -> Query:
-        return self._get_query()
-
-    def filter(self, **kwargs) -> Query:
-        return self._get_query().filter(**kwargs)
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._get_query(), name)

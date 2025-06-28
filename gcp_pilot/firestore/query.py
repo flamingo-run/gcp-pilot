@@ -14,6 +14,7 @@ from gcp_pilot.firestore.exceptions import DoesNotExist, InvalidCursor, Multiple
 if TYPE_CHECKING:
     from gcp_pilot.firestore.document import Document
     from gcp_pilot.firestore.manager import Manager
+    from gcp_pilot.firestore.paginator import Paginator
 
 
 class Query:
@@ -83,6 +84,14 @@ class Query:
         clone = self._clone()
         clone._start_at = cursor
         return clone
+
+    def all(self) -> Query:
+        return self._clone()
+
+    def paginate(self, per_page: int) -> Paginator:
+        from gcp_pilot.firestore.paginator import Paginator  # noqa: PLC0415
+
+        return Paginator(query=self, per_page=per_page)
 
     async def get(self) -> Document:
         query_for_get = self.limit(2)

@@ -5,10 +5,10 @@ import os
 
 import pytest
 import pytest_asyncio
-from polyfactory.factories.pydantic_factory import ModelFactory
 from pydantic import BaseModel
 
 from gcp_pilot.firestore import Document
+from gcp_pilot.firestore.factory import FirestoreFactory
 from gcp_pilot.firestore.manager import Manager
 
 # Set emulator host
@@ -51,8 +51,7 @@ class Product(Document):
         collection_name = "products"
 
 
-class AllDataTypesFactory(ModelFactory[AllDataTypes]):
-    __model__ = AllDataTypes
+class AllDataTypesFactory(FirestoreFactory[AllDataTypes]): ...
 
 
 @pytest.fixture

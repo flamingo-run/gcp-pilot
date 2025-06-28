@@ -1,6 +1,6 @@
 import pytest
 
-from tests.gcp_pilot.firestore_test.conftest import AllDataTypes
+from tests.gcp_pilot.firestore_test.conftest import AllDataTypes, AllDataTypesFactory
 
 
 @pytest.mark.asyncio
@@ -70,11 +70,10 @@ class TestFirestoreFiltering:
         for item in results:
             assert "b" in item.list_of_strings or "c" in item.list_of_strings
 
-    async def test_filter_nested_field(self, populated_db):
-        target = populated_db[0]
-        results = [item async for item in AllDataTypes.objects.filter(nested_model__name__eq=target.nested_model.name)]
-        assert len(results) >= 1  # Could be more if factory generated same names
-        assert target.pk in [item.pk for item in results]
+    async def test_filter_nested_field(self):
+        obj = await AllDataTypesFactory.create_async(nested_model={"name": "test", "value": 1})
+        retrieved = await AllDataTypes.objects.get(nested_model__name="test")
+        assert retrieved.pk == obj.pk
 
     async def test_filter_chaining(self, populated_db):
         results = [

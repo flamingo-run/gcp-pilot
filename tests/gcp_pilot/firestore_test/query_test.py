@@ -1,6 +1,6 @@
 import pytest
 
-from tests.gcp_pilot.firestore_test.conftest import Product
+from tests.gcp_pilot.firestore_test.conftest import AllDataTypes, Product
 
 
 @pytest.mark.asyncio
@@ -51,3 +51,10 @@ class TestQueryBuilding:
         assert self._filters_to_set(q1._where_filters) == self._filters_to_set(q2._where_filters)
         assert q1._order_by == q2._order_by
         assert q1._limit == q2._limit
+
+
+@pytest.mark.asyncio
+class TestQueryExecution:
+    async def test_count_method(self, populated_db):
+        count = await AllDataTypes.objects.all().count()
+        assert count == 5

@@ -68,10 +68,24 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
       - name: Install Python dependencies
         run: make dependencies
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Start Firebase Emulator
+        uses: invertase/firebase-emulator-action@v1
+        with:
+          emulators: firestore
       - name: Unit test
         run: make unit
         env:
           LOG_LEVEL: ERROR
+          FIRESTORE_EMULATOR_HOST: "localhost:8080"
 
       - name: Report Coverage
         run: uv run coverage lcov

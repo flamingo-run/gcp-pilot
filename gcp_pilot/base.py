@@ -215,7 +215,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         return {"oidc_token": oidc_token}
 
     def set_up_permissions(self, email: str, project_id: str | None = None) -> None:
-        from gcp_pilot.resource import ResourceManager, ServiceAgent
+        from gcp_pilot.resource import ResourceManager, ServiceAgent  # noqa: PLC0415
 
         rm = ResourceManager()
         for role in self._iam_roles:
@@ -237,7 +237,7 @@ class GoogleCloudPilotAPI(abc.ABC):
             )
 
     def _get_project_number(self, project_id: str) -> int:
-        from gcp_pilot.resource import ResourceManager
+        from gcp_pilot.resource import ResourceManager  # noqa: PLC0415
 
         project = ResourceManager().get_project(project_id=project_id)
         return project["projectNumber"]
@@ -257,7 +257,7 @@ class GoogleCloudPilotAPI(abc.ABC):
         if location:
             return location
 
-        from gcp_pilot.app_engine import AppEngine
+        from gcp_pilot.app_engine import AppEngine  # noqa: PLC0415
 
         try:
             app_engine = AppEngine.build_from(client=self, project_id=project_id)

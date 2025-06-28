@@ -12,17 +12,13 @@ class TestFirestoreFiltering:
 
     async def test_filter_equal(self, populated_db):
         target = populated_db[0]
-        results = [
-            item async for item in AllDataTypes.objects.filter(integer_field__eq=target.integer_field)
-        ]
+        results = [item async for item in AllDataTypes.objects.filter(integer_field__eq=target.integer_field)]
         assert len(results) == 1
         assert results[0].pk == target.pk
 
     async def test_filter_not_equal(self, populated_db):
         target = populated_db[0]
-        results = [
-            item async for item in AllDataTypes.objects.filter(integer_field__ne=target.integer_field)
-        ]
+        results = [item async for item in AllDataTypes.objects.filter(integer_field__ne=target.integer_field)]
         assert len(results) == len(populated_db) - 1
         assert target.pk not in [item.pk for item in results]
 
@@ -69,28 +65,20 @@ class TestFirestoreFiltering:
             assert "a" in item.list_of_strings
 
     async def test_filter_array_contains_any(self, populated_db):
-        results = [
-            item async for item in AllDataTypes.objects.filter(list_of_strings__contains_any=["b", "c"])
-        ]
+        results = [item async for item in AllDataTypes.objects.filter(list_of_strings__contains_any=["b", "c"])]
         assert len(results) == 2
         for item in results:
             assert "b" in item.list_of_strings or "c" in item.list_of_strings
 
     async def test_filter_nested_field(self, populated_db):
         target = populated_db[0]
-        results = [
-            item
-            async for item in AllDataTypes.objects.filter(nested_model__name__eq=target.nested_model.name)
-        ]
+        results = [item async for item in AllDataTypes.objects.filter(nested_model__name__eq=target.nested_model.name)]
         assert len(results) >= 1  # Could be more if factory generated same names
         assert target.pk in [item.pk for item in results]
 
     async def test_filter_chaining(self, populated_db):
         results = [
-            item
-            async for item in AllDataTypes.objects.filter(
-                integer_field__gte=30, list_of_strings__contains="a"
-            )
+            item async for item in AllDataTypes.objects.filter(integer_field__gte=30, list_of_strings__contains="a")
         ]
         assert len(results) == 2
         for item in results:

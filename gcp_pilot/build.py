@@ -331,7 +331,7 @@ class CloudBuild(GoogleCloudPilotAPI):
         # https://cloud.google.com/cloud-build/docs/subscribe-build-notifications
         try:
             # try to import here to avoid making pubsub a mandatory dependency of CloudBuild
-            from gcp_pilot.pubsub import CloudSubscriber
+            from gcp_pilot.pubsub import CloudSubscriber  # noqa: PLC0415
         except ImportError as exc:
             raise ImportError("Add `pubsub` extras dependency in order to use CloudBuild notifications") from exc
         subscriber = CloudSubscriber()

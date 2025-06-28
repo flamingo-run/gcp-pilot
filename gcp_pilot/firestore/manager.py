@@ -11,7 +11,7 @@ from google.cloud.firestore_v1.base_query import FieldFilter
 from pydantic import BaseModel
 
 from gcp_pilot.firestore.atomic import _active_batch
-from gcp_pilot.firestore.exceptions import DoesNotExist, MultipleObjectsFound
+from gcp_pilot.firestore.exceptions import DoesNotExist, InvalidCursor, MultipleObjectsFound
 
 if TYPE_CHECKING:
     from gcp_pilot.firestore.document import Document
@@ -110,7 +110,15 @@ class Manager:
         else:
             await doc_ref.delete()
 
-    async def filter(self, *, order_by: list[str] | None = None, **kwargs) -> AsyncGenerator[Document]:
+    async def filter(
+        self,
+        *,
+        order_by: list[str] | None = None,
+        limit: int | None = None,
+        start_after: Document | dict[str, Any] | None = None,
+        start_at: Document | dict[str, Any] | None = None,
+        **kwargs,
+    ) -> AsyncGenerator[Document]:
         query: Any = self.collection
         for key, value in kwargs.items():
             parts = key.split("__")
@@ -129,13 +137,32 @@ class Manager:
                 if field.startswith("-"):
                     field_name = field[1:]
                     direction = AsyncQuery.DESCENDING
-                elif field.startswith("+"):
-                    field_name = field[1:]
-                    direction = AsyncQuery.ASCENDING
                 else:
-                    field_name = field
+                    field_name = field.lstrip("+")
                     direction = AsyncQuery.ASCENDING
                 query = query.order_by(field_name, direction=direction)
+
+        if not order_by and (start_after or start_at):
+            raise ValueError("`order_by` is required when using `start_after` or `start_at`.")
+
+        if start_after:
+            if isinstance(start_after, dict | BaseModel):
+                dumped_cursor = start_after if isinstance(start_after, dict) else start_after.model_dump()
+                query = query.start_after(dumped_cursor)
+            else:
+                raise InvalidCursor("Cursor must be a dictionary or a Pydantic model.")
+
+        if start_at:
+            if not order_by:
+                raise ValueError("`order_by` is required when using `start_at`.")
+            if isinstance(start_at, dict | BaseModel):
+                dumped_cursor = start_at if isinstance(start_at, dict) else start_at.model_dump()
+                query = query.start_at(dumped_cursor)
+            else:
+                raise InvalidCursor("Cursor must be a dictionary or a Pydantic model.")
+
+        if limit:
+            query = query.limit(limit)
 
         stream = query.stream()
         async for doc_snapshot in stream:

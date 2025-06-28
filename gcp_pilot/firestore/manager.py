@@ -30,14 +30,21 @@ class Manager:
     }
     _client: AsyncClient | None = None
 
-    def __init__(self, doc_klass: type[Document]):
+    def __init__(self, doc_klass: type[Document], parent: Document | None = None):
         self.doc_klass = doc_klass
+        self.parent = parent
+
+    def _to_document(self, data: dict[str, Any]) -> Document:
+        document = self.doc_klass.model_validate(data)
+        document._manager = self
+        return document
 
     @property
     def client(self) -> AsyncClient:
         if not self.__class__._client:
             # Using class-level client to have a single instance
             self.__class__._client = firestore.AsyncClient()
+        assert self.__class__._client
         return self.__class__._client
 
     @property
@@ -46,7 +53,13 @@ class Manager:
 
     @property
     def collection(self) -> AsyncCollectionReference:
-        return self.client.collection(self.collection_name)
+        if not self.parent:
+            return self.client.collection(self.collection_name)
+
+        if not self.parent.pk:
+            raise ValueError("Cannot access subcollection on a document without a primary key.")
+
+        return self.parent.objects.collection.document(self.parent.pk).collection(self.collection_name)
 
     async def get(self, pk: str | None = None, **kwargs) -> Document:
         if pk and kwargs:
@@ -60,7 +73,7 @@ class Manager:
 
             data = doc_snapshot.to_dict() or {}
             data["id"] = doc_snapshot.id
-            return self.doc_klass.model_validate(data)
+            return self._to_document(data)
 
         results = [obj async for obj in self.filter(**kwargs)]
         if not results:
@@ -73,7 +86,7 @@ class Manager:
         doc_ref = self.collection.document()
         await doc_ref.set(data)
         data["id"] = doc_ref.id
-        return self.doc_klass.model_validate(data)
+        return self._to_document(data)
 
     async def update(self, pk: str, data: dict[str, Any]) -> None:
         doc_ref = self.collection.document(pk)
@@ -114,4 +127,4 @@ class Manager:
         async for doc_snapshot in stream:
             data = doc_snapshot.to_dict() or {}
             data["id"] = doc_snapshot.id
-            yield self.doc_klass.model_validate(data)
+            yield self._to_document(data)

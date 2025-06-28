@@ -67,13 +67,8 @@ class Document(BaseModel, abc.ABC):
     async def save(self) -> Document:
         data = self.model_dump(mode="json", by_alias=True, exclude={self._meta.pk_field_name})
 
-        if not self.pk:
-            created = await self.manager.create(data=data)
-            self.id = created.id
-            self._manager = created.manager
-            return self
-
-        await self.manager.update(pk=self.pk, data=data)
+        saved_doc = await self.manager.create(data=data, pk=self.pk)
+        self.id = saved_doc.pk
         return self
 
     async def update(self, **kwargs: Any) -> None:

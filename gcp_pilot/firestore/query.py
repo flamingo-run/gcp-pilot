@@ -94,6 +94,12 @@ class Query:
             raise MultipleObjectsFound(self._manager.doc_klass, filters=self._filters_for_repr)
         return results[0]
 
+    async def count(self) -> int:
+        query = self._build_query()
+        aggregation_query = query.count()
+        result = await aggregation_query.get()
+        return int(result[0][0].value)
+
     def _build_query(self) -> AsyncQuery:
         query = self._apply_filters()
         query = self._apply_ordering(query)

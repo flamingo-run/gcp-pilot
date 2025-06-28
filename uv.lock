@@ -296,6 +296,7 @@ tasks = [
 dev = [
     { name = "polyfactory" },
     { name = "pyjwt" },
+    { name = "pytest-asyncio" },
     { name = "pytest-cov" },
     { name = "pytest-random-order" },
     { name = "pytest-rerunfailures" },
@@ -306,9 +307,6 @@ dev = [
 docs = [
     { name = "mkdocs" },
     { name = "mkdocs-material" },
-]
-test = [
-    { name = "pytest-asyncio" },
 ]
 
 [package.metadata]
@@ -343,6 +341,7 @@ provides-extras = ["tasks", "build", "storage", "bigquery", "speech", "sheets", 
 dev = [
     { name = "polyfactory", specifier = ">=2.15.2" },
     { name = "pyjwt", specifier = ">=2.10.1" },
+    { name = "pytest-asyncio", specifier = ">=1.0.0" },
     { name = "pytest-cov", specifier = ">=6.0.0" },
     { name = "pytest-random-order", specifier = ">=1.1.1" },
     { name = "pytest-rerunfailures", specifier = ">=15.0" },
@@ -354,7 +353,6 @@ docs = [
     { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "mkdocs-material", specifier = ">=9.6.14" },
 ]
-test = [{ name = "pytest-asyncio", specifier = ">=1.0.0" }]
 
 [[package]]
 name = "ghp-import"

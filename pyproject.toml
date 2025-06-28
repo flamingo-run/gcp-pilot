@@ -49,6 +49,10 @@ datastore = [
     "google-cloud-datastore>=2.20.1",
     "pydantic>=2.10.3",
 ]
+firestore = [
+    "google-cloud-firestore>=2.20.1",
+    "pydantic>=2.10.3",
+]
 dns = [
     "google-cloud-dns>=0.35.0",
 ]
@@ -68,18 +72,21 @@ iam = [
 
 [dependency-groups]
 dev = [
+    "polyfactory>=2.15.2",
     "pyjwt>=2.10.1",
     "pytest-cov>=6.0.0",
     "pytest-random-order>=1.1.1",
     "pytest-rerunfailures>=15.0",
     "pytest-sugar>=1.0.0",
     "pytest-timeout>=2.3.1",
-    "pytest-xdist>=3.6.1",
-    "ruff>=0.8.2",
+    "ruff>=0.12.0",
 ]
 docs = [
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.6.14",
+]
+test = [
+    "pytest-asyncio>=1.0.0",
 ]
 
 [tool.ruff]
@@ -92,7 +99,7 @@ ignore = ["COM812","COM819", "PLR2004", "PLR0911", "PLR0912", "PLR0913", "PLR091
 
 
 [tool.pytest.ini_options]
-addopts = "-n auto --reruns 2 --random-order --timeout 100 --cov"
+addopts = "--reruns 2 --random-order --timeout 100 --cov"
 python_files = ["*_test.py"]
 
 

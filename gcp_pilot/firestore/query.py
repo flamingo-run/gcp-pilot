@@ -109,6 +109,18 @@ class Query:
         result = await aggregation_query.get()
         return int(result[0][0].value)
 
+    async def sum(self, field: str) -> int | float:
+        query = self._build_query()
+        aggregation_query = query.sum(field)
+        result = await aggregation_query.get()
+        return result[0][0].value
+
+    async def avg(self, field: str) -> int | float:
+        query = self._build_query()
+        aggregation_query = query.avg(field)
+        result = await aggregation_query.get()
+        return result[0][0].value
+
     def _build_query(self) -> AsyncQuery:
         query = self._apply_filters()
         query = self._apply_ordering(query)

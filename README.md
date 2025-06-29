@@ -30,6 +30,7 @@ Some APIs need extra packages, thus you must use `extras` to add them:
 - Sheets: `pip install gcp-pilot[sheets]`
 - Pub/Sub: `pip install gcp-pilot[pubsub]`
 - Datastore: `pip install gcp-pilot[datastore]`
+- Firestore: `pip install gcp-pilot[firestore]`
 - Cloud DNS: `pip install gcp-pilot[dns]`
 - Secret Manager: `pip install gcp-pilot[secret]`
 - Healthcare Engine: `pip install gcp-pilot[healthcare]`
@@ -51,12 +52,24 @@ grm = ResourceManager()
 - **Integration**: Seamlessly integrates different GCP services
 - **Authentication Handling**: Uses Application Default Credentials with support for impersonation and delegation
 
+### Firestore ORM
+
+A powerful and intuitive Object-Relational Mapper (ORM) for Google Firestore.
+
+- **Model-Based Structure**: Define your Firestore collections and documents as Python classes.
+- **Intuitive Querying**: Build complex queries using a chained, Django-like syntax.
+- **Built-in Pagination**: Easily paginate through large datasets.
+- **Atomic Operations**: Support for transactions to ensure data consistency.
+- **Subcollections**: Seamlessly work with nested data structures.
+
+You can read more at the [Firestore ORM Documentation](https://gcp-pilot.flamingo.codes/services/firestore).
+
 ## Supported Services
 
 gcp-pilot supports a wide range of Google Cloud Platform services, including:
 
 - IAM and Identity Management
-- Storage and Databases (Cloud Storage, BigQuery, Datastore, etc.)
+- Storage and Databases (Cloud Storage, BigQuery, Datastore, Firestore, etc.)
 - Compute and Serverless (Cloud Functions, Cloud Run, App Engine)
 - Messaging and Integration (Pub/Sub, Cloud Tasks, Cloud Scheduler)
 - DevOps and CI/CD (Cloud Build, Source Repositories)

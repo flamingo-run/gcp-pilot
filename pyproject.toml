@@ -12,7 +12,7 @@ maintainers = [
     {name = "Lucas Gomide"},
 ]
 readme = "README.md"
-keywords = ["gcp", "google cloud python", "datastore orm"]
+keywords = ["gcp", "google cloud python", "firestore orm"]
 requires-python = ">=3.11"
 dependencies = [
     "factory-boy>=3.3.1",

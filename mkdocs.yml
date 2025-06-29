@@ -33,7 +33,7 @@ markdown_extensions:
   - attr_list # Required for custom attributes on icons/emojis
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg 
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 nav:
   - Home: index.md
@@ -51,6 +51,7 @@ nav:
       - Cloud Storage: services/storage.md
       - Cloud SQL: services/sql.md
       - Datastore: services/datastore.md
+      - Firestore: services/firestore.md
       - BigQuery: services/big_query.md
     - Compute and Serverless:
       - Cloud Functions: services/functions.md

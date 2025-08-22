@@ -117,6 +117,6 @@ async def clear_collections(safe_client):
     yield
     # Clear collections after each test
     for model in [Product, AllDataTypes]:
-        all_docs = model.objects.collection.stream()
+        all_docs = model.documents.collection.stream()
         async for doc in all_docs:
             await doc.reference.delete()

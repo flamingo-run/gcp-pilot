@@ -26,7 +26,7 @@ class FirestorePersistenceHandler(AsyncPersistenceProtocol[T]):
     async def save(self, data: T) -> T:
         doc_data = data.model_dump(by_alias=True, exclude={"id"})
         converted_data = _convert_dates_to_datetimes(doc_data)
-        created_doc = await data.__class__.objects.create(data=converted_data)
+        created_doc = await data.__class__.documents.create(data=converted_data)
         return cast(T, created_doc)
 
     async def save_many(self, data: list[T]) -> list[T]:

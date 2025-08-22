@@ -32,12 +32,12 @@ async def sales():
 @pytest.mark.asyncio
 async def test_sum_aggregation(sales):
     run_id, _ = sales
-    total = await Sale.objects.filter(product="A", run_id=run_id).sum("amount")
+    total = await Sale.documents.filter(product="A", run_id=run_id).sum("amount")
     assert total == 60
 
 
 @pytest.mark.asyncio
 async def test_avg_aggregation(sales):
     run_id, _ = sales
-    average = await Sale.objects.filter(product="A", run_id=run_id).avg("amount")
+    average = await Sale.documents.filter(product="A", run_id=run_id).avg("amount")
     assert average == 20

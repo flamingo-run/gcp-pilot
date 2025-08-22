@@ -109,7 +109,9 @@ class TestPagination:
 
     async def test_start_at_with_pydantic_model_cursor(self):
         cursor = self.SimpleCursor(price=100)
-        page = [item async for item in Product.documents.all().order_by("price").limit(10).start_at(cursor.model_dump())]
+        page = [
+            item async for item in Product.documents.all().order_by("price").limit(10).start_at(cursor.model_dump())
+        ]
         assert len(page) == 10
         assert page[0].name == "Product 10"
         assert page[9].name == "Product 19"

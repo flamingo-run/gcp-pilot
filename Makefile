@@ -1,8 +1,4 @@
-setup:
-	@pip install -U pip uv
-
 dependencies:
-	@make setup
 	@uv sync --all-extras
 
 update:
@@ -36,7 +32,6 @@ clean:
 publish:
 	@make clean
 	@printf "\nPublishing lib"
-	@make setup
 	@uv build
 	@uv publish --token $(PYPI_API_TOKEN)
 	@make clean

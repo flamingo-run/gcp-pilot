@@ -41,20 +41,21 @@ class Document(BaseModel, abc.ABC):
     )
 
     if TYPE_CHECKING:
-        objects: ClassVar[Manager]
+        documents: ClassVar[Manager]
         _meta: ClassVar[Options]
 
     def __init_subclass__(cls, **kwargs):
         from gcp_pilot.firestore.manager import Manager  # noqa: PLC0415
 
         super().__init_subclass__(**kwargs)
-        cls.objects = Manager(doc_klass=cls)
+        manager = Manager(doc_klass=cls)
+        cls.documents = manager
         meta = getattr(cls, "Meta", None)
         cls._meta = Options(meta=meta, klass=cls)
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self._manager = self.__class__.objects
+        self._manager = self.__class__.documents
 
     @property
     def pk(self) -> str | None:
@@ -62,7 +63,7 @@ class Document(BaseModel, abc.ABC):
 
     @property
     def manager(self) -> Manager:
-        return self._manager or self.__class__.objects
+        return self._manager or self.__class__.documents
 
     async def save(self) -> Document:
         data = self.model_dump(mode="json", by_alias=True, exclude={self._meta.pk_field_name})

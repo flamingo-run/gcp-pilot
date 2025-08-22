@@ -9,28 +9,28 @@ class TestQueryBuilding:
         return {(f.field_path, f.op_string, f.value) for f in filters}
 
     async def test_query_is_cloned_on_filter(self):
-        query1 = Product.objects.all()
+        query1 = Product.documents.all()
         query2 = query1.filter(name="some name")
         assert query1 is not query2
         assert not query1._where_filters
         assert len(query2._where_filters) == 1
 
     async def test_query_is_cloned_on_order_by(self):
-        query1 = Product.objects.all()
+        query1 = Product.documents.all()
         query2 = query1.order_by("name")
         assert query1 is not query2
         assert not query1._order_by
         assert query2._order_by == ["name"]
 
     async def test_query_is_cloned_on_limit(self):
-        query1 = Product.objects.all()
+        query1 = Product.documents.all()
         query2 = query1.limit(10)
         assert query1 is not query2
         assert query1._limit is None
         assert query2._limit == 10
 
     async def test_query_can_be_reused(self):
-        base_query = Product.objects.filter(price__gt=50)
+        base_query = Product.documents.filter(price__gt=50)
 
         query1 = base_query.order_by("price")
         query2 = base_query.order_by("-price")
@@ -45,8 +45,8 @@ class TestQueryBuilding:
         assert len(query2._where_filters) == 1
 
     async def test_chaining_methods_in_any_order_produces_same_query(self):
-        q1 = Product.objects.filter(price__gt=10, stock__gt=0).order_by("-name").limit(5)
-        q2 = Product.objects.all().limit(5).order_by("-name").filter(price__gt=10).filter(stock__gt=0)
+        q1 = Product.documents.filter(price__gt=10, stock__gt=0).order_by("-name").limit(5)
+        q2 = Product.documents.all().limit(5).order_by("-name").filter(price__gt=10).filter(stock__gt=0)
 
         assert self._filters_to_set(q1._where_filters) == self._filters_to_set(q2._where_filters)
         assert q1._order_by == q2._order_by
@@ -56,5 +56,5 @@ class TestQueryBuilding:
 @pytest.mark.asyncio
 class TestQueryExecution:
     async def test_count_method(self, populated_db):
-        count = await AllDataTypes.objects.all().count()
+        count = await AllDataTypes.documents.all().count()
         assert count == 5

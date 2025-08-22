@@ -44,7 +44,7 @@ class Manager:
         if not self.parent.pk:
             raise ValueError("Cannot access subcollection on a document without a primary key.")
 
-        return self.parent.objects.collection.document(self.parent.pk).collection(self.collection_name)
+        return self.parent.documents.collection.document(self.parent.pk).collection(self.collection_name)
 
     def _get_query(self) -> Query:
         return Query(manager=self)

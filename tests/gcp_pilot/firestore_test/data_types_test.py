@@ -10,7 +10,7 @@ class TestFirestoreDataTypes:
         instance.id = None
         saved_instance = await instance.save()
 
-        retrieved_instance = await AllDataTypes.objects.get(pk=saved_instance.pk)
+        retrieved_instance = await AllDataTypes.documents.get(pk=saved_instance.pk)
 
         # Compare saved and retrieved data
         assert saved_instance.pk == retrieved_instance.pk

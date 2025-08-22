@@ -21,7 +21,7 @@ async def cities():
 
 @pytest.mark.asyncio
 async def test_paginator_iteration(cities):
-    paginator = City.objects.order_by("name").paginate(per_page=10)
+    paginator = City.documents.order_by("name").paginate(per_page=10)
 
     pages = [page async for page in paginator]
     assert len(pages) == 3
@@ -45,21 +45,21 @@ async def test_paginator_iteration(cities):
 
 @pytest.mark.asyncio
 async def test_paginator_count(cities):
-    paginator = City.objects.paginate(per_page=10)
+    paginator = City.documents.paginate(per_page=10)
     count = await paginator.count()
     assert count == 25
 
 
 @pytest.mark.asyncio
 async def test_paginator_num_pages(cities):
-    paginator = City.objects.paginate(per_page=10)
+    paginator = City.documents.paginate(per_page=10)
     num_pages = await paginator.num_pages
     assert num_pages == 3
 
 
 @pytest.mark.asyncio
 async def test_paginator_large_per_page(cities):
-    paginator = City.objects.paginate(per_page=50)
+    paginator = City.documents.paginate(per_page=50)
     pages = [page async for page in paginator]
     assert len(pages) == 1
     assert len(pages[0].object_list) == 25

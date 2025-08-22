@@ -95,11 +95,11 @@ await product.update(price=109.99, stock=100)
 
 ### Getting Documents
 
-You can retrieve a single document by its ID using the `objects.get()` method on the model class.
+You can retrieve a single document by its ID using the `documents.get()` method on the model class.
 
 ```python
 # Get a product by its ID
-product = await Product.objects.get(pk="my-custom-id")
+product = await Product.documents.get(pk="my-custom-id")
 print(f"Product name: {product.name}")
 print(f"Product price: {product.price}")
 ```
@@ -109,7 +109,7 @@ If the document does not exist, a `gcp_pilot.firestore.DoesNotExist` exception w
 You can also get a document by filtering on its fields. This will return the first document that matches the query.
 
 ```python
-product = await Product.objects.get(name__eq="Ergonomic Keyboard")
+product = await Product.documents.get(name__eq="Ergonomic Keyboard")
 ```
 
 ### Refreshing a Document
@@ -126,7 +126,7 @@ To delete a document, call the `.delete()` method on a document instance.
 
 ```python
 # First, get the document
-product = await Product.objects.get(pk="my-custom-id")
+product = await Product.documents.get(pk="my-custom-id")
 
 # Then, delete it
 await product.delete()
@@ -134,19 +134,19 @@ await product.delete()
 You can also delete a document by its ID directly from the manager.
 
 ```python
-await Product.objects.delete(pk="my-custom-id")
+await Product.documents.delete(pk="my-custom-id")
 ```
 
 ### Querying Data
 
-The Firestore ORM provides a powerful and intuitive API for querying your data. You can filter, order, and limit your results with ease. To start querying, you use the `.objects` manager on your model class.
+The Firestore ORM provides a powerful and intuitive API for querying your data. You can filter, order, and limit your results with ease. To start querying, you use the `.documents` manager on your model class.
 
 #### Getting All Documents
 
 To retrieve all documents from a collection, you can iterate over the result of `.all()`:
 
 ```python
-all_products = [product async for product in Product.objects.all()]
+all_products = [product async for product in Product.documents.all()]
 ```
 
 #### Filtering
@@ -155,10 +155,10 @@ You can filter your results using the `.filter()` method. You can chain multiple
 
 ```python
 # Get all products with a price greater than 100
-expensive_products = Product.objects.filter(price__gt=100)
+expensive_products = Product.documents.filter(price__gt=100)
 
 # Get all products with a price between 50 and 100
-mid_range_products = Product.objects.filter(price__gte=50, price__lte=100)
+mid_range_products = Product.documents.filter(price__gte=50, price__lte=100)
 
 # Iterate over the results
 async for product in mid_range_products:
@@ -188,10 +188,10 @@ You can order your results using the `.order_by()` method. To order in descendin
 
 ```python
 # Get all products ordered by price in ascending order
-products_by_price = Product.objects.order_by("price")
+products_by_price = Product.documents.order_by("price")
 
 # Get all products ordered by price in descending order
-products_by_price_desc = Product.objects.order_by("-price")
+products_by_price_desc = Product.documents.order_by("-price")
 ```
 
 #### Limiting Results
@@ -200,7 +200,7 @@ You can limit the number of results using the `.limit()` method.
 
 ```python
 # Get the 3 most expensive products
-most_expensive_products = Product.objects.order_by("-price").limit(3)
+most_expensive_products = Product.documents.order_by("-price").limit(3)
 ```
 
 #### Counting Results
@@ -208,7 +208,7 @@ most_expensive_products = Product.objects.order_by("-price").limit(3)
 To count the number of documents that match a query, you can use the `.count()` method.
 
 ```python
-num_products = await Product.objects.filter(price__gt=100).count()
+num_products = await Product.documents.filter(price__gt=100).count()
 ```
 
 ### Atomic Operations
@@ -228,8 +228,8 @@ async with atomic.batch():
     await Product(name="USB-C Hub", price=89.99).save()
 
 # Update and delete in the same batch
-product_to_update = await Product.objects.get(name__eq="Laptop Stand")
-product_to_delete = await Product.objects.get(name__eq="USB-C Hub")
+product_to_update = await Product.documents.get(name__eq="Laptop Stand")
+product_to_delete = await Product.documents.get(name__eq="USB-C Hub")
 
 async with atomic.batch():
     product_to_update.price = 45.99
@@ -250,7 +250,7 @@ You can atomically increment or decrement a numeric field using the `Increment` 
 ```python
 from gcp_pilot.firestore.operations import Increment
 
-product = await Product.objects.get(name__eq="Laptop Stand")
+product = await Product.documents.get(name__eq="Laptop Stand")
 await product.update(stock=Increment(1))  # Atomically increments the stock by 1
 await product.update(stock=Increment(-1)) # Atomically decrements the stock by 1
 ```
@@ -262,7 +262,7 @@ You can atomically add or remove elements from an array field using `ArrayUnion`
 ```python
 from gcp_pilot.firestore.operations import ArrayUnion, ArrayRemove
 
-product = await Product.objects.get(name__eq="Laptop Stand")
+product = await Product.documents.get(name__eq="Laptop Stand")
 
 # Add new tags to the 'tags' array field
 await product.update(tags=ArrayUnion(["new", "featured"]))
@@ -277,15 +277,15 @@ When dealing with large datasets, it's often necessary to paginate the results. 
 
 ```python
 # Get the first page of 10 products, ordered by price
-page1 = [p async for p in Product.objects.order_by("price").limit(10)]
+page1 = [p async for p in Product.documents.order_by("price").limit(10)]
 
 if page1:
     # To get the next page, use the last document of the current page as a cursor
     last_product_on_page1 = page1[-1]
-    page2 = [p async for p in Product.objects.order_by("price").limit(10).start_after(last_product_on_page1)]
+    page2 = [p async for p in Product.documents.order_by("price").limit(10).start_after(last_product_on_page1)]
 
     # To get a page starting from a specific document, use start_at()
-    page_starting_from_last = [p async for p in Product.objects.order_by("price").limit(10).start_at(last_product_on_page1)]
+    page_starting_from_last = [p async for p in Product.documents.order_by("price").limit(10).start_at(last_product_on_page1)]
 ```
 
 The cursor can be a document instance (as in the example above), or a dictionary containing the values of the fields used for ordering.
@@ -293,16 +293,16 @@ The cursor can be a document instance (as in the example above), or a dictionary
 ```python
 # Using a dictionary as a cursor
 cursor = {"price": 100}
-page = [p async for p in Product.objects.order_by("price").limit(10).start_after(cursor)]
+page = [p async for p in Product.documents.order_by("price").limit(10).start_after(cursor)]
 ```
 
 ### Working with Subcollections
 
-You can access the subcollection through an instance of the parent document. The subcollection attribute on the instance acts as a manager for the subcollection, similar to the `.objects` manager on a model class.
+You can access the subcollection through an instance of the parent document. The subcollection attribute on the instance acts as a manager for the subcollection, similar to the `.documents` manager on a model class.
 
 ```python
 # Get a product document
-product = await Product.objects.get(pk="my-product-id")
+product = await Product.documents.get(pk="my-product-id")
 
 # Now you can work with its "reviews" subcollection
 all_reviews = [r async for r in product.reviews.all()]
@@ -314,7 +314,7 @@ You can create documents in a subcollection using the `.create()` or `.save()` m
 
 ```python
 # Get the parent document
-product = await Product.objects.get(pk="my-product-id")
+product = await Product.documents.get(pk="my-product-id")
 
 # Create a new review in the "reviews" subcollection
 new_review = await product.reviews.create(data={"rating": 5, "comment": "Excellent product!"})
@@ -326,7 +326,7 @@ You can filter, order, and limit subcollection documents just like top-level col
 
 ```python
 # Get the parent document
-product = await Product.objects.get(pk="my-product-id")
+product = await Product.documents.get(pk="my-product-id")
 
 # Get all 5-star reviews for this product
 five_star_reviews = [r async for r in product.reviews.filter(rating__eq=5)]

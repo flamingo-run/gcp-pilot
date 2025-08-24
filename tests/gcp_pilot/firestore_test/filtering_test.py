@@ -8,19 +8,19 @@ class TestFirestoreFiltering:
     async def test_get_by_filter(self, populated_db):
         target = populated_db[0]
         retrieved = await AllDataTypes.documents.get(integer_field=target.integer_field)
-        assert retrieved.pk == target.pk
+        assert retrieved.fqn == target.fqn
 
     async def test_filter_equal(self, populated_db):
         target = populated_db[0]
         results = [item async for item in AllDataTypes.documents.filter(integer_field__eq=target.integer_field)]
         assert len(results) == 1
-        assert results[0].pk == target.pk
+        assert results[0].fqn == target.fqn
 
     async def test_filter_not_equal(self, populated_db):
         target = populated_db[0]
         results = [item async for item in AllDataTypes.documents.filter(integer_field__ne=target.integer_field)]
         assert len(results) == len(populated_db) - 1
-        assert target.pk not in [item.pk for item in results]
+        assert target.fqn not in [item.fqn for item in results]
 
     async def test_filter_greater_than(self, populated_db):
         results = [item async for item in AllDataTypes.documents.filter(integer_field__gt=30)]
@@ -71,7 +71,7 @@ class TestFirestoreFiltering:
 
         results = [item async for item in AllDataTypes.documents.filter(list_of_strings__contains_any=["a", "d"])]
         assert len(results) == 2
-        assert {r.pk for r in results} == {obj1.pk, obj2.pk}
+        assert {r.fqn for r in results} == {obj1.fqn, obj2.fqn}
 
     async def test_filter_in_list_nested(self):
         obj1 = await AllDataTypesFactory.create_async(nested_model={"name": "test1", "value": 1})
@@ -80,7 +80,7 @@ class TestFirestoreFiltering:
 
         results = [item async for item in AllDataTypes.documents.filter(nested_model__name__in=["test1", "test2"])]
         assert len(results) == 2
-        assert {r.pk for r in results} == {obj1.pk, obj2.pk}
+        assert {r.fqn for r in results} == {obj1.fqn, obj2.fqn}
 
     async def test_filter_not_in_list(self):
         obj1 = await AllDataTypesFactory.create_async()
@@ -93,7 +93,7 @@ class TestFirestoreFiltering:
     async def test_filter_nested_field(self):
         obj = await AllDataTypesFactory.create_async(nested_model={"name": "test", "value": 1})
         retrieved = await AllDataTypes.documents.get(nested_model__name="test")
-        assert retrieved.pk == obj.pk
+        assert retrieved.fqn == obj.fqn
 
     async def test_filter_chaining(self, populated_db):
         results = [

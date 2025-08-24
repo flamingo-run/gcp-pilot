@@ -8,15 +8,15 @@ from tests.gcp_pilot.firestore_test.conftest import Product
 class TestAtomicWrites:
     async def test_batch_create(self):
         async with atomic.batch():
-            await Product.documents.create(data={"name": "Product 1", "price": 10})
-            await Product.documents.create(data={"name": "Product 2", "price": 20})
+            await Product.documents.create(name="Product 1", price=10)
+            await Product.documents.create(name="Product 2", price=20)
 
         products = [item async for item in Product.documents.filter(name__in=["Product 1", "Product 2"])]
         assert len(products) == 2
 
     async def test_batch_update(self):
-        p1 = await Product.documents.create(data={"name": "Product 1", "price": 10})
-        p2 = await Product.documents.create(data={"name": "Product 2", "price": 20})
+        p1 = await Product.documents.create(name="Product 1", price=10)
+        p2 = await Product.documents.create(name="Product 2", price=20)
 
         async with atomic.batch():
             p1.price = 15
@@ -24,15 +24,15 @@ class TestAtomicWrites:
             await p1.save()
             await p2.save()
 
-        updated_p1 = await Product.documents.get(pk=p1.pk)
-        updated_p2 = await Product.documents.get(pk=p2.pk)
+        updated_p1 = await Product.documents.get(id=p1.id)
+        updated_p2 = await Product.documents.get(id=p2.id)
 
         assert updated_p1.price == 15
         assert updated_p2.price == 25
 
     async def test_batch_delete(self):
-        p1 = await Product.documents.create(data={"name": "Product 1", "price": 10})
-        p2 = await Product.documents.create(data={"name": "Product 2", "price": 20})
+        p1 = await Product.documents.create(name="Product 1", price=10)
+        p2 = await Product.documents.create(name="Product 2", price=20)
 
         async with atomic.batch():
             await p1.delete()

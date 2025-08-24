@@ -12,7 +12,7 @@ class TestPagination:
     @pytest_asyncio.fixture(autouse=True)
     async def setup_products(self):
         for i in range(20):
-            await Product.documents.create(data={"name": f"Product {i}", "price": i * 10})
+            await Product.documents.create(name=f"Product {i}", price=i * 10)
 
     async def test_limit(self):
         products = [item async for item in Product.documents.all().order_by("price").limit(5)]

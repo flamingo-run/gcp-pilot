@@ -13,10 +13,16 @@ class City(Document):
 
 @pytest_asyncio.fixture
 async def cities():
-    cities_to_create = [City(id=f"city-{i}", name=f"City {i:02d}") for i in range(25)]
-    for city in cities_to_create:
-        await city.save()
-    return cities_to_create
+    # Ensure a clean collection for each test run
+    existing = City.documents.collection.stream()
+    async for doc in existing:
+        await doc.reference.delete()
+
+    created = []
+    for i in range(25):
+        doc = await City.documents.create(name=f"City {i:02d}")
+        created.append(doc)
+    return created
 
 
 @pytest.mark.asyncio

@@ -17,7 +17,7 @@ class Page[T]:
         self.paginator = paginator
 
     def __repr__(self):
-        return f"<Page {self.number} of {self.paginator.num_pages}>"
+        return f"<Page {self.number}>"
 
     def __len__(self):
         return len(self.object_list)

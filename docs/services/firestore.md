@@ -68,17 +68,13 @@ In this example, `Product` documents can have a "reviews" subcollection containi
 
 ### Creating and Updating Documents
 
-To create a new document in Firestore, you can instantiate your model and use the `.save()` method. If the document already has a primary key (i.e., it was fetched from Firestore or the `id` was manually set), `.save()` will overwrite the existing document's data.
+To create a new document in Firestore, instantiate your model and use `.save()`. IDs are always auto-generated; the ORM stores a Fully Qualified Name (FQN) internally and exposes the document ID via the `id` field for convenience.
 
 ```python
 # Create a new document with an auto-generated ID
 product = Product(name="Wireless Mouse", price=79.99)
 await product.save()
 print(f"Product created with ID: {product.id}")
-
-# Create a new document with a specific ID
-product = Product(id="my-custom-id", name="Ergonomic Keyboard", price=129.99)
-await product.save()
 
 # Update an existing document
 product.price = 119.99
@@ -87,7 +83,7 @@ await product.save()  # This will overwrite the entire document
 
 #### Partial Updates
 
-If you want to update only specific fields without overwriting the entire document, you can use the `.update()` method.
+If you want to update only specific fields without overwriting the entire document, use `.update()`.
 
 ```python
 await product.update(price=109.99, stock=100)
@@ -99,7 +95,7 @@ You can retrieve a single document by its ID using the `documents.get()` method 
 
 ```python
 # Get a product by its ID
-product = await Product.documents.get(pk="my-custom-id")
+product = await Product.documents.get(id="<id>")
 print(f"Product name: {product.name}")
 print(f"Product price: {product.price}")
 ```
@@ -122,11 +118,11 @@ await product.refresh()
 
 ### Deleting Documents
 
-To delete a document, call the `.delete()` method on a document instance.
+To delete a document, call `.delete()` on a document instance.
 
 ```python
 # First, get the document
-product = await Product.documents.get(pk="my-custom-id")
+product = await Product.documents.get(id="my-auto-id")
 
 # Then, delete it
 await product.delete()
@@ -134,7 +130,7 @@ await product.delete()
 You can also delete a document by its ID directly from the manager.
 
 ```python
-await Product.documents.delete(pk="my-custom-id")
+await Product.documents.delete(id="my-auto-id")
 ```
 
 ### Querying Data
@@ -143,7 +139,7 @@ The Firestore ORM provides a powerful and intuitive API for querying your data. 
 
 #### Getting All Documents
 
-To retrieve all documents from a collection, you can iterate over the result of `.all()`:
+To retrieve all documents from a collection, iterate over the result of `.all()`:
 
 ```python
 all_products = [product async for product in Product.documents.all()]
@@ -205,7 +201,7 @@ most_expensive_products = Product.documents.order_by("-price").limit(3)
 
 #### Counting Results
 
-To count the number of documents that match a query, you can use the `.count()` method.
+To count the number of documents that match a query, use `.count()`.
 
 ```python
 num_products = await Product.documents.filter(price__gt=100).count()
@@ -302,7 +298,7 @@ You can access the subcollection through an instance of the parent document. The
 
 ```python
 # Get a product document
-product = await Product.documents.get(pk="my-product-id")
+product = await Product.documents.get(id="<id>")
 
 # Now you can work with its "reviews" subcollection
 all_reviews = [r async for r in product.reviews.all()]
@@ -314,10 +310,10 @@ You can create documents in a subcollection using the `.create()` or `.save()` m
 
 ```python
 # Get the parent document
-product = await Product.documents.get(pk="my-product-id")
+product = await Product.documents.get(id="my-auto-id")
 
 # Create a new review in the "reviews" subcollection
-new_review = await product.reviews.create(data={"rating": 5, "comment": "Excellent product!"})
+new_review = await product.reviews.create(rating=5, comment="Excellent product!")
 ```
 
 #### Querying Subcollections
@@ -326,7 +322,7 @@ You can filter, order, and limit subcollection documents just like top-level col
 
 ```python
 # Get the parent document
-product = await Product.documents.get(pk="my-product-id")
+product = await Product.documents.get(id="my-auto-id")
 
 # Get all 5-star reviews for this product
 five_star_reviews = [r async for r in product.reviews.filter(rating__eq=5)]

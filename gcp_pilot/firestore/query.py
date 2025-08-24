@@ -4,12 +4,15 @@ import copy
 from collections.abc import AsyncGenerator
 from typing import TYPE_CHECKING, Any, cast
 
-from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 from google.cloud.firestore_v1.async_query import AsyncQuery
 from google.cloud.firestore_v1.base_query import FieldFilter
 from pydantic import BaseModel
 
-from gcp_pilot.firestore.exceptions import DoesNotExist, InvalidCursor, MultipleObjectsFound
+from gcp_pilot.firestore.exceptions import (
+    DoesNotExist,
+    InvalidCursor,
+    MultipleObjectsFound,
+)
 
 if TYPE_CHECKING:
     from gcp_pilot.firestore.document import Document
@@ -128,13 +131,13 @@ class Query:
         query = self._apply_limit(query)
         return cast(AsyncQuery, query)
 
-    def _apply_filters(self) -> AsyncQuery | AsyncCollectionReference:
-        query: AsyncQuery | AsyncCollectionReference = self._manager.collection
+    def _apply_filters(self) -> AsyncQuery:
+        query: AsyncQuery = self._manager.collection
         for field_filter in self._where_filters:
             query = query.where(filter=field_filter)
         return query
 
-    def _apply_ordering(self, query: AsyncQuery | AsyncCollectionReference) -> AsyncQuery | AsyncCollectionReference:
+    def _apply_ordering(self, query: AsyncQuery) -> AsyncQuery:
         if not self._order_by:
             return query
 
@@ -148,16 +151,24 @@ class Query:
             query = query.order_by(field_name, direction=direction)
         return query
 
-    def _dump_cursor(self, cursor) -> dict[str, Any]:
+    def _dump_cursor(self, cursor: BaseModel | dict[str, Any] | str) -> dict[str, Any]:
+        """Normalize a cursor for Firestore.
+
+        Supports:
+        - dict/Pydantic models (existing behavior)
+        - Document instances: dump model to dict
+        """
         if isinstance(cursor, dict):
             return cursor
         if isinstance(cursor, BaseModel):
             return cursor.model_dump()
+
+        # Strings and other types are not supported as cursors (yet)
         raise InvalidCursor("Cursor must be a dictionary or a Pydantic model.")
 
-    def _apply_pagination(self, query: AsyncQuery | AsyncCollectionReference) -> AsyncQuery | AsyncCollectionReference:
+    def _apply_pagination(self, query: AsyncQuery) -> AsyncQuery:
         if not self._order_by and (self._start_after or self._start_at):
-            raise ValueError("`order_by` is required when using `start_after` or `start_at`.")
+            raise ValueError("`order_by` is required when paginating.")
 
         if self._start_after:
             cursor_data = self._dump_cursor(self._start_after)
@@ -169,15 +180,13 @@ class Query:
 
         return query
 
-    def _apply_limit(self, query: AsyncQuery | AsyncCollectionReference) -> AsyncQuery | AsyncCollectionReference:
-        if self._limit:
-            query = query.limit(self._limit)
-        return query
+    def _apply_limit(self, query: AsyncQuery) -> AsyncQuery:
+        if not self._limit:
+            return query
+        return query.limit(self._limit)
 
     async def __aiter__(self) -> AsyncGenerator[Document]:
         query = self._build_query()
         stream = query.stream()
         async for doc_snapshot in stream:
-            data = doc_snapshot.to_dict() or {}
-            data["id"] = doc_snapshot.id
-            yield self._manager._to_document(data)
+            yield self._manager._to_document(doc_snapshot)

@@ -125,3 +125,25 @@ class TestPagination:
         cursor = (100,)  # tuple is not a valid cursor
         with pytest.raises(InvalidCursor, match="Cursor must be a dictionary or a Pydantic model."):
             [item async for item in Product.documents.all().order_by("price").start_at(cursor)]
+
+    async def test_inferred_ordering_with_single_field_dict_cursor(self):
+        # Without explicit order_by, a single-field dict cursor should infer ascending ordering by that field
+        page = [item async for item in Product.documents.all().limit(10).start_after({"price": 90})]
+        assert len(page) == 10
+        assert page[0].name == "Product 10"
+        assert page[9].name == "Product 19"
+
+    async def test_inferred_ordering_with_string_id_cursor_matches_explicit_id_ordering(self):
+        # Build an explicit id-ordered reference and pick a cursor id
+        ordered_by_id = [item async for item in Product.documents.all().order_by("id").limit(20)]
+        cursor_id = ordered_by_id[9].id
+
+        # Inferred ordering: using string id without order_by
+        inferred_page = [item async for item in Product.documents.all().limit(20).start_after(cursor_id)]
+
+        # Explicit ordering by id for the same cursor to compare
+        explicit_page = [
+            item async for item in Product.documents.all().order_by("id").limit(20).start_after({"id": cursor_id})
+        ]
+
+        assert [d.id for d in inferred_page] == [d.id for d in explicit_page]

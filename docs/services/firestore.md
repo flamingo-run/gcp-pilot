@@ -188,6 +188,10 @@ products_by_price = Product.documents.order_by("price")
 
 # Get all products ordered by price in descending order
 products_by_price_desc = Product.documents.order_by("-price")
+
+# Order by document id (short id). Internally mapped to the document name.
+products_by_id = Product.documents.order_by("id")
+products_by_id_desc = Product.documents.order_by("-id")
 ```
 
 #### Limiting Results
@@ -284,12 +288,21 @@ if page1:
     page_starting_from_last = [p async for p in Product.documents.order_by("price").limit(10).start_at(last_product_on_page1)]
 ```
 
-The cursor can be a document instance (as in the example above), or a dictionary containing the values of the fields used for ordering.
+The cursor can be a document instance (as in the example above), a dictionary containing the values of the fields used for ordering, or a string document id when ordering by id. If you pass a single-field dictionary as the cursor and omit `order_by()`, the ORM infers ascending ordering by that field. If you pass a string id, the ORM infers ordering by id.
 
 ```python
 # Using a dictionary as a cursor
 cursor = {"price": 100}
 page = [p async for p in Product.documents.order_by("price").limit(10).start_after(cursor)]
+
+# Inferred ordering when using a single-field cursor without calling order_by()
+page_inferred = [p async for p in Product.documents.limit(10).start_after({"price": 100})]
+
+# Using a string id as a cursor when ordering by id
+page_by_id = [p async for p in Product.documents.order_by("id").limit(10).start_after("<doc-id>")]
+
+# Inferred ordering by id when passing a string id without order_by()
+page_by_id_inferred = [p async for p in Product.documents.limit(10).start_after("<doc-id>")]
 ```
 
 ### Working with Subcollections

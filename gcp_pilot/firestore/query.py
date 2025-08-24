@@ -148,7 +148,9 @@ class Query:
             else:
                 field_name = field.lstrip("+")
                 direction = AsyncQuery.ASCENDING
-            query = query.order_by(field_name, direction=direction)
+            # Support ordering by document id by translating to Firestore's special __name__ field
+            firestore_field = "__name__" if field_name == "id" else field_name
+            query = query.order_by(firestore_field, direction=direction)
         return query
 
     def _dump_cursor(self, cursor: BaseModel | dict[str, Any] | str) -> dict[str, Any]:
@@ -157,17 +159,57 @@ class Query:
         Supports:
         - dict/Pydantic models (existing behavior)
         - Document instances: dump model to dict
+        - string: convert to DocumentReference
         """
         if isinstance(cursor, dict):
+            # Support id-based cursors by translating to Firestore's __name__
+            if "id" in cursor and "__name__" not in cursor:
+                doc_ref = self._manager.collection.document(str(cursor["id"]))
+                return {"__name__": doc_ref}
             return cursor
         if isinstance(cursor, BaseModel):
             return cursor.model_dump()
+        if isinstance(cursor, str):
+            doc_ref = self._manager.collection.document(cursor)
+            return {"__name__": doc_ref}
 
-        # Strings and other types are not supported as cursors (yet)
+        # Error message kept for backward compatibility with existing tests
         raise InvalidCursor("Cursor must be a dictionary or a Pydantic model.")
 
+    def _infer_ordering_field(self) -> str | None:
+        """Infer an ordering field from the pagination cursor when none is provided.
+
+        - If cursor is a string: implies ordering by document name ("__name__")
+        - If cursor is a dict/BaseModel with a single key: order by that key (asc)
+        - If key is "id": we will map to "__name__"
+        """
+        if self._order_by:
+            return None
+
+        raw_cursor: Document | dict[str, Any] | str | None = self._start_after or self._start_at
+        if raw_cursor is None:
+            return None
+
+        if isinstance(raw_cursor, str):
+            return "__name__"
+        if isinstance(raw_cursor, BaseModel):
+            data = raw_cursor.model_dump()
+        elif isinstance(raw_cursor, dict):
+            data = raw_cursor
+        else:
+            return None
+
+        if len(data) != 1:
+            return None
+        key = next(iter(data.keys()))
+        return "__name__" if key == "id" else key
+
     def _apply_pagination(self, query: AsyncQuery) -> AsyncQuery:
-        if not self._order_by and (self._start_after or self._start_at):
+        # Auto-infer ordering when possible (single-field cursor or string id)
+        inferred_field = self._infer_ordering_field()
+        if not self._order_by and inferred_field:
+            query = query.order_by(inferred_field, direction=AsyncQuery.ASCENDING)
+        elif not self._order_by and (self._start_after or self._start_at):
             raise ValueError("`order_by` is required when paginating.")
 
         if self._start_after:

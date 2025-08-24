@@ -173,7 +173,6 @@ class Query:
             doc_ref = self._manager.collection.document(cursor)
             return {"__name__": doc_ref}
 
-        # Error message kept for backward compatibility with existing tests
         raise InvalidCursor("Cursor must be a dictionary or a Pydantic model.")
 
     def _infer_ordering_field(self) -> str | None:

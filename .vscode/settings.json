@@ -1,0 +1,23 @@
+{
+    "[python]": {
+      "editor.formatOnSave": true,
+      "editor.codeActionsOnSave": {
+        "source.fixAll.ruff": "always",
+        "source.organizeImports.ruff": "always"
+      },
+      "editor.detectIndentation": false,
+      "editor.tabSize": 4,
+      "editor.defaultFormatter": "charliermarsh.ruff",
+      "editor.rulers": [
+        120
+      ],
+    },
+    "python.analysis.autoImportCompletions": true,
+    "python.formatting.provider": "none",
+    "python.languageServer": "None",
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.defaultInterpreterPath": "${workspaceRoot}/.venv/bin/python",
+    "debug.allowBreakpointsEverywhere": true,
+    "ruff.nativeServer": "on"
+  }

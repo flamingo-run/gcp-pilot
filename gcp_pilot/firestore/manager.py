@@ -46,7 +46,10 @@ class Manager:
     @property
     def client(self) -> AsyncClient:
         if not self.__class__._client:
-            self.__class__._client = firestore.AsyncClient()
+            self.__class__._client = firestore.AsyncClient(
+                database=self.doc_klass._meta.database_id,
+                project=self.doc_klass._meta.project_id,
+            )
         return self.__class__._client  # type: ignore
 
     @property

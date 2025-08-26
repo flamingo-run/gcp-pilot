@@ -19,8 +19,10 @@ class Options:
     def __init__(self, meta, klass: type[Document]):
         self.meta = meta
         self.model_class = klass
-        self.project_id = getattr(meta, "project_id", None)
-        self.database_id = getattr(meta, "database_id", "(default)")
+
+        parent_meta = getattr(klass, "_meta", None)
+        self.project_id = getattr(meta, "project_id", getattr(parent_meta, "project_id", None))
+        self.database_id = getattr(meta, "database_id", getattr(parent_meta, "database_id", "(default)"))
         self.collection_name: str = getattr(meta, "collection_name", klass.__name__.lower())
 
 

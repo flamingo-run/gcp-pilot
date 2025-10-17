@@ -27,4 +27,4 @@ class FirestoreFactory(ModelFactory[T]):
 
     @classmethod
     def is_supported_type(cls, value: Any) -> TypeGuard[type[T]]:
-        return issubclass(value, Document)
+        return isinstance(value, type) and issubclass(value, Document)

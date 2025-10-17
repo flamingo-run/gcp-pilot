@@ -64,7 +64,9 @@ class Query:
             else:
                 operator = "=="
                 field_path = ".".join(parts)
-            field_filter = FieldFilter(field_path, operator, value)
+            # Normalize the value for Firestore (e.g., convert date to datetime)
+            normalized_value = self._manager._normalize_for_firestore(value)
+            field_filter = FieldFilter(field_path, operator, normalized_value)
             clone._where_filters.append(field_filter)
         return clone
 

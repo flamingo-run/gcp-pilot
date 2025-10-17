@@ -118,12 +118,12 @@ class TestPagination:
 
     async def test_start_after_with_invalid_cursor_type_raises_error(self):
         cursor = [90]  # list is not a valid cursor
-        with pytest.raises(InvalidCursor, match="Cursor must be a dictionary or a Pydantic model."):
+        with pytest.raises(InvalidCursor, match=r"^Cursor must be a dictionary or a Pydantic model\.$"):
             [item async for item in Product.documents.all().order_by("price").start_after(cursor)]
 
     async def test_start_at_with_invalid_cursor_type_raises_error(self):
         cursor = (100,)  # tuple is not a valid cursor
-        with pytest.raises(InvalidCursor, match="Cursor must be a dictionary or a Pydantic model."):
+        with pytest.raises(InvalidCursor, match=r"^Cursor must be a dictionary or a Pydantic model\.$"):
             [item async for item in Product.documents.all().order_by("price").start_at(cursor)]
 
     async def test_inferred_ordering_with_single_field_dict_cursor(self):

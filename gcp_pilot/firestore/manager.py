@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+from datetime import UTC
 from typing import TYPE_CHECKING, Any
 
 from google.cloud import firestore
@@ -26,6 +27,7 @@ class Manager:
     def _to_document(self, doc_snapshot: Any) -> Document:
         """Create a Document strictly from a Firestore DocumentSnapshot."""
         data: dict[str, Any] = doc_snapshot.to_dict() or {}
+        data = self._normalize_from_firestore(data)
         data["id"] = doc_snapshot.id
         document = self.doc_klass.model_validate(data)
         document._manager = self
@@ -72,12 +74,33 @@ class Manager:
         return Query(manager=self)
 
     def _normalize_for_firestore(self, value: Any) -> Any:
+        """
+        Normalize values for Firestore storage and queries.
+
+        Converts Python date objects to datetime at midnight UTC to ensure
+        proper indexing and support for range queries (__gte, __lte).
+        """
         if isinstance(value, dict):
             return {k: self._normalize_for_firestore(v) for k, v in value.items()}
         if isinstance(value, list):
             return [self._normalize_for_firestore(v) for v in value]
+        if isinstance(value, datetime.datetime) and value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
         if isinstance(value, datetime.date) and not isinstance(value, datetime.datetime):
-            return datetime.datetime.combine(value, datetime.time.min)
+            return datetime.datetime.combine(value, datetime.time.min, tzinfo=UTC)
+        return value
+
+    def _normalize_from_firestore(self, value: Any) -> Any:
+        """Normalize values read from Firestore.
+
+        Ensures datetimes are timezone-aware (UTC) for consistent equality checks.
+        """
+        if isinstance(value, dict):
+            return {k: self._normalize_from_firestore(v) for k, v in value.items()}
+        if isinstance(value, list):
+            return [self._normalize_from_firestore(v) for v in value]
+        if isinstance(value, datetime.datetime) and value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
         return value
 
     async def get(self, id: str | None = None, **kwargs) -> Document:

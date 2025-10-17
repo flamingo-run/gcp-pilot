@@ -59,13 +59,16 @@ class Document(BaseModel, abc.ABC):
         return self._manager or self.__class__.documents
 
     async def save(self) -> Document:
-        data = self.model_dump(mode="json", by_alias=True, exclude={"id"})
+        data = self.model_dump(by_alias=True, exclude={"id"})
 
         # For new documents, pass only the ID (or None to auto-generate) and fields as kwargs
         saved_doc = await self.manager.create(id=self.id, **data)
 
-        # Sync identifiers from persisted document
-        self.id = saved_doc.id
+        # Sync fields and identifiers from persisted document so in-memory instance
+        # matches Firestore-normalized values (e.g., timezone-aware datetimes).
+        # Use attribute values (not model_dump) to preserve nested model types.
+        for field_name in saved_doc.model_fields:
+            setattr(self, field_name, getattr(saved_doc, field_name))
         self._fqn = saved_doc._fqn
         return self
 
@@ -78,9 +81,8 @@ class Document(BaseModel, abc.ABC):
         if not (self.id or self.fqn):
             raise ValueError("Cannot refresh a document without a fully qualified name (fqn).")
         refreshed_doc = await self.manager.get(id=self.document_id)
-        object_attributes = refreshed_doc.model_dump()
-        for key, value in object_attributes.items():
-            setattr(self, key, value)
+        for field_name in refreshed_doc.model_fields:
+            setattr(self, field_name, getattr(refreshed_doc, field_name))
         # Ensure fqn (path) is also refreshed
         self._fqn = refreshed_doc._fqn
 

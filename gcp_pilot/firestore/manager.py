@@ -8,7 +8,7 @@ from google.cloud import firestore
 from google.cloud.firestore_v1.async_client import AsyncClient
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 
-from gcp_pilot.firestore.atomic import _active_batch
+from gcp_pilot.firestore.atomic import _active_batch, _Batch
 from gcp_pilot.firestore.exceptions import DoesNotExist
 from gcp_pilot.firestore.fqn import FQN
 from gcp_pilot.firestore.query import Query
@@ -122,7 +122,7 @@ class Manager:
         fields = self._normalize_for_firestore(fields)
         batch = _active_batch.get()
         if batch is not None:
-            batch.set(doc_ref, fields, client=self.client)
+            await batch.set(doc_ref, fields, client=self.client)
             # Cannot fetch snapshot before commit; build document without using _to_document
             payload = {"id": doc_ref.id, **fields}
             document = self.doc_klass.model_validate(payload)
@@ -151,7 +151,7 @@ class Manager:
         fields = self._normalize_for_firestore(fields)
         batch = _active_batch.get()
         if batch is not None:
-            batch.update(doc_ref, fields, client=self.client)
+            await batch.update(doc_ref, fields, client=self.client)
         else:
             await doc_ref.update(fields)
 
@@ -159,9 +159,36 @@ class Manager:
         doc_ref = self.collection.document(id)
         batch = _active_batch.get()
         if batch is not None:
-            batch.delete(doc_ref, client=self.client)
+            await batch.delete(doc_ref, client=self.client)
         else:
             await doc_ref.delete()
+
+    async def bulk_create(self, items: list[dict[str, Any]]) -> int:
+        """Batch-create documents efficiently with automatic splitting.
+
+        Each item dict may include an ``id`` key for deterministic document IDs.
+        Uses Firestore set() semantics (upsert).
+
+        Args:
+            items: List of field dictionaries to write.
+
+        Returns:
+            Number of documents written.
+        """
+        if _active_batch.get() is not None:
+            raise RuntimeError("bulk_create cannot be used inside an atomic.batch() context.")
+
+        b = _Batch(self.doc_klass)
+        count = 0
+        for item in items:
+            fields = dict(item)
+            doc_id = fields.pop("id", None)
+            doc_ref = self.collection.document(doc_id)
+            fields = self._normalize_for_firestore(fields)
+            await b.set(doc_ref, fields, client=self.client)
+            count += 1
+        await b.commit()
+        return count
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._get_query(), name)

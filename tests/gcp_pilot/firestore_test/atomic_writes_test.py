@@ -7,7 +7,7 @@ from tests.gcp_pilot.firestore_test.conftest import Product
 @pytest.mark.asyncio
 class TestAtomicWrites:
     async def test_batch_create(self):
-        async with atomic.batch():
+        async with atomic.batch(Product):
             await Product.documents.create(name="Product 1", price=10)
             await Product.documents.create(name="Product 2", price=20)
 
@@ -18,7 +18,7 @@ class TestAtomicWrites:
         p1 = await Product.documents.create(name="Product 1", price=10)
         p2 = await Product.documents.create(name="Product 2", price=20)
 
-        async with atomic.batch():
+        async with atomic.batch(Product):
             p1.price = 15
             p2.price = 25
             await p1.save()
@@ -34,7 +34,7 @@ class TestAtomicWrites:
         p1 = await Product.documents.create(name="Product 1", price=10)
         p2 = await Product.documents.create(name="Product 2", price=20)
 
-        async with atomic.batch():
+        async with atomic.batch(Product):
             await p1.delete()
             await p2.delete()
 

@@ -122,7 +122,7 @@ class Manager:
         fields = self._normalize_for_firestore(fields)
         batch = _active_batch.get()
         if batch is not None:
-            batch.set(doc_ref, fields)
+            batch.set(doc_ref, fields, client=self.client)
             # Cannot fetch snapshot before commit; build document without using _to_document
             payload = {"id": doc_ref.id, **fields}
             document = self.doc_klass.model_validate(payload)
@@ -151,7 +151,7 @@ class Manager:
         fields = self._normalize_for_firestore(fields)
         batch = _active_batch.get()
         if batch is not None:
-            batch.update(doc_ref, fields)
+            batch.update(doc_ref, fields, client=self.client)
         else:
             await doc_ref.update(fields)
 
@@ -159,7 +159,7 @@ class Manager:
         doc_ref = self.collection.document(id)
         batch = _active_batch.get()
         if batch is not None:
-            batch.delete(doc_ref)
+            batch.delete(doc_ref, client=self.client)
         else:
             await doc_ref.delete()
 
